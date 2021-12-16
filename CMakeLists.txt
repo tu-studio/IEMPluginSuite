@@ -78,14 +78,11 @@ add_subdirectory (JUCE)
 set (IEM_FORMATS "")
 
 if (IEM_BUILD_VST2)
-    message ("-- IEM: Building VST2 versions")
-    list (APPEND IEM_FORMATS VST)
+    SET(VST2SDKPATH "/usr/include" CACHE STRING "Path to the VST2 SDK")
     # checking VST2 SDK
-    if (DEFINED VST2SDKPATH)
-        juce_set_vst2_sdk_path (${VST2SDKPATH})
-    else()
-        message (FATAL_ERROR "You have to specify the VST2SDKPATH variable with the path to the VST2 SDK if you want to build VST2 versions.")
-    endif()
+    juce_set_vst2_sdk_path (${VST2SDKPATH})
+    list (APPEND IEM_FORMATS VST)
+    message ("-- IEM: Building VST2 versions")
 endif()
 
 if (IEM_BUILD_VST3)
