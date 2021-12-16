@@ -37,6 +37,7 @@ set (PLUGINS_TO_BUILD
 
 # The following options let you select the plug-ins formats you want to build.
 # You can either change them here or use the command line to switch them on/off.
+option (IEM_USE_SYSTEM_JUCE "Use JUCE found via CMake rather than the bundled one." OFF)
 option (IEM_BUILD_VST2 "Build VST2 version of the plug-ins." OFF)
 option (IEM_BUILD_VST3 "Build VST3 version of the plug-ins." ON)
 option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." OFF)
@@ -72,7 +73,11 @@ elseif ((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BS
 endif()
 
 # add JUCE dependency
-add_subdirectory (JUCE)
+if (IEM_USE_SYSTEM_JUCE)
+    find_package(JUCE CONFIG REQUIRED)
+else()
+    add_subdirectory (JUCE)
+endif()
 
 # formats
 set (IEM_FORMATS "")
