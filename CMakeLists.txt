@@ -84,7 +84,7 @@ if (IEM_BUILD_VST2)
     if (DEFINED VST2SDKPATH)
         juce_set_vst2_sdk_path (${VST2SDKPATH})
     else()
-        message (FATAL_ERROR "You have to specify the VST2PATH variable with the path to the VST2 SDK if you want to build VST2 versions.")
+        message (FATAL_ERROR "You have to specify the VST2SDKPATH variable with the path to the VST2 SDK if you want to build VST2 versions.")
     endif()
 endif()
 
