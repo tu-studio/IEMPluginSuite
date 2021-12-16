@@ -214,7 +214,7 @@ void DirectionalCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer&
         buffer.applyGain (juce::Decibels::decibelsToGain (preGain->load()));
 
 
-    // --------- make copys of buffer
+    // --------- make copies of buffer
     omniW.copyFrom(0, 0, buffer, 0, 0, bufferSize);
 
     maskBuffer.clear();

@@ -620,7 +620,7 @@ void RoomEncoderAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, j
         float* tempWritePtr = pMonoBufferWrite; //reset writePtr as it gets increased during the next for loop
         const float* readPtr = pBufferRead;
 
-        double tempDelay = oldDelay[q]; //start from oldDelay and add delayStep after each interation;
+        double tempDelay = oldDelay[q]; //start from oldDelay and add delayStep after each iteration;
 
         //int interpCoeffIdx;
         for (int smplIdx = 0; smplIdx < L; ++smplIdx) {
