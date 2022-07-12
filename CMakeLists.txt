@@ -14,7 +14,7 @@ cmake_minimum_required (VERSION 3.13)
 # Simply comment them out if you want to build only a subset of the plug-ins.
 set (PLUGINS_TO_BUILD
 #        AllRADecoder
-        BinauralDecoder
+#        BinauralDecoder
 #        CoordinateConverter
 #        DirectionalCompressor
 #        DirectivityShaper
@@ -31,7 +31,8 @@ set (PLUGINS_TO_BUILD
 #        RoomEncoder
 #        SceneRotator
 #        SimpleDecoder
-        StereoEncoder
+#        StereoEncoder
+        GranularEncoder
 #        ToolBox
     )
 
@@ -39,8 +40,8 @@ set (PLUGINS_TO_BUILD
 # You can either change them here or use the command line to switch them on/off.
 option (IEM_BUILD_VST2 "Build VST2 version of the plug-ins." OFF)
 option (IEM_BUILD_VST3 "Build VST3 version of the plug-ins." ON)
-option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." OFF)
-option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." ON)
+option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." ON)
+option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." OFF)
 
 
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
