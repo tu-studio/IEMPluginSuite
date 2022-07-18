@@ -119,6 +119,10 @@ private:
 
     juce::AudioBuffer<float> bufferCopy;
 
+    juce::AudioBuffer<float> circularBuffer;
+	int circularBufferWriteHead;
+	int circularBufferLength;
+
     juce::LinearSmoothedValue<float> smoothAzimuthL, smoothElevationL;
     juce::LinearSmoothedValue<float> smoothAzimuthR, smoothElevationR;
 

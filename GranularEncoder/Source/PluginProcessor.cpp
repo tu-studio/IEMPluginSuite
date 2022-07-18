@@ -109,6 +109,10 @@ void StereoEncoderAudioProcessor::prepareToPlay (double sampleRate, int samplesP
 
     bufferCopy.setSize(2, samplesPerBlock);
 
+    circularBuffer.setSize(2, juce::roundToInt(sampleRate*2)); // two second long circular buffer
+	circularBufferWriteHead = 0;
+	circularBufferLength = circularBuffer.getNumSamples();
+
     smoothAzimuthL.setCurrentAndTargetValue (*azimuth / 180.0f * juce::MathConstants<float>::pi);
     smoothElevationL.setCurrentAndTargetValue (*elevation / 180.0f * juce::MathConstants<float>::pi);
 
@@ -187,6 +191,25 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     for (int i = 0; i < totalNumInputChannels; ++i)
         bufferCopy.copyFrom(i, 0, buffer.getReadPointer(i), buffer.getNumSamples());
     buffer.clear();
+
+	// Fill circular buffer with audio input
+	// Try to start grains in loop
+	const float* leftInput = bufferCopy.getReadPointer(0);
+	const float* rightInput = bufferCopy.getReadPointer(1);
+
+	for (int i = 0; i < buffer.getNumSamples(); i++) 
+	{
+		circularBuffer.setSample(0, circularBufferWriteHead, leftInput[i]);
+		circularBuffer.setSample(1, circularBufferWriteHead, rightInput[i]);
+
+		circularBufferWriteHead++;
+		if (circularBufferWriteHead >= circularBufferLength) 
+		{
+			circularBufferWriteHead = 0;
+		}
+	}
+
+
 
     const float widthInRadiansQuarter {Conversions<float>::degreesToRadians (*width) / 4.0f};
     const iem::Quaternion<float> quatLRot {iem::Quaternion<float> (cos (widthInRadiansQuarter), 0.0f, 0.0f, sin (widthInRadiansQuarter))};
