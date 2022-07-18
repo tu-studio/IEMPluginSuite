@@ -17,6 +17,8 @@ target_sources (GranularEncoder PRIVATE
     Source/PluginEditor.h
     Source/PluginProcessor.cpp
     Source/PluginProcessor.h
+    Source/Grain.cpp
+    Source/Grain.h
 
     ../resources/OSC/OSCInputStream.h
     ../resources/OSC/OSCParameterInterface.cpp
