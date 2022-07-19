@@ -42,10 +42,11 @@ void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<flo
 	{
 		if (_currentIndex < _grainLengthSamples) // grain still needs samples
 		{
+			int readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
 			for (int ch = 0; ch < nChOut; ++ch) 
 			{
-				int readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
-				buffer.addSample(ch, i, circularLeftChannel[readIndex] * channelWeights[ch] * mix);
+				float ch_weight = channelWeights[ch];
+				buffer.addSample(ch, i, circularLeftChannel[readIndex] * ch_weight * mix);
 			}
 			_currentIndex++;
 		}
