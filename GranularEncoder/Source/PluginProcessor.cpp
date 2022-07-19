@@ -112,6 +112,10 @@ void StereoEncoderAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     circularBuffer.setSize(2, juce::roundToInt(sampleRate*2)); // two second long circular buffer
 	circularBufferWriteHead = 0;
 	circularBufferLength = circularBuffer.getNumSamples();
+	circularBuffer.clear();
+
+	lastSampleRate = sampleRate;
+
 
     smoothAzimuthL.setCurrentAndTargetValue (*azimuth / 180.0f * juce::MathConstants<float>::pi);
     smoothElevationL.setCurrentAndTargetValue (*elevation / 180.0f * juce::MathConstants<float>::pi);
@@ -197,11 +201,33 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	const float* leftInput = bufferCopy.getReadPointer(0);
 	const float* rightInput = bufferCopy.getReadPointer(1);
 
+	deltaTimeSamples = juce::roundToInt(lastSampleRate * deltaTimeSec);
+	grainLengthSamples = juce::roundToInt(lastSampleRate * grainLengthSec);
+
 	for (int i = 0; i < buffer.getNumSamples(); i++) 
 	{
 		circularBuffer.setSample(0, circularBufferWriteHead, leftInput[i]);
 		circularBuffer.setSample(1, circularBufferWriteHead, rightInput[i]);
 
+		if (grainTimeCounter >= deltaTimeSamples)
+		{
+			grainTimeCounter = 0;
+			// start a grain at this sample time stamp
+			for (int g = 0; g < 64; g++)
+			{
+				if (!grains[g].isActive())
+				{
+					grains[g].startGrain(circularBufferWriteHead, grainLengthSamples, i);
+					break;
+				}
+			}
+		}
+		else
+		{
+			grainTimeCounter++;
+		}
+
+		// increment circular buffer write head
 		circularBufferWriteHead++;
 		if (circularBufferWriteHead >= circularBufferLength) 
 		{
@@ -225,96 +251,39 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     Conversions<float>::cartesianToSpherical (right, azimuthR, elevationR);
 
 
-    if (*highQuality < 0.5f) // no high-quality
+	// SH eval and mix between grains and direct encoding of audio
+    if (positionHasChanged.compareAndSetBool (false, true))
     {
-        if (positionHasChanged.compareAndSetBool (false, true))
-        {
-            smoothAzimuthL.setCurrentAndTargetValue (azimuthL);
-            smoothElevationL.setCurrentAndTargetValue (elevationL);
-            smoothAzimuthR.setCurrentAndTargetValue (azimuthR);
-            smoothElevationR.setCurrentAndTargetValue (elevationR);
+        smoothAzimuthL.setCurrentAndTargetValue (azimuthL);
+        smoothElevationL.setCurrentAndTargetValue (elevationL);
+        smoothAzimuthR.setCurrentAndTargetValue (azimuthR);
+        smoothElevationR.setCurrentAndTargetValue (elevationR);
 
-            SHEval (ambisonicOrder, left.x, left.y, left.z, SHL);
-            SHEval (ambisonicOrder, right.x, right.y, right.z, SHR);
-
-            if (*useSN3D > 0.5f)
-            {
-                juce::FloatVectorOperations::multiply(SHL, SHL, n3d2sn3d, nChOut);
-                juce::FloatVectorOperations::multiply(SHR, SHR, n3d2sn3d, nChOut);
-            }
-        }
-        const float *leftIn = bufferCopy.getReadPointer(0);
-        const float *rightIn = bufferCopy.getReadPointer(1);
-        for (int i = 0; i < nChOut; ++i)
-        {
-            buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i], SHL[i]);
-            buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i], SHR[i]);
-        }
-    }
-    else // high-quality sampling
-    {
-        if (smoothAzimuthL.getTargetValue() - azimuthL > juce::MathConstants<float>::pi)
-            smoothAzimuthL.setCurrentAndTargetValue (smoothAzimuthL.getTargetValue() - 2.0f * juce::MathConstants<float>::pi);
-        else if (azimuthL - smoothAzimuthL.getTargetValue() > juce::MathConstants<float>::pi)
-            smoothAzimuthL.setCurrentAndTargetValue (smoothAzimuthL.getTargetValue() + 2.0f * juce::MathConstants<float>::pi);
-
-        if (smoothElevationL.getTargetValue() - elevationL > juce::MathConstants<float>::pi)
-            smoothElevationL.setCurrentAndTargetValue (smoothElevationL.getTargetValue() - 2.0f * juce::MathConstants<float>::pi);
-        else if (elevationL - smoothElevationL.getTargetValue() > juce::MathConstants<float>::pi)
-            smoothElevationL.setCurrentAndTargetValue (smoothElevationL.getTargetValue() + 2.0f * juce::MathConstants<float>::pi);
-
-        if (smoothAzimuthR.getTargetValue() - azimuthR > juce::MathConstants<float>::pi)
-            smoothAzimuthR.setCurrentAndTargetValue (smoothAzimuthR.getTargetValue() - 2.0f * juce::MathConstants<float>::pi);
-        else if (azimuthR - smoothAzimuthR.getTargetValue() > juce::MathConstants<float>::pi)
-            smoothAzimuthR.setCurrentAndTargetValue (smoothAzimuthR.getTargetValue() + 2.0f * juce::MathConstants<float>::pi);
-
-        if (smoothElevationR.getTargetValue() - elevationR > juce::MathConstants<float>::pi)
-            smoothElevationR.setCurrentAndTargetValue (smoothElevationR.getTargetValue() - 2.0f * juce::MathConstants<float>::pi);
-        else if (elevationR - smoothElevationR.getTargetValue() > juce::MathConstants<float>::pi)
-            smoothElevationR.setCurrentAndTargetValue (smoothElevationR.getTargetValue() + 2.0f * juce::MathConstants<float>::pi);
-
-        smoothAzimuthL.setTargetValue (azimuthL);
-        smoothElevationL.setTargetValue (elevationL);
-        smoothAzimuthR.setTargetValue (azimuthR);
-        smoothElevationR.setTargetValue (elevationR);
-
-        for (int i = 0; i < L; ++i) // left
-        {
-            const float azimuth = smoothAzimuthL.getNextValue();
-            const float elevation = smoothElevationL.getNextValue();
-            float sample = bufferCopy.getSample(0, i);
-
-            const juce::Vector3D<float> pos = Conversions<float>::sphericalToCartesian(azimuth, elevation);
-            SHEval(ambisonicOrder, pos.x, pos.y, pos.z, SHL);
-
-            for (int ch = 0; ch < nChOut; ++ch)
-                buffer.setSample(ch, i, sample * SHL[ch]);
-        }
-
-        for (int i = 0; i < L; ++i) // right
-        {
-            const float azimuth = smoothAzimuthR.getNextValue();
-            const float elevation = smoothElevationR.getNextValue();
-            float sample = bufferCopy.getSample(1, i);
-
-            const juce::Vector3D<float> pos = Conversions<float>::sphericalToCartesian(azimuth, elevation);
-            SHEval(ambisonicOrder, pos.x, pos.y, pos.z, SHR);
-
-            for (int ch = 0; ch < nChOut; ++ch)
-                buffer.addSample(ch, i, sample * SHR[ch]);
-        }
+        SHEval (ambisonicOrder, left.x, left.y, left.z, SHL);
+        SHEval (ambisonicOrder, right.x, right.y, right.z, SHR);
 
         if (*useSN3D > 0.5f)
         {
-            for (int ch = 0; ch < nChOut; ++ch)
-            {
-                buffer.applyGain(ch, 0, L, n3d2sn3d[ch]);
-            }
-
             juce::FloatVectorOperations::multiply(SHL, SHL, n3d2sn3d, nChOut);
             juce::FloatVectorOperations::multiply(SHR, SHR, n3d2sn3d, nChOut);
         }
     }
+
+    const float *leftIn = bufferCopy.getReadPointer(0);
+    const float *rightIn = bufferCopy.getReadPointer(1);
+	float dryAmount = (1 - mixAmount);
+    for (int i = 0; i < nChOut; ++i)
+    {
+        buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i]* dryAmount, SHL[i] * dryAmount);
+        buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryAmount, SHR[i] * dryAmount);
+    }
+
+	for (int g = 0; g < 64; g++)
+	{
+		grains[g].processBlock(buffer, circularBuffer, L, circularBufferLength, SHL, mixAmount);
+	}
+    
+
     juce::FloatVectorOperations::copy(_SHL, SHL, nChOut);
     juce::FloatVectorOperations::copy(_SHR, SHR, nChOut);
 }

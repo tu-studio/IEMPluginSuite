@@ -30,6 +30,7 @@
 #include "../../resources/ambisonicTools.h"
 
 #include "../../resources/Conversions.h"
+#include "Grain.h"
 
 
 #define ProcessorClass StereoEncoderAudioProcessor
@@ -42,6 +43,7 @@ class StereoEncoderAudioProcessor  : public AudioProcessorBase<IOTypes::AudioCha
 public:
     constexpr static int numberOfInputChannels = 2;
     constexpr static int numberOfOutputChannels = 64;
+
     //==============================================================================
     StereoEncoderAudioProcessor();
     ~StereoEncoderAudioProcessor();
@@ -122,6 +124,19 @@ private:
     juce::AudioBuffer<float> circularBuffer;
 	int circularBufferWriteHead;
 	int circularBufferLength;
+
+	float deltaTimeSec = 0.2;
+	int deltaTimeSamples = 0;
+
+	float grainLengthSec = 0.1;
+	int grainLengthSamples = 0;
+	float lastSampleRate;
+
+	int grainTimeCounter = 0;
+
+	Grain grains[64];
+
+	float mixAmount = 1.0f;
 
     juce::LinearSmoothedValue<float> smoothAzimuthL, smoothElevationL;
     juce::LinearSmoothedValue<float> smoothAzimuthR, smoothElevationR;
