@@ -7,7 +7,7 @@ public:
 	Grain();
 
 	void startGrain(int startIndexCircularBuffer, int grainLengthSamples, int startOffset);
-	void processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer, int numSampOutBuffer, int numSampCircBuffer, float *channelWeights, float mix);
+	void processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer, int numSampOutBuffer, int numSampCircBuffer, float *channelWeights, float mix, float gainFactor);
 
 	bool isActive() const;
 

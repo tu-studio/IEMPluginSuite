@@ -30,7 +30,7 @@ void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int
 	// preRenderEnvelope(grainLengthSamples, Type envelopeType);
 }
 
-void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer, int numSampOutBuffer, int numSampCircBuffer, float *channelWeights, float mix)
+void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer, int numSampOutBuffer, int numSampCircBuffer, float *channelWeights, float mix, float gainFactor)
 {
 	if (!_isActive)
 		return;
@@ -53,16 +53,16 @@ void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<flo
 	{
 		if (_currentIndex < _grainLengthSamples) // grain still needs samples
 		{
-			//int readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
-			int readIndex = _startIndexCircularBuffer + _currentIndex;
+			int readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
+			/*int readIndex = _startIndexCircularBuffer + _currentIndex;
 			if (_startIndexCircularBuffer + _currentIndex >= numSampCircBuffer)
 			{
-				readIndex = 0;
-			}
+				readIndex = _currentIndex;
+			}*/
 
 			for (int ch = 0; ch < nChOut; ++ch) 
 			{
-				buffer.addSample(ch, i, 1.0f*circularLeftChannel[readIndex] * channelWeights[ch] * mix);
+				buffer.addSample(ch, i, 1.0f*circularLeftChannel[readIndex] * channelWeights[ch] * mix * 1.0f);
 			}
 			_currentIndex++;
 		}
