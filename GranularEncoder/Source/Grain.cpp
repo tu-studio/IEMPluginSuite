@@ -16,6 +16,7 @@ Grain::Grain()
 	_isActive = false;
 	_currentIndex = 0;
 	_startOffset = 0;
+	_blockCounter = 0;
 }
 
 void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int startOffset) // Type envelopeType)
@@ -25,6 +26,7 @@ void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int
 	_isActive = true;
 	_startOffset = startOffset;
 	_currentIndex = 0;
+	_blockCounter = 0;
 	// preRenderEnvelope(grainLengthSamples, Type envelopeType);
 }
 
@@ -37,26 +39,41 @@ void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<flo
 
 	int nChOut = buffer.getNumChannels();
 
-	int outStart = (_currentIndex > (numSampOutBuffer - _startOffset)) ? 0 : _startOffset;
+	int outStart;
+	if(_blockCounter == 0)
+	{
+		outStart = _startOffset;
+	}
+	else
+	{
+		outStart = 0;
+	}
+
 	for (int i = outStart; i < numSampOutBuffer; i++)
 	{
 		if (_currentIndex < _grainLengthSamples) // grain still needs samples
 		{
-			int readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
+			//int readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
+			int readIndex = _startIndexCircularBuffer + _currentIndex;
+			if (_startIndexCircularBuffer + _currentIndex >= numSampCircBuffer)
+			{
+				readIndex = 0;
+			}
+
 			for (int ch = 0; ch < nChOut; ++ch) 
 			{
-				float ch_weight = channelWeights[ch];
-				buffer.addSample(ch, i, circularLeftChannel[readIndex] * ch_weight * mix);
+				buffer.addSample(ch, i, 1.0f*circularLeftChannel[readIndex] * channelWeights[ch] * mix);
 			}
 			_currentIndex++;
 		}
 		else
 		{
 			_isActive = false;
-			_currentIndex = 0;
 			return;
 		}
 	}
+
+	_blockCounter++;
 };
 
 bool Grain::isActive() const {

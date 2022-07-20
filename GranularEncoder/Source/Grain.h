@@ -17,4 +17,5 @@ private:
 	int _currentIndex;
 	int _startOffset;
 	bool _isActive;
+	int _blockCounter;
 };
