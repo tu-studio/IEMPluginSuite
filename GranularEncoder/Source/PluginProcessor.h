@@ -125,10 +125,10 @@ private:
 	int circularBufferWriteHead;
 	int circularBufferLength;
 
-	float deltaTimeSec = 0.2;
+	float deltaTimeSec = 0.25;
 	int deltaTimeSamples = 0;
 
-	float grainLengthSec = 0.1;
+	float grainLengthSec = 0.25;
 	int grainLengthSamples = 0;
 	float lastSampleRate;
 

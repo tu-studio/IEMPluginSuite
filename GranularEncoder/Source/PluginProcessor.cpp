@@ -109,7 +109,7 @@ void StereoEncoderAudioProcessor::prepareToPlay (double sampleRate, int samplesP
 
     bufferCopy.setSize(2, samplesPerBlock);
 
-    circularBuffer.setSize(2, juce::roundToInt(sampleRate*2)); // two second long circular buffer
+    circularBuffer.setSize(2, juce::roundToInt(sampleRate*4)); // two second long circular buffer
 	circularBufferWriteHead = 0;
 	circularBufferLength = circularBuffer.getNumSamples();
 	circularBuffer.clear();
@@ -204,7 +204,8 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	deltaTimeSamples = juce::roundToInt(lastSampleRate * deltaTimeSec);
 	grainLengthSamples = juce::roundToInt(lastSampleRate * grainLengthSec);
 
-	for (int i = 0; i < buffer.getNumSamples(); i++) 
+
+	for (int i = 0; i < buffer.getNumSamples(); i++)
 	{
 		circularBuffer.setSample(0, circularBufferWriteHead, leftInput[i]);
 		circularBuffer.setSample(1, circularBufferWriteHead, rightInput[i]);
@@ -229,12 +230,11 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
 		// increment circular buffer write head
 		circularBufferWriteHead++;
-		if (circularBufferWriteHead >= circularBufferLength) 
+		if (circularBufferWriteHead >= circularBufferLength)
 		{
 			circularBufferWriteHead = 0;
 		}
 	}
-
 
 
     const float widthInRadiansQuarter {Conversions<float>::degreesToRadians (*width) / 4.0f};
@@ -274,13 +274,24 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	float dryAmount = (1 - mixAmount);
     for (int i = 0; i < nChOut; ++i)
     {
-        buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i]* dryAmount, SHL[i] * dryAmount);
-        buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryAmount, SHR[i] * dryAmount);
+        //buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i]* dryAmount, SHL[i] * dryAmount);
+        //buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryAmount, SHR[i] * dryAmount);
+		buffer.copyFrom(i, 0, leftIn, buffer.getNumSamples(), SHL[i] * dryAmount);
+		buffer.addFrom(i, 0, rightIn, buffer.getNumSamples(), SHR[i] * dryAmount);
     }
 
+	int numActiveGrains = 0;
 	for (int g = 0; g < 64; g++)
 	{
-		grains[g].processBlock(buffer, circularBuffer, L, circularBufferLength, SHL, mixAmount);
+		if (grains[g].isActive())
+			numActiveGrains++;
+	}
+
+	float gainFactor = 1 / std::sqrt(numActiveGrains);
+	// NEEDS SMOOTHING TO AVOID CLICKS IN SIGNAL
+	for (int g = 0; g < 64; g++)
+	{
+		grains[g].processBlock(buffer, circularBuffer, L, circularBufferLength, SHL, mixAmount, gainFactor);
 	}
     
 
