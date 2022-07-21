@@ -25,7 +25,7 @@ void Grain::setBlockSize(int numSampOutBuffer) {
 	_outputBuffer.clear();
 }
 
-void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int startOffset) // Type envelopeType)
+void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int startOffset, float* channelWeights) // Type envelopeType)
 {
 	_startIndexCircularBuffer = startIndexCircularBuffer;
 	_grainLengthSamples = grainLengthSamples;
@@ -34,7 +34,7 @@ void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int
 	_currentIndex = 0;
 	_blockCounter = 0;
 	_outputBuffer.clear();
-	//_channelWeights = channelWeights;
+	_channelWeights = channelWeights;
 	// preRenderEnvelope(grainLengthSamples, Type envelopeType);
 }
 
@@ -88,7 +88,7 @@ void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<flo
 	// SIMD Ambisonics encoding to current grain direction
 	for (int ch = 0; ch < nChOut; ++ch)
 	{
-		buffer.addFrom(ch, 0, grain_samples, buffer.getNumSamples(), channelWeights[ch] * mix * gainFactor);
+		buffer.addFrom(ch, 0, grain_samples, buffer.getNumSamples(), _channelWeights[ch] * mix * gainFactor);
 	}
 
 	_blockCounter++;

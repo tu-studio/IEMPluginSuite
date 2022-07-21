@@ -126,7 +126,7 @@ private:
 	int circularBufferWriteHead;
 	int circularBufferLength;
 
-	float deltaTimeSec = 0.001;
+	float deltaTimeSec = 0.1;
 	int deltaTimeSamples = 0;
 
 	float grainLengthSec = 0.250;
@@ -136,6 +136,8 @@ private:
 	int grainTimeCounter = 0;
 
 	Grain grains[maxNumGrains];
+
+	float _grainSH[maxNumGrains][64];
 	//int maxNumGrains;
 
 	float mixAmount = 1.0f;

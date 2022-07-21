@@ -258,7 +258,7 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	grainLengthSamples = juce::roundToInt(lastSampleRate * grainLengthSec);
 
 
-	float gainFactor = 0.01f;
+	//float gainFactor = 0.01f;
 
 
 	const float* circLeftCh = circularBuffer.getReadPointer(0);
@@ -277,13 +277,14 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 			{
 				if (!grains[g].isActive())
 				{
-					/*juce::Vector3D<float> randDirection;
-					randDirection.x = juce::Random::getSystemRandom().nextFloat()-0.5f;
-					randDirection.y = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-					randDirection.z = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+					juce::Vector3D<float> randDir;
+					randDir.x = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+					randDir.y = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+					randDir.z = juce::Random::getSystemRandom().nextFloat() - 0.5f;
 
-					randDirection /= randDirection.length();*/
-					grains[g].startGrain(circularBufferWriteHead, grainLengthSamples, i);
+					randDir /= randDir.length();
+					SHEval(ambisonicOrder, randDir.x, randDir.y, randDir.z, _grainSH[g]);
+					grains[g].startGrain(circularBufferWriteHead, grainLengthSamples, i, _grainSH[g]);
 					break;
 				}
 			}
@@ -316,7 +317,7 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	}
 
 	
-	//float gainFactor = 0.01f;//juce::jmin(std::sqrt(deltaTimeSec / grainLengthSec), 1.0f);
+	float gainFactor = juce::jmin(std::sqrt(deltaTimeSec / grainLengthSec), 1.0f);
 	for (int g = 0; g < maxNumGrains; g++)
 	{
 		grains[g].processBlock(buffer, circularBuffer, L, circularBufferLength, SHL, mixAmount, gainFactor);
