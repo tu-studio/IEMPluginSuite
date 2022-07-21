@@ -35,6 +35,7 @@
 
 #define ProcessorClass StereoEncoderAudioProcessor
 #define maxNumGrains 64
+#define windowResolution 1024
 
 //==============================================================================
 /**
@@ -101,6 +102,10 @@ public:
     std::atomic<float>* width;
     std::atomic<float>* highQuality;
 
+	enum class WindowType {
+		hann, rectangular
+	};
+
     // --------------------
 
     bool sphericalInput;
@@ -139,6 +144,11 @@ private:
 
 	float _grainSH[maxNumGrains][64];
 	//int maxNumGrains;
+
+	float _hannWindow[windowResolution];
+	float _rectangularWindow[windowResolution];
+	float _currentWindow[windowResolution];
+	WindowType _currentWindowType = WindowType::hann;
 
 	float mixAmount = 1.0f;
 	//juce::LinearSmoothedValue<float> gainFactor;

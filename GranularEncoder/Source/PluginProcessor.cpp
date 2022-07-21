@@ -71,6 +71,13 @@ updatedPositionData (true)
 
     juce::FloatVectorOperations::clear(SHL, 64);
     juce::FloatVectorOperations::clear(SHR, 64);
+
+	for (int i = 0; i < windowResolution; i++)
+	{
+		_hannWindow[i] = std::pow(std::sin(i * juce::MathConstants<float>::pi / windowResolution), 2);
+		_rectangularWindow[i] = 1.0f;
+	}
+	juce::FloatVectorOperations::copy(_currentWindow, _hannWindow, windowResolution);
 }
 
 StereoEncoderAudioProcessor::~StereoEncoderAudioProcessor()
@@ -257,12 +264,16 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	deltaTimeSamples = juce::roundToInt(lastSampleRate * deltaTimeSec);
 	grainLengthSamples = juce::roundToInt(lastSampleRate * grainLengthSec);
 
+	switch (_currentWindowType)
+	{
+		default:
+			break;
+		case WindowType::hann:
+			juce::FloatVectorOperations::copy(_currentWindow, _hannWindow, windowResolution);
+		case WindowType::rectangular:
+			juce::FloatVectorOperations::copy(_currentWindow, _rectangularWindow, windowResolution);
+	}
 
-	//float gainFactor = 0.01f;
-
-
-	const float* circLeftCh = circularBuffer.getReadPointer(0);
-	const float* circRightCh = circularBuffer.getReadPointer(1);
 
 	for (int i = 0; i < buffer.getNumSamples(); i++)
 	{
