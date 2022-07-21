@@ -34,6 +34,7 @@
 
 
 #define ProcessorClass StereoEncoderAudioProcessor
+#define maxNumGrains 64
 
 //==============================================================================
 /**
@@ -125,18 +126,20 @@ private:
 	int circularBufferWriteHead;
 	int circularBufferLength;
 
-	float deltaTimeSec = 0.25;
+	float deltaTimeSec = 0.001;
 	int deltaTimeSamples = 0;
 
-	float grainLengthSec = 0.25;
+	float grainLengthSec = 0.250;
 	int grainLengthSamples = 0;
 	float lastSampleRate;
 
 	int grainTimeCounter = 0;
 
-	Grain grains[64];
+	Grain grains[maxNumGrains];
+	//int maxNumGrains;
 
 	float mixAmount = 1.0f;
+	//juce::LinearSmoothedValue<float> gainFactor;
 
     juce::LinearSmoothedValue<float> smoothAzimuthL, smoothElevationL;
     juce::LinearSmoothedValue<float> smoothAzimuthR, smoothElevationR;

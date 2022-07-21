@@ -116,6 +116,12 @@ void StereoEncoderAudioProcessor::prepareToPlay (double sampleRate, int samplesP
 
 	lastSampleRate = sampleRate;
 
+	for (int g = 0; g < maxNumGrains; g++)
+	{
+		grains[g].setBlockSize(samplesPerBlock);
+	}
+	//maxNumGrains = (size_t) grains;
+
 
     smoothAzimuthL.setCurrentAndTargetValue (*azimuth / 180.0f * juce::MathConstants<float>::pi);
     smoothElevationL.setCurrentAndTargetValue (*elevation / 180.0f * juce::MathConstants<float>::pi);
@@ -196,6 +202,53 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         bufferCopy.copyFrom(i, 0, buffer.getReadPointer(i), buffer.getNumSamples());
     buffer.clear();
 
+	// SPATIAL PROCESSING
+	const float widthInRadiansQuarter{ Conversions<float>::degreesToRadians(*width) / 4.0f };
+	const iem::Quaternion<float> quatLRot{ iem::Quaternion<float>(cos(widthInRadiansQuarter), 0.0f, 0.0f, sin(widthInRadiansQuarter)) };
+	const iem::Quaternion<float> quatL = quaternionDirection * quatLRot;
+	const iem::Quaternion<float> quatR = quaternionDirection * quatLRot.getConjugate();
+
+	const auto left = quatL.getCartesian();
+	const auto right = quatR.getCartesian();
+
+	//conversion to spherical for high-quality mode
+	float azimuthL, azimuthR, elevationL, elevationR;
+	Conversions<float>::cartesianToSpherical(left, azimuthL, elevationL);
+	Conversions<float>::cartesianToSpherical(right, azimuthR, elevationR);
+
+
+	// SH eval and mix between grains and direct encoding of audio
+	if (positionHasChanged.compareAndSetBool(false, true))
+	{
+		smoothAzimuthL.setCurrentAndTargetValue(azimuthL);
+		smoothElevationL.setCurrentAndTargetValue(elevationL);
+		smoothAzimuthR.setCurrentAndTargetValue(azimuthR);
+		smoothElevationR.setCurrentAndTargetValue(elevationR);
+
+		SHEval(ambisonicOrder, left.x, left.y, left.z, SHL);
+		SHEval(ambisonicOrder, right.x, right.y, right.z, SHR);
+
+		if (*useSN3D > 0.5f)
+		{
+			juce::FloatVectorOperations::multiply(SHL, SHL, n3d2sn3d, nChOut);
+			juce::FloatVectorOperations::multiply(SHR, SHR, n3d2sn3d, nChOut);
+		}
+	}
+
+	// DRY PROCESSING
+	const float *leftIn = bufferCopy.getReadPointer(0);
+	const float *rightIn = bufferCopy.getReadPointer(1);
+	float dryAmount = (1 - mixAmount);
+	for (int i = 0; i < nChOut; ++i)
+	{
+		//buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i]* dryAmount, SHL[i] * dryAmount);
+		//buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryAmount, SHR[i] * dryAmount);
+		buffer.copyFrom(i, 0, leftIn, buffer.getNumSamples(), SHL[i] * dryAmount);
+		buffer.addFrom(i, 0, rightIn, buffer.getNumSamples(), SHR[i] * dryAmount);
+	}
+
+
+	// TEMPORAL PROCESSING
 	// Fill circular buffer with audio input
 	// Try to start grains in loop
 	const float* leftInput = bufferCopy.getReadPointer(0);
@@ -204,6 +257,12 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	deltaTimeSamples = juce::roundToInt(lastSampleRate * deltaTimeSec);
 	grainLengthSamples = juce::roundToInt(lastSampleRate * grainLengthSec);
 
+
+	float gainFactor = 0.01f;
+
+
+	const float* circLeftCh = circularBuffer.getReadPointer(0);
+	const float* circRightCh = circularBuffer.getReadPointer(1);
 
 	for (int i = 0; i < buffer.getNumSamples(); i++)
 	{
@@ -214,10 +273,16 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 		{
 			grainTimeCounter = 0;
 			// start a grain at this sample time stamp
-			for (int g = 0; g < 64; g++)
+			for (int g = 0; g < maxNumGrains; g++)
 			{
 				if (!grains[g].isActive())
 				{
+					/*juce::Vector3D<float> randDirection;
+					randDirection.x = juce::Random::getSystemRandom().nextFloat()-0.5f;
+					randDirection.y = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+					randDirection.z = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+
+					randDirection /= randDirection.length();*/
 					grains[g].startGrain(circularBufferWriteHead, grainLengthSamples, i);
 					break;
 				}
@@ -228,6 +293,12 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 			grainTimeCounter++;
 		}
 
+		/*for (int g = 0; g < maxNumGrains; g++)
+		{
+			grains[g].processSample(buffer, circLeftCh, circRightCh, circularBufferLength, SHL, mixAmount, gainFactor, i);
+		}*/
+
+
 		// increment circular buffer write head
 		circularBufferWriteHead++;
 		if (circularBufferWriteHead >= circularBufferLength)
@@ -237,59 +308,16 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	}
 
 
-    const float widthInRadiansQuarter {Conversions<float>::degreesToRadians (*width) / 4.0f};
-    const iem::Quaternion<float> quatLRot {iem::Quaternion<float> (cos (widthInRadiansQuarter), 0.0f, 0.0f, sin (widthInRadiansQuarter))};
-    const iem::Quaternion<float> quatL = quaternionDirection * quatLRot;
-    const iem::Quaternion<float> quatR = quaternionDirection * quatLRot.getConjugate();
-
-    const auto left = quatL.getCartesian();
-    const auto right = quatR.getCartesian();
-
-    //conversion to spherical for high-quality mode
-    float azimuthL, azimuthR, elevationL, elevationR;
-    Conversions<float>::cartesianToSpherical (left, azimuthL, elevationL);
-    Conversions<float>::cartesianToSpherical (right, azimuthR, elevationR);
-
-
-	// SH eval and mix between grains and direct encoding of audio
-    if (positionHasChanged.compareAndSetBool (false, true))
-    {
-        smoothAzimuthL.setCurrentAndTargetValue (azimuthL);
-        smoothElevationL.setCurrentAndTargetValue (elevationL);
-        smoothAzimuthR.setCurrentAndTargetValue (azimuthR);
-        smoothElevationR.setCurrentAndTargetValue (elevationR);
-
-        SHEval (ambisonicOrder, left.x, left.y, left.z, SHL);
-        SHEval (ambisonicOrder, right.x, right.y, right.z, SHR);
-
-        if (*useSN3D > 0.5f)
-        {
-            juce::FloatVectorOperations::multiply(SHL, SHL, n3d2sn3d, nChOut);
-            juce::FloatVectorOperations::multiply(SHR, SHR, n3d2sn3d, nChOut);
-        }
-    }
-
-    const float *leftIn = bufferCopy.getReadPointer(0);
-    const float *rightIn = bufferCopy.getReadPointer(1);
-	float dryAmount = (1 - mixAmount);
-    for (int i = 0; i < nChOut; ++i)
-    {
-        //buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i]* dryAmount, SHL[i] * dryAmount);
-        //buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryAmount, SHR[i] * dryAmount);
-		buffer.copyFrom(i, 0, leftIn, buffer.getNumSamples(), SHL[i] * dryAmount);
-		buffer.addFrom(i, 0, rightIn, buffer.getNumSamples(), SHR[i] * dryAmount);
-    }
-
 	int numActiveGrains = 0;
-	for (int g = 0; g < 64; g++)
+	for (int g = 0; g < maxNumGrains; g++)
 	{
 		if (grains[g].isActive())
 			numActiveGrains++;
 	}
 
-	float gainFactor = 1 / std::sqrt(numActiveGrains);
-	// NEEDS SMOOTHING TO AVOID CLICKS IN SIGNAL
-	for (int g = 0; g < 64; g++)
+	
+	//float gainFactor = 0.01f;//juce::jmin(std::sqrt(deltaTimeSec / grainLengthSec), 1.0f);
+	for (int g = 0; g < maxNumGrains; g++)
 	{
 		grains[g].processBlock(buffer, circularBuffer, L, circularBufferLength, SHL, mixAmount, gainFactor);
 	}
