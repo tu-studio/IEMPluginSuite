@@ -299,7 +299,6 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 			grains[g].processSample(buffer, circLeftCh, circRightCh, circularBufferLength, SHL, mixAmount, gainFactor, i);
 		}*/
 
-
 		// increment circular buffer write head
 		circularBufferWriteHead++;
 		if (circularBufferWriteHead >= circularBufferLength)

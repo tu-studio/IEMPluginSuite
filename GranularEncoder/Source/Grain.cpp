@@ -1,14 +1,4 @@
 #include "Grain.h"
-#include "../../resources/efficientSHvanilla.h"
-
-/*
-Grain::Grain(int startIndexCircularBuffer, int grainLengthSamples)
-{
-	_startIndexCircularBuffer = startIndexCircularBuffer;
-	_grainLengthSamples = grainLengthSamples;
-	_isActive = false;
-	_currentIndex = 0;
-};*/
 
 Grain::Grain()
 {
@@ -68,13 +58,7 @@ void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<flo
 		if (_currentIndex < _grainLengthSamples) // grain still needs samples
 		{
 			readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
-			/*int readIndex = _startIndexCircularBuffer + _currentIndex;
-			if (_startIndexCircularBuffer + _currentIndex >= numSampCircBuffer)
-			{
-				readIndex = _currentIndex;
-			}*/
 			_outputBuffer.setSample(0, i, circularLeftChannel[readIndex]);
-		
 			_currentIndex++;
 		}
 		else
@@ -104,20 +88,11 @@ void Grain::processSample(juce::AudioBuffer<float>& buffer, const float* circula
 	if (_currentIndex < _grainLengthSamples) // grain still needs a sample
 	{
 		int readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
-		/*int readIndex = _startIndexCircularBuffer + _currentIndex;
-		if (_startIndexCircularBuffer + _currentIndex >= numSampCircBuffer)
-		{
-		readIndex = _currentIndex;
-		}*/
-
-
-
-		/*
+		
 		for (int ch = 0; ch < nChOut; ++ch)
 		{
 			buffer.addSample(ch, bufferIndex, 1.0f*circularLeftChannel[readIndex] * channelWeights[ch] * mix * gainFactor);
-		}*/
-		buffer.addSample(0, bufferIndex, 1.0f*circularLeftChannel[readIndex] * channelWeights[0] * mix * gainFactor);
+		}
 		_currentIndex++;
 	}
 	else
