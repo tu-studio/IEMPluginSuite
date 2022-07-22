@@ -145,7 +145,7 @@ private:
 	float _hannWindow[windowResolution];
 	float _rectangularWindow[windowResolution];
 	float* _currentWindow;
-	WindowType _currentWindowType = WindowType::hann;
+	WindowType _currentWindowType = WindowType::rectangular;
 
 	float mixAmount = 1.0f;
 	//juce::LinearSmoothedValue<float> gainFactor;

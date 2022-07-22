@@ -77,7 +77,7 @@ updatedPositionData (true)
 		_hannWindow[i] = std::pow(std::sin(i * juce::MathConstants<float>::pi / windowResolution), 2);
 		_rectangularWindow[i] = 1.0f;
 	}
-    _currentWindow = _hannWindow;
+    _currentWindow = _rectangularWindow;
 }
 
 StereoEncoderAudioProcessor::~StereoEncoderAudioProcessor()
@@ -266,15 +266,17 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	grainLengthSamples = juce::roundToInt(lastSampleRate * grainLengthSec);
 
 
-    /*switch (_currentWindowType)
+    switch (_currentWindowType)
 	{
 		default:
 			break;
 		case WindowType::hann:
 			_currentWindow = _hannWindow;
+			break;
 		case WindowType::rectangular:
 			_currentWindow = _rectangularWindow;
-	}*/
+			break;
+	}
 
 
 	for (int i = 0; i < buffer.getNumSamples(); i++)
@@ -309,6 +311,7 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                     params.channelWeights = channelWeights;
 					params.gainFactor = juce::jmin(std::sqrt(deltaTimeSec / grainLengthSec), 1.0f);
 					params.mix = mixAmount;
+					params.window = _currentWindow;
 					grains[g].startGrain(params);
 					break;
 				}

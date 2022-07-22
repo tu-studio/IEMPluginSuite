@@ -13,6 +13,7 @@ public:
 		std::array<float,64> channelWeights;
 		float gainFactor = 1.0f;
 		float mix = 1.0f;
+		float* window;
 		//juce::Vector3D<float> grainDirection;
 		//int tDesignDirectionIndex = 0;
 	};
