@@ -8,6 +8,8 @@ Grain::Grain()
 	_currentIndex = 0;
 	_startOffset = 0;
 	_blockCounter = 0;
+	_channelWeights = nullptr;
+	_window = nullptr;
 }
 
 void Grain::setBlockSize(int numSampOutBuffer) {
@@ -15,7 +17,7 @@ void Grain::setBlockSize(int numSampOutBuffer) {
 	_outputBuffer.clear();
 }
 
-void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int startOffset, float* channelWeights) // Type envelopeType)
+void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int startOffset, float* channelWeights, float* windowFunction) // Type envelopeType)
 {
 	_startIndexCircularBuffer = startIndexCircularBuffer;
 	_grainLengthSamples = grainLengthSamples;
@@ -25,15 +27,34 @@ void Grain::startGrain(int startIndexCircularBuffer, int grainLengthSamples, int
 	_blockCounter = 0;
 	_outputBuffer.clear();
 	_channelWeights = channelWeights;
+	_window = windowFunction;
 	// preRenderEnvelope(grainLengthSamples, Type envelopeType);
 }
 
-void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer, int numSampOutBuffer, int numSampCircBuffer, float *channelWeights, float mix, float gainFactor)
+void Grain::startGrain(const GrainJobParameters& grainParameters) // Type envelopeType)
+{
+	_params = grainParameters;
+
+	_isActive = true;
+	_currentIndex = 0;
+	_blockCounter = 0;
+
+	_outputBuffer.clear();
+	// preRenderEnvelope(grainLengthSamples, Type envelopeType);
+}
+
+
+void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer, float mix, float gainFactor)
 {
 	if (!_isActive)
 		return;
 
+	int numSampCircBuffer = circularBuffer.getNumSamples();
+	int numSampOutBuffer = buffer.getNumSamples();
 	jassert(_outputBuffer.getNumSamples() == numSampOutBuffer);
+	jassert(_channelWeights != nullptr);
+	jassert(_window != nullptr);
+
 	_outputBuffer.clear();
 
 	const float* circularLeftChannel = circularBuffer.getReadPointer(0);
@@ -78,6 +99,59 @@ void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<flo
 	_blockCounter++;
 };
 
+void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer)
+{
+	if (!_isActive)
+		return;
+
+	int numSampCircBuffer = circularBuffer.getNumSamples();
+	int numSampOutBuffer = buffer.getNumSamples();
+	jassert(_outputBuffer.getNumSamples() == numSampOutBuffer);
+	//jassert(_channelWeights != nullptr);
+	//jassert(_window != nullptr);
+
+	_outputBuffer.clear();
+	int nChOut = buffer.getNumChannels();
+
+	const float* circularLeftChannel = circularBuffer.getReadPointer(0);
+	const float* circularRightChannel = circularBuffer.getReadPointer(1);
+
+	int outStart;
+	if(_blockCounter == 0)
+	{
+		outStart = _params.startOffsetBlock;
+	}
+	else
+	{
+		outStart = 0;
+	}
+
+	int readIndex;
+	// Write samples to internal mono buffer
+	for (int i = outStart; i < numSampOutBuffer; i++)
+	{
+		if (_currentIndex < _params.grainLengthSamples) // grain still needs samples
+		{
+			readIndex = (_params.startPositionCircBuffer + _currentIndex) % numSampCircBuffer;
+			_outputBuffer.setSample(0, i, circularLeftChannel[readIndex]);
+			_currentIndex++;
+		}
+		else
+		{
+			_isActive = false;
+			return;
+		}
+	}
+
+	const float* grain_samples = _outputBuffer.getReadPointer(0);
+	for (int ch = 0; ch < nChOut; ++ch)
+	{
+		buffer.addFrom(ch, 0, grain_samples, buffer.getNumSamples(), _params.channelWeights[ch] * _params.mix * _params.gainFactor);
+	}
+
+	_blockCounter++;
+};
+
 void Grain::processSample(juce::AudioBuffer<float>& buffer, const float* circularLeftChannel, const float* circularRightChannel, int numSampCircBuffer, float *channelWeights, float mix, float gainFactor, int bufferIndex)
 {
 	if (!_isActive)
@@ -102,6 +176,7 @@ void Grain::processSample(juce::AudioBuffer<float>& buffer, const float* circula
 	}
 };
 
-bool Grain::isActive() const {
+bool Grain::isActive() const 
+{
 	return _isActive;
 };

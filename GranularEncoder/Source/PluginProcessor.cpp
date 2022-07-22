@@ -77,7 +77,7 @@ updatedPositionData (true)
 		_hannWindow[i] = std::pow(std::sin(i * juce::MathConstants<float>::pi / windowResolution), 2);
 		_rectangularWindow[i] = 1.0f;
 	}
-	juce::FloatVectorOperations::copy(_currentWindow, _hannWindow, windowResolution);
+    _currentWindow = _hannWindow;
 }
 
 StereoEncoderAudioProcessor::~StereoEncoderAudioProcessor()
@@ -115,6 +115,7 @@ void StereoEncoderAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     checkInputAndOutput (this, 2, *orderSetting, true);
 
     bufferCopy.setSize(2, samplesPerBlock);
+    grainOutBuffer.setSize(1, samplesPerBlock);
 
     circularBuffer.setSize(2, juce::roundToInt(sampleRate*4)); // two second long circular buffer
 	circularBufferWriteHead = 0;
@@ -264,15 +265,16 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	deltaTimeSamples = juce::roundToInt(lastSampleRate * deltaTimeSec);
 	grainLengthSamples = juce::roundToInt(lastSampleRate * grainLengthSec);
 
-	switch (_currentWindowType)
+
+    /*switch (_currentWindowType)
 	{
 		default:
 			break;
 		case WindowType::hann:
-			juce::FloatVectorOperations::copy(_currentWindow, _hannWindow, windowResolution);
+			_currentWindow = _hannWindow;
 		case WindowType::rectangular:
-			juce::FloatVectorOperations::copy(_currentWindow, _rectangularWindow, windowResolution);
-	}
+			_currentWindow = _rectangularWindow;
+	}*/
 
 
 	for (int i = 0; i < buffer.getNumSamples(); i++)
@@ -292,10 +294,22 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 					randDir.x = juce::Random::getSystemRandom().nextFloat() - 0.5f;
 					randDir.y = juce::Random::getSystemRandom().nextFloat() - 0.5f;
 					randDir.z = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-
 					randDir /= randDir.length();
-					SHEval(ambisonicOrder, randDir.x, randDir.y, randDir.z, _grainSH[g]);
-					grains[g].startGrain(circularBufferWriteHead, grainLengthSamples, i, _grainSH[g]);
+
+                    SHEval(ambisonicOrder, randDir.x, randDir.y, randDir.z, _grainSH[g]);
+
+                    std::array<float, 64> channelWeights;
+                    std::copy(_grainSH[g], _grainSH[g] + 64, channelWeights.begin());
+                    Grain::GrainJobParameters params;
+                    params.startPositionCircBuffer = circularBufferWriteHead;
+                    params.grainLengthSamples = grainLengthSamples;
+                    params.pitchSemitones = 0;
+                    params.startOffsetBlock = i;
+                    params.windowType = _currentWindowType;
+                    params.channelWeights = channelWeights;
+					params.gainFactor = juce::jmin(std::sqrt(deltaTimeSec / grainLengthSec), 1.0f);
+					params.mix = mixAmount;
+					grains[g].startGrain(params);
 					break;
 				}
 			}
@@ -326,11 +340,9 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 			numActiveGrains++;
 	}
 
-	
-	float gainFactor = juce::jmin(std::sqrt(deltaTimeSec / grainLengthSec), 1.0f);
 	for (int g = 0; g < maxNumGrains; g++)
 	{
-		grains[g].processBlock(buffer, circularBuffer, L, circularBufferLength, SHL, mixAmount, gainFactor);
+		grains[g].processBlock(buffer, circularBuffer);
 	}
     
 

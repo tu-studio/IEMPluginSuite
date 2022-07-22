@@ -102,10 +102,6 @@ public:
     std::atomic<float>* width;
     std::atomic<float>* highQuality;
 
-	enum class WindowType {
-		hann, rectangular
-	};
-
     // --------------------
 
     bool sphericalInput;
@@ -126,12 +122,13 @@ private:
     iem::Quaternion<float> quaternionDirection;
 
     juce::AudioBuffer<float> bufferCopy;
+    juce::AudioBuffer<float> grainOutBuffer;
 
     juce::AudioBuffer<float> circularBuffer;
 	int circularBufferWriteHead;
 	int circularBufferLength;
 
-	float deltaTimeSec = 0.1;
+	float deltaTimeSec = 0.100;
 	int deltaTimeSamples = 0;
 
 	float grainLengthSec = 0.250;
@@ -147,7 +144,7 @@ private:
 
 	float _hannWindow[windowResolution];
 	float _rectangularWindow[windowResolution];
-	float _currentWindow[windowResolution];
+	float* _currentWindow;
 	WindowType _currentWindowType = WindowType::hann;
 
 	float mixAmount = 1.0f;
