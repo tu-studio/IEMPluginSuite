@@ -24,7 +24,7 @@ public:
 	void startGrain(int startIndexCircularBuffer, int grainLengthSamples, int startOffset, float* channelWeights, float* windowFunction);
 	void startGrain(const GrainJobParameters& grainParameters);
 	void processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer, float mix, float gainFactor);
-	void processBlock(juce::AudioBuffer<float>& grainBuffer, juce::AudioBuffer<float>& circularBuffer);
+	void processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer);
 	void processSample(juce::AudioBuffer<float>& buffer, const float* circularLeftChannel, const float* circularRightChannel, int numSampCircBuffer, float *channelWeights, float mix, float gainFactor, int bufferIndex);
 
 	bool isActive() const;
