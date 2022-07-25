@@ -72,12 +72,19 @@ updatedPositionData (true)
     juce::FloatVectorOperations::clear(SHL, 64);
     juce::FloatVectorOperations::clear(SHR, 64);
 
+	_hannWindowBuffer.setSize(1, windowResolution);
+	_rectWindowBuffer.setSize(1, windowResolution);
+
+
+	float* _hannWindowBufferWritePtr = _hannWindowBuffer.getWritePointer(0);
+	float* _rectWindowBufferWritePtr = _rectWindowBuffer.getWritePointer(0);
+
 	for (int i = 0; i < windowResolution; i++)
 	{
-		_hannWindow[i] = std::pow(std::sin(i * juce::MathConstants<float>::pi / windowResolution), 2);
-		_rectangularWindow[i] = 1.0f;
+		_hannWindowBufferWritePtr[i] = std::pow(std::sin(i * juce::MathConstants<float>::pi / windowResolution), 2);
+		_rectWindowBufferWritePtr[i] = 1.0f;
 	}
-    _currentWindow = _rectangularWindow;
+    _currentWindow = &_rectWindowBuffer;
 }
 
 StereoEncoderAudioProcessor::~StereoEncoderAudioProcessor()
@@ -271,10 +278,10 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 		default:
 			break;
 		case WindowType::hann:
-			_currentWindow = _hannWindow;
+			_currentWindow = &_hannWindowBuffer;
 			break;
 		case WindowType::rectangular:
-			_currentWindow = _rectangularWindow;
+			_currentWindow = &_rectWindowBuffer;
 			break;
 	}
 
@@ -307,11 +314,10 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                     params.grainLengthSamples = grainLengthSamples;
                     params.pitchSemitones = 0;
                     params.startOffsetBlock = i;
-                    params.windowType = _currentWindowType;
                     params.channelWeights = channelWeights;
 					params.gainFactor = juce::jmin(std::sqrt(deltaTimeSec / grainLengthSec), 1.0f);
 					params.mix = mixAmount;
-					params.window = _currentWindow;
+					params.windowBuffer = _currentWindow;
 					grains[g].startGrain(params);
 					break;
 				}

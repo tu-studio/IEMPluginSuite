@@ -31,6 +31,7 @@
 
 #include "../../resources/Conversions.h"
 #include "Grain.h"
+#include "Type.h"
 
 
 #define ProcessorClass StereoEncoderAudioProcessor
@@ -142,10 +143,11 @@ private:
 	float _grainSH[maxNumGrains][64];
 	//int maxNumGrains;
 
-	float _hannWindow[windowResolution];
-	float _rectangularWindow[windowResolution];
-	float* _currentWindow;
-	WindowType _currentWindowType = WindowType::rectangular;
+	juce::AudioBuffer<float> _hannWindowBuffer;
+	juce::AudioBuffer<float> _rectWindowBuffer;
+	juce::AudioBuffer<float>* _currentWindow;
+
+	WindowType _currentWindowType = WindowType::hann;
 
 	float mixAmount = 1.0f;
 	//juce::LinearSmoothedValue<float> gainFactor;
