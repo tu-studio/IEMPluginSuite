@@ -105,6 +105,12 @@ public:
 	std::atomic<float>* deltaTime;
 	std::atomic<float>* grainLength;
 
+	std::atomic<float>* pitch;
+	std::atomic<float>*	pitchMod;
+
+	std::atomic<float>* position;
+	std::atomic<float>* positionMod;
+
     std::atomic<float>* highQuality;
 
     // --------------------

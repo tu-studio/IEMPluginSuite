@@ -196,7 +196,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     lblWidth.setText("Width");
 
 	addAndMakeVisible(&lbDeltaTime);
-	lbDeltaTime.setText("Time");
+	lbDeltaTime.setText("Delta-t");
 
 	addAndMakeVisible(&lbGrainLength);
 	lbGrainLength.setText("Length");
