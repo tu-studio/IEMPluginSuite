@@ -32,8 +32,8 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    //setSize(500, 325);
-	setSize(500, 450);
+    // setSize(500, 325);
+    setSize(500, 450);
     setLookAndFeel(&globalLaF);
 
     // ==== SPHERE AND ELEMENTS ===============
@@ -94,43 +94,43 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     elevationSlider.setTooltip("Elevation angle");
     elevationSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(°)"));
 
-	addAndMakeVisible(&rollSlider);
-	rollAttachment.reset(new SliderAttachment(valueTreeState, "roll", rollSlider));
-	rollSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-	rollSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-	rollSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
-	rollSlider.setReverse(false);
-	rollSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
-	rollSlider.setTooltip("Roll angle");
-	rollSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(°)"));
+    addAndMakeVisible(&rollSlider);
+    rollAttachment.reset(new SliderAttachment(valueTreeState, "roll", rollSlider));
+    rollSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    rollSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    rollSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
+    rollSlider.setReverse(false);
+    rollSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
+    rollSlider.setTooltip("Roll angle");
+    rollSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(°)"));
 
-	// ======================== TEMPORAL GRAIN PARAMETERS GROUP
-	grainGroup.setText("Grain Parameters");
-	grainGroup.setTextLabelPosition(juce::Justification::centredLeft);
-	grainGroup.setColour(juce::GroupComponent::outlineColourId, globalLaF.ClSeperator);
-	grainGroup.setColour(juce::GroupComponent::textColourId, juce::Colours::white);
-	addAndMakeVisible(&grainGroup);
-	grainGroup.setVisible(true);
+    // ======================== TEMPORAL GRAIN PARAMETERS GROUP
+    grainGroup.setText("Grain Parameters");
+    grainGroup.setTextLabelPosition(juce::Justification::centredLeft);
+    grainGroup.setColour(juce::GroupComponent::outlineColourId, globalLaF.ClSeperator);
+    grainGroup.setColour(juce::GroupComponent::textColourId, juce::Colours::white);
+    addAndMakeVisible(&grainGroup);
+    grainGroup.setVisible(true);
 
-	addAndMakeVisible(&deltaTimeSlider);
-	deltaTimeAttachment.reset(new SliderAttachment(valueTreeState, "deltaTime", deltaTimeSlider));
-	deltaTimeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-	deltaTimeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-	deltaTimeSlider.setReverse(true);
-	deltaTimeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
-	deltaTimeSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
-	deltaTimeSlider.setTooltip("Set time between grains");
-	deltaTimeSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
+    addAndMakeVisible(&deltaTimeSlider);
+    deltaTimeAttachment.reset(new SliderAttachment(valueTreeState, "deltaTime", deltaTimeSlider));
+    deltaTimeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    deltaTimeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    deltaTimeSlider.setReverse(false);
+    deltaTimeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    deltaTimeSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+    deltaTimeSlider.setTooltip("Set time between grains");
+    deltaTimeSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
 
-	addAndMakeVisible(&grainLengthSlider);
-	grainLengthAttachment.reset(new SliderAttachment(valueTreeState, "grainLength", grainLengthSlider));
-	grainLengthSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-	grainLengthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-	grainLengthSlider.setReverse(true);
-	grainLengthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
-	grainLengthSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
-	grainLengthSlider.setTooltip("Set length of grains");
-	grainLengthSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
+    addAndMakeVisible(&grainLengthSlider);
+    grainLengthAttachment.reset(new SliderAttachment(valueTreeState, "grainLength", grainLengthSlider));
+    grainLengthSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    grainLengthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    grainLengthSlider.setReverse(false);
+    grainLengthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    grainLengthSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+    grainLengthSlider.setTooltip("Set length of grains");
+    grainLengthSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
 
     // ====================== QUATERNION GROUP
     quatGroup.setText("Quaternions");
@@ -195,12 +195,11 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     addAndMakeVisible(&lblWidth);
     lblWidth.setText("Width");
 
-	addAndMakeVisible(&lbDeltaTime);
-	lbDeltaTime.setText("Delta-t");
+    addAndMakeVisible(&lbDeltaTime);
+    lbDeltaTime.setText("Delta-t");
 
-	addAndMakeVisible(&lbGrainLength);
-	lbGrainLength.setText("Length");
-
+    addAndMakeVisible(&lbGrainLength);
+    lbGrainLength.setText("Length");
 
     addAndMakeVisible(&lbW);
     lbW.setText("W");
@@ -286,7 +285,7 @@ void StereoEncoderAudioProcessorEditor::resized()
     const int labelWidth = 20;
 
     // -------------- Azimuth Elevation Roll Width ------------------
-	
+
     juce::Rectangle<int> yprArea(sideBarArea.removeFromTop(25 + rotSliderHeight + labelHeight));
     ypGroup.setBounds(yprArea);
     yprArea.removeFromTop(25); // for box headline
@@ -310,51 +309,50 @@ void StereoEncoderAudioProcessorEditor::resized()
 
     sideBarArea.removeFromTop(20);
 
-	// -------------- DeltaTime GrainLength Position Pitch ------------------
-	juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + rotSliderHeight + labelHeight));
-	grainGroup.setBounds(grainArea);
-	grainArea.removeFromTop(25); // for box headline
+    // -------------- DeltaTime GrainLength Position Pitch ------------------
+    juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + rotSliderHeight + labelHeight));
+    grainGroup.setBounds(grainArea);
+    grainArea.removeFromTop(25); // for box headline
 
-	sliderRow = (grainArea.removeFromTop(rotSliderHeight));
-	deltaTimeSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
-	sliderRow.removeFromLeft(rotSliderSpacing);
-	grainLengthSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+    sliderRow = (grainArea.removeFromTop(rotSliderHeight));
+    deltaTimeSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+    sliderRow.removeFromLeft(rotSliderSpacing);
+    grainLengthSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
 
-	lbDeltaTime.setBounds(grainArea.removeFromLeft(rotSliderWidth));
-	grainArea.removeFromLeft(rotSliderSpacing - 5);
-	lbGrainLength.setBounds(grainArea.removeFromLeft(rotSliderWidth));
-
+    lbDeltaTime.setBounds(grainArea.removeFromLeft(rotSliderWidth));
+    grainArea.removeFromLeft(rotSliderSpacing - 5);
+    lbGrainLength.setBounds(grainArea.removeFromLeft(rotSliderWidth));
 
     // ============== SIDEBAR LEFT ====================
     area.removeFromRight(10); // spacing
-	// Sphere-Panner
+                              // Sphere-Panner
     sphere.setBounds(area.getX(), area.getY(), area.getWidth() - 20, area.getWidth() - 20);
 
-	// ------------- Quaternion ------------------------
-	area.removeFromTop(area.getWidth());
-	juce::Rectangle<int> quatArea (area.getX(), area.getY(), area.getWidth() - 20, 165);
-	quatGroup.setBounds(quatArea);
-	quatArea.removeFromTop(25); // for box headline
+    // ------------- Quaternion ------------------------
+    area.removeFromTop(area.getWidth());
+    juce::Rectangle<int> quatArea(area.getX(), area.getY(), area.getWidth() - 20, 165);
+    quatGroup.setBounds(quatArea);
+    quatArea.removeFromTop(25); // for box headline
 
-	sliderRow = quatArea.removeFromTop(sliderHeight);
-	qwSlider.setBounds(sliderRow.removeFromRight(185 - labelWidth));
-	lbW.setBounds(sliderRow);
-	quatArea.removeFromTop(sliderSpacing);
+    sliderRow = quatArea.removeFromTop(sliderHeight);
+    qwSlider.setBounds(sliderRow.removeFromRight(185 - labelWidth));
+    lbW.setBounds(sliderRow);
+    quatArea.removeFromTop(sliderSpacing);
 
-	sliderRow = quatArea.removeFromTop(sliderHeight);
-	qxSlider.setBounds(sliderRow.removeFromRight(185 - labelWidth));
-	lbX.setBounds(sliderRow);
-	quatArea.removeFromTop(sliderSpacing);
+    sliderRow = quatArea.removeFromTop(sliderHeight);
+    qxSlider.setBounds(sliderRow.removeFromRight(185 - labelWidth));
+    lbX.setBounds(sliderRow);
+    quatArea.removeFromTop(sliderSpacing);
 
-	sliderRow = quatArea.removeFromTop(sliderHeight);
-	qySlider.setBounds(sliderRow.removeFromRight(185 - labelWidth));
-	lbY.setBounds(sliderRow);
-	quatArea.removeFromTop(sliderSpacing);
+    sliderRow = quatArea.removeFromTop(sliderHeight);
+    qySlider.setBounds(sliderRow.removeFromRight(185 - labelWidth));
+    lbY.setBounds(sliderRow);
+    quatArea.removeFromTop(sliderSpacing);
 
-	sliderRow = quatArea.removeFromTop(sliderHeight);
-	qzSlider.setBounds(sliderRow.removeFromRight(185 - labelWidth));
-	lbZ.setBounds(sliderRow);
-	quatArea.removeFromTop(sliderSpacing);
+    sliderRow = quatArea.removeFromTop(sliderHeight);
+    qzSlider.setBounds(sliderRow.removeFromRight(185 - labelWidth));
+    lbZ.setBounds(sliderRow);
+    quatArea.removeFromTop(sliderSpacing);
 }
 
 bool StereoEncoderAudioProcessorEditor::keyPressed(const juce::KeyPress &key, juce::Component *originatingComponent)
