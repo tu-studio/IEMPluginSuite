@@ -101,6 +101,10 @@ public:
     std::atomic<float>* elevation;
     std::atomic<float>* roll;
     std::atomic<float>* width;
+
+	std::atomic<float>* deltaTime;
+	std::atomic<float>* grainLength;
+
     std::atomic<float>* highQuality;
 
     // --------------------

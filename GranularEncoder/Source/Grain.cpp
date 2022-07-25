@@ -76,7 +76,7 @@ void Grain::processBlock(juce::AudioBuffer<float>& buffer, juce::AudioBuffer<flo
 		else
 		{
 			_isActive = false;
-			return;
+			break;
 		}
 	}
 

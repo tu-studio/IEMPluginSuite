@@ -66,8 +66,9 @@ private:
     StereoEncoderAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
 
-    juce::GroupComponent quatGroup,ypGroup,settingsGroup;
+    juce::GroupComponent quatGroup,ypGroup,grainGroup,settingsGroup;
     ReverseSlider azimuthSlider, elevationSlider, rollSlider, widthSlider, qwSlider, qxSlider, qySlider, qzSlider;
+	ReverseSlider deltaTimeSlider, grainLengthSlider;
     juce::ComboBox inputChooser;
 
     SpherePanner sphere;
@@ -83,6 +84,10 @@ private:
     std::unique_ptr<SliderAttachment> elevationAttachment;
     std::unique_ptr<SliderAttachment> rollAttachment;
     std::unique_ptr<SliderAttachment> widthAttachment;
+
+	std::unique_ptr<SliderAttachment> deltaTimeAttachment;
+	std::unique_ptr<SliderAttachment> grainLengthAttachment;
+
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;
 
@@ -90,6 +95,7 @@ private:
 
     // labels
     SimpleLabel lbAzimuth, lbElevation, lbRoll, lblWidth, lbW, lbX, lbY, lbZ;
+	SimpleLabel lbDeltaTime, lbGrainLength;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoEncoderAudioProcessorEditor)
 };

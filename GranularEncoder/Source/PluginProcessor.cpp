@@ -50,6 +50,10 @@ updatedPositionData (true)
     parameters.addParameterListener("elevation", this);
     parameters.addParameterListener("roll", this);
     parameters.addParameterListener("width", this);
+
+	parameters.addParameterListener("deltaTime", this);
+	parameters.addParameterListener("grainLength", this);
+
     parameters.addParameterListener("orderSetting", this);
     parameters.addParameterListener("useSN3D", this);
 
@@ -63,6 +67,10 @@ updatedPositionData (true)
     elevation = parameters.getRawParameterValue("elevation");
     roll = parameters.getRawParameterValue("roll");
     width = parameters.getRawParameterValue("width");
+
+	deltaTime = parameters.getRawParameterValue("deltaTime");
+	grainLength = parameters.getRawParameterValue("grainLength");
+
     highQuality = parameters.getRawParameterValue("highQuality");
 
     processorUpdatingParams = false;
@@ -269,8 +277,10 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 	const float* leftInput = bufferCopy.getReadPointer(0);
 	const float* rightInput = bufferCopy.getReadPointer(1);
 
-	deltaTimeSamples = juce::roundToInt(lastSampleRate * deltaTimeSec);
-	grainLengthSamples = juce::roundToInt(lastSampleRate * grainLengthSec);
+	deltaTimeSamples = juce::roundToInt(lastSampleRate * *deltaTime);
+	grainLengthSamples = juce::roundToInt(lastSampleRate * *grainLength);
+
+	float gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength), 1.0f);
 
 
     switch (_currentWindowType)
@@ -315,7 +325,7 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                     params.pitchSemitones = 0;
                     params.startOffsetBlock = i;
                     params.channelWeights = channelWeights;
-					params.gainFactor = juce::jmin(std::sqrt(deltaTimeSec / grainLengthSec), 1.0f);
+					params.gainFactor = gainFactor;
 					params.mix = mixAmount;
 					params.windowBuffer = _currentWindow;
 					grains[g].startGrain(params);
@@ -531,6 +541,14 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
     params.push_back (OSCParameterInterface::createParameterTheOldWay ("width", "Stereo Width", juce::CharPointer_UTF8 (R"(°)"),
                                                  juce::NormalisableRange<float>(-360.0f, 360.0f, 0.01f), 0.0,
                                                  [](float value) { return juce::String(value, 2); }, nullptr));
+
+	params.push_back(OSCParameterInterface::createParameterTheOldWay("deltaTime", "Delta Time", juce::CharPointer_UTF8(R"(s)"),
+												 juce::NormalisableRange<float>(0.001f, 1.0f, 0.0001f), 0.05f,
+												 [](float value) { return juce::String(value, 3); }, nullptr));
+
+	params.push_back(OSCParameterInterface::createParameterTheOldWay("grainLength", "Grain Length", juce::CharPointer_UTF8(R"(s)"),
+												 juce::NormalisableRange<float>(0.001f, 0.250f, 0.0001f), 0.1f,
+												 [](float value) { return juce::String(value, 3); }, nullptr));
 
     params.push_back (OSCParameterInterface::createParameterTheOldWay ("highQuality", "Sample-wise Panning", "",
                                                  juce::NormalisableRange<float>(0.0f, 1.0f, 1.0f), 0.0f,
