@@ -112,6 +112,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     addAndMakeVisible(&grainGroup);
     grainGroup.setVisible(true);
 
+	//Delta Time
     addAndMakeVisible(&deltaTimeSlider);
     deltaTimeAttachment.reset(new SliderAttachment(valueTreeState, "deltaTime", deltaTimeSlider));
     deltaTimeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
@@ -121,7 +122,18 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     deltaTimeSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     deltaTimeSlider.setTooltip("Set time between grains");
     deltaTimeSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
+	//Delta Time Modulation Amount
+	addAndMakeVisible(&deltaTimeModSlider);
+	deltaTimeModAttachment.reset(new SliderAttachment(valueTreeState, "deltaTimeMod", deltaTimeModSlider));
+	deltaTimeModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+	deltaTimeModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+	deltaTimeModSlider.setReverse(false);
+	deltaTimeModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+	deltaTimeModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+	deltaTimeModSlider.setTooltip("Set modulation amount for the time between grains");
+	deltaTimeModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
+	// Grain Length
     addAndMakeVisible(&grainLengthSlider);
     grainLengthAttachment.reset(new SliderAttachment(valueTreeState, "grainLength", grainLengthSlider));
     grainLengthSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
@@ -131,6 +143,60 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     grainLengthSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     grainLengthSlider.setTooltip("Set length of grains");
     grainLengthSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
+	// Grain Length Modulation Amount
+	addAndMakeVisible(&grainLengthModSlider);
+	grainLengthModAttachment.reset(new SliderAttachment(valueTreeState, "grainLengthMod", grainLengthModSlider));
+	grainLengthModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+	grainLengthModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+	grainLengthModSlider.setReverse(false);
+	grainLengthModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+	grainLengthModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+	grainLengthModSlider.setTooltip("Set modulation amount for the length of grains");
+	grainLengthModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+
+	// Buffer Position
+	addAndMakeVisible(&positionSlider);
+	positionAttachment.reset(new SliderAttachment(valueTreeState, "position", positionSlider));
+	positionSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+	positionSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+	positionSlider.setReverse(false);
+	positionSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+	positionSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+	positionSlider.setTooltip("Set read position in the audio buffer");
+	positionSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
+	// Buffer Position Modulation Amount
+	addAndMakeVisible(&positionModSlider);
+	positionModAttachment.reset(new SliderAttachment(valueTreeState, "positionMod", positionModSlider));
+	positionModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+	positionModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+	positionModSlider.setReverse(false);
+	positionModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+	positionModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+	positionModSlider.setTooltip("Set modulation amount for the read position in the audio buffer");
+	positionModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+
+	// Pitch 
+	addAndMakeVisible(&pitchSlider);
+	pitchAttachment.reset(new SliderAttachment(valueTreeState, "pitch", pitchSlider));
+	pitchSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+	pitchSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+	pitchSlider.setReverse(false);
+	pitchSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+	pitchSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+	pitchSlider.setTooltip("Set pitch of grains in semitones");
+	pitchSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
+	// Pitch Modulation Amount
+	addAndMakeVisible(&pitchModSlider);
+	pitchModAttachment.reset(new SliderAttachment(valueTreeState, "pitchMod", pitchModSlider));
+	pitchModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+	pitchModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+	pitchModSlider.setReverse(false);
+	pitchModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+	pitchModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+	pitchModSlider.setTooltip("Set modulation amount for the pitch of grains");
+	pitchModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+
+
 
     // ====================== QUATERNION GROUP
     quatGroup.setText("Quaternions");
@@ -197,9 +263,23 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
 
     addAndMakeVisible(&lbDeltaTime);
     lbDeltaTime.setText("Delta-t");
+	addAndMakeVisible(&lbDeltaTimeMod);
+	lbDeltaTimeMod.setText("t-Mod");
 
     addAndMakeVisible(&lbGrainLength);
     lbGrainLength.setText("Length");
+	addAndMakeVisible(&lbGrainLengthMod);
+	lbGrainLengthMod.setText("L-Mod");
+
+	addAndMakeVisible(&lbPosition);
+	lbPosition.setText("Position");
+	addAndMakeVisible(&lbPositionMod);
+	lbPositionMod.setText("Pos-Mod");
+
+	addAndMakeVisible(&lbPitch);
+	lbPitch.setText("Pitch");
+	addAndMakeVisible(&lbPitchMod);
+	lbPitchMod.setText("Pitch-Mod");
 
     addAndMakeVisible(&lbW);
     lbW.setText("W");
@@ -318,10 +398,18 @@ void StereoEncoderAudioProcessorEditor::resized()
     deltaTimeSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
     sliderRow.removeFromLeft(rotSliderSpacing);
     grainLengthSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+	sliderRow.removeFromLeft(rotSliderSpacing);
+	positionSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+	sliderRow.removeFromLeft(rotSliderSpacing);
+	pitchSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
 
     lbDeltaTime.setBounds(grainArea.removeFromLeft(rotSliderWidth));
     grainArea.removeFromLeft(rotSliderSpacing - 5);
     lbGrainLength.setBounds(grainArea.removeFromLeft(rotSliderWidth));
+	grainArea.removeFromLeft(rotSliderSpacing - 5);
+	lbPosition.setBounds(grainArea.removeFromLeft(rotSliderWidth));
+	grainArea.removeFromLeft(rotSliderSpacing - 5);
+	lbPitch.setBounds(grainArea.removeFromLeft(rotSliderWidth));
 
     // ============== SIDEBAR LEFT ====================
     area.removeFromRight(10); // spacing

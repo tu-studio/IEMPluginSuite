@@ -68,7 +68,8 @@ private:
 
     juce::GroupComponent quatGroup,ypGroup,grainGroup,settingsGroup;
     ReverseSlider azimuthSlider, elevationSlider, rollSlider, widthSlider, qwSlider, qxSlider, qySlider, qzSlider;
-	ReverseSlider deltaTimeSlider, grainLengthSlider, positionSlider, positionModSlider, pitchSlider, pitchModSlider;
+	ReverseSlider deltaTimeSlider, deltaTimeModSlider, grainLengthSlider, grainLengthModSlider;
+	ReverseSlider positionSlider, positionModSlider, pitchSlider, pitchModSlider;
     juce::ComboBox inputChooser;
 
     SpherePanner sphere;
@@ -86,14 +87,16 @@ private:
     std::unique_ptr<SliderAttachment> widthAttachment;
 
 	std::unique_ptr<SliderAttachment> deltaTimeAttachment;
+	std::unique_ptr<SliderAttachment> deltaTimeModAttachment;
+
 	std::unique_ptr<SliderAttachment> grainLengthAttachment;
+	std::unique_ptr<SliderAttachment> grainLengthModAttachment;
 
 	std::unique_ptr<SliderAttachment> positionAttachment;
 	std::unique_ptr<SliderAttachment> positionModAttachment;
 
 	std::unique_ptr<SliderAttachment> pitchAttachment;
 	std::unique_ptr<SliderAttachment> pitchModAttachment;
-
 
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;
@@ -102,7 +105,8 @@ private:
 
     // labels
     SimpleLabel lbAzimuth, lbElevation, lbRoll, lblWidth, lbW, lbX, lbY, lbZ;
-	SimpleLabel lbDeltaTime, lbGrainLength, lbPosition, lbPositionMod, lbPitch, lbPitchMod;
+	SimpleLabel lbDeltaTime, lbDeltaTimeMod, lbGrainLength, lbGrainLengthMod;
+	SimpleLabel	lbPosition, lbPositionMod, lbPitch, lbPitchMod;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoEncoderAudioProcessorEditor)
 };
