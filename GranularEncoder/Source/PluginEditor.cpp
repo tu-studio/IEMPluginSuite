@@ -411,6 +411,17 @@ void StereoEncoderAudioProcessorEditor::resized()
 	grainArea.removeFromLeft(rotSliderSpacing - 5);
 	lbPitch.setBounds(grainArea.removeFromLeft(rotSliderWidth + 10));
 
+	juce::Rectangle<int> grainModArea(sideBarArea.removeFromTop(25 + rotSliderHeight + labelHeight));
+	sliderRow = (grainModArea.removeFromTop(rotSliderHeight));
+	deltaTimeModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+	sliderRow.removeFromLeft(rotSliderSpacing);
+	grainLengthModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+	sliderRow.removeFromLeft(rotSliderSpacing);
+	positionModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+	sliderRow.removeFromLeft(rotSliderSpacing);
+	pitchModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+
+
     // ============== SIDEBAR LEFT ====================
     area.removeFromRight(10); // spacing
                               // Sphere-Panner

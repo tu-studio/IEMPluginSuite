@@ -69,9 +69,17 @@ updatedPositionData (true)
     width = parameters.getRawParameterValue("width");
 
 	deltaTime = parameters.getRawParameterValue("deltaTime");
+	deltaTimeMod = parameters.getRawParameterValue("deltaTimeMod");
+
 	grainLength = parameters.getRawParameterValue("grainLength");
+	grainLengthMod = parameters.getRawParameterValue("grainLengthMod");
+
 	position = parameters.getRawParameterValue("position");
+	positionMod = parameters.getRawParameterValue("positionMod");
+
 	pitch = parameters.getRawParameterValue("pitch");
+	pitchMod = parameters.getRawParameterValue("pitchMod");
+
 
     highQuality = parameters.getRawParameterValue("highQuality");
 

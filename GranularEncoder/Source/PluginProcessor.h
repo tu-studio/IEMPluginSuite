@@ -104,7 +104,10 @@ public:
     std::atomic<float>* width;
 
 	std::atomic<float>* deltaTime;
+	std::atomic<float>* deltaTimeMod;
+
 	std::atomic<float>* grainLength;
+	std::atomic<float>* grainLengthMod;
 
 	std::atomic<float>* pitch;
 	std::atomic<float>*	pitchMod;
