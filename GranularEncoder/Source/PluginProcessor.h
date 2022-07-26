@@ -37,6 +37,7 @@
 #define ProcessorClass StereoEncoderAudioProcessor
 #define maxNumGrains 64
 #define windowResolution 1024
+#define CIRC_BUFFER_SECONDS 4.0f
 
 //==============================================================================
 /**
@@ -139,10 +140,10 @@ private:
 	int circularBufferWriteHead;
 	int circularBufferLength;
 
-	float deltaTimeSec = 0.100;
+	// deltaTimeSec = 0.100;
 	int deltaTimeSamples = 0;
 
-	float grainLengthSec = 0.250;
+	//float grainLengthSec = 0.250;
 	int grainLengthSamples = 0;
 	float lastSampleRate;
 

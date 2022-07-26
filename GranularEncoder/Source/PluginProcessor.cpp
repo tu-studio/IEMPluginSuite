@@ -70,6 +70,8 @@ updatedPositionData (true)
 
 	deltaTime = parameters.getRawParameterValue("deltaTime");
 	grainLength = parameters.getRawParameterValue("grainLength");
+	position = parameters.getRawParameterValue("position");
+	pitch = parameters.getRawParameterValue("pitch");
 
     highQuality = parameters.getRawParameterValue("highQuality");
 
@@ -132,7 +134,7 @@ void StereoEncoderAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     bufferCopy.setSize(2, samplesPerBlock);
     grainOutBuffer.setSize(1, samplesPerBlock);
 
-    circularBuffer.setSize(2, juce::roundToInt(sampleRate*4)); // two second long circular buffer
+    circularBuffer.setSize(2, juce::roundToInt(sampleRate*CIRC_BUFFER_SECONDS)); // seconds long circular buffer
 	circularBufferWriteHead = 0;
 	circularBufferLength = circularBuffer.getNumSamples();
 	circularBuffer.clear();
@@ -543,12 +545,32 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
                                                  [](float value) { return juce::String(value, 2); }, nullptr));
 
 	params.push_back(OSCParameterInterface::createParameterTheOldWay("deltaTime", "Delta Time", juce::CharPointer_UTF8(R"(s)"),
-												 juce::NormalisableRange<float>(0.001f, 1.0f, 0.0001f), 0.05f,
+												 juce::NormalisableRange<float>(0.001f, 0.5f, 0.0001f), 0.05f,
 												 [](float value) { return juce::String(value, 3); }, nullptr));
+	params.push_back(OSCParameterInterface::createParameterTheOldWay("deltaTimeMod", "Delta Time Mod", juce::CharPointer_UTF8(R"(%)"),
+												 juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+												 [](float value) { return juce::String(value, 1); }, nullptr));
 
 	params.push_back(OSCParameterInterface::createParameterTheOldWay("grainLength", "Grain Length", juce::CharPointer_UTF8(R"(s)"),
-												 juce::NormalisableRange<float>(0.001f, 0.250f, 0.0001f), 0.1f,
+												 juce::NormalisableRange<float>(0.001f, 0.500f, 0.0001f), 0.1f,
 												 [](float value) { return juce::String(value, 3); }, nullptr));
+	params.push_back(OSCParameterInterface::createParameterTheOldWay("grainLengthMod", "Grain Length Mod", juce::CharPointer_UTF8(R"(%)"),
+												 juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+												 [](float value) { return juce::String(value, 1); }, nullptr));
+
+	params.push_back(OSCParameterInterface::createParameterTheOldWay("position", "Position", juce::CharPointer_UTF8(R"(s)"),
+												 juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS/2, 0.001f), 0.0f,
+												 [](float value) { return juce::String(value, 3); }, nullptr));
+	params.push_back(OSCParameterInterface::createParameterTheOldWay("positionMod", "Position Mod", juce::CharPointer_UTF8(R"(%)"),
+												 juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+												 [](float value) { return juce::String(value, 1); }, nullptr));
+
+	params.push_back(OSCParameterInterface::createParameterTheOldWay("pitch", "Pitch", juce::CharPointer_UTF8(R"(st)"),
+												 juce::NormalisableRange<float>(-12.0f, 0.0f, 0.1f), 0.0f,
+												 [](float value) { return juce::String(value, 1); }, nullptr));
+	params.push_back(OSCParameterInterface::createParameterTheOldWay("pitchMod", "Pitch Mod", juce::CharPointer_UTF8(R"(%)"),
+												 juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+												 [](float value) { return juce::String(value, 1); }, nullptr));
 
     params.push_back (OSCParameterInterface::createParameterTheOldWay ("highQuality", "Sample-wise Panning", "",
                                                  juce::NormalisableRange<float>(0.0f, 1.0f, 1.0f), 0.0f,
