@@ -88,8 +88,9 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 
 			// Linear interpolation for grain window function
 			float windowIndex = static_cast<float>(_currentIndex) / static_cast<float>(_params.grainLengthSamples) * (windowNumSamples-1);
-			jassert(windowIndex >= 0.0f && windowIndex < windowNumSamples);
 			int windowIndexInt = static_cast<int>(windowIndex);
+			jassert(windowIndexInt >= 0 && windowIndexInt < (windowNumSamples-1));
+
 			int windowIndexIntNext = windowIndexInt + 1;//windowIndexInt < 1023 ? (windowIndexInt + 1) : windowIndexInt;
 			float windowFracWeight = windowIndex - windowIndexInt;
 			float windowIntPart = window_ptr[windowIndexInt];
