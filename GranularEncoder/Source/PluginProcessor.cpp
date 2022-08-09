@@ -332,7 +332,8 @@ void StereoEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                     Grain::GrainJobParameters params;
                     params.startPositionCircBuffer = circularBufferWriteHead;
                     params.grainLengthSamples = grainLengthSamples;
-                    params.pitchSemitones = 0;
+                    params.pitchSemitones = *pitch;
+                    params.pitchMod = *pitchMod;
                     params.startOffsetBlock = i;
                     params.channelWeights = channelWeights;
 					params.gainFactor = gainFactor;

@@ -22,6 +22,12 @@ void Grain::startGrain(const GrainJobParameters &grainParameters) // Type envelo
 {
 	_params = grainParameters;
 
+	// Compute readSpeed based on grain pitch
+	float pitchModSemitones = _params.pitchMod / 100.0f * 0.125f * juce::Random::getSystemRandom().nextFloat();
+	_params.pitchReadFactor = std::pow(2.0f, (_params.pitchSemitones - pitchModSemitones) / 12.0f);
+	// Updated length of grain in samples
+	_params.grainLengthSamples = static_cast<int>(_params.grainLengthSamples * (1 / _params.pitchReadFactor));
+
 	_isActive = true;
 	_currentIndex = 0;
 	_blockCounter = 0;
@@ -62,24 +68,36 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 		outStart = 0;
 	}
 
-	int readIndex;
 	// Write samples to internal mono buffer
 	for (int i = outStart; i < numSampOutBuffer; i++)
 	{
 		if (_currentIndex < _params.grainLengthSamples) // grain still needs samples
 		{
-			readIndex = (_params.startPositionCircBuffer + _currentIndex) % numSampCircBuffer;
-			float windowIndex = (float)_currentIndex / _params.grainLengthSamples * windowNumSamples;
+			// Linear interpolation of buffer samples 
+			float readIndex = _params.startPositionCircBuffer + (_currentIndex * _params.pitchReadFactor);
+			int readIndexInt = static_cast<int>(readIndex);
+			int readIndexIntNext = readIndexInt + 1; 
+			float sampleFracWeight = readIndex - readIndexInt;
+			if (readIndexInt >= numSampCircBuffer)
+				readIndexInt = readIndexInt - numSampCircBuffer;
+			if (readIndexIntNext >= numSampCircBuffer)
+				readIndexIntNext = readIndexIntNext - numSampCircBuffer;
+			float sampleIntPart = circularLeftChannel[readIndexInt];
+			float sampleFracPart = circularLeftChannel[readIndexIntNext] - sampleIntPart;
+			float sampleValue = sampleIntPart + sampleFracWeight * sampleFracPart;
+
+			// Linear interpolation for grain window function
+			float windowIndex = static_cast<float>(_currentIndex) / static_cast<float>(_params.grainLengthSamples) * (windowNumSamples-1);
+			jassert(windowIndex >= 0.0f && windowIndex < windowNumSamples);
 			int windowIndexInt = static_cast<int>(windowIndex);
+			int windowIndexIntNext = windowIndexInt + 1;//windowIndexInt < 1023 ? (windowIndexInt + 1) : windowIndexInt;
 			float windowFracWeight = windowIndex - windowIndexInt;
-
 			float windowIntPart = window_ptr[windowIndexInt];
-			float windFracPart = window_ptr[windowIndexInt + 1] - windowIntPart;
-
+			float windFracPart = window_ptr[windowIndexIntNext] - windowIntPart;
 			float windowValue = windowIntPart + windowFracWeight * windFracPart;
+		    jassert(windowValue >= 0.0f && windowValue <= 1.0f);
+			outputBufferWritePtr[i] = sampleValue * windowValue;
 
-			outputBufferWritePtr[i] = circularLeftChannel[readIndex] * windowValue;
-			//_outputBuffer.setSample(0, i, circularLeftChannel[readIndex] * window_ptr[static_cast<int>((float) _currentIndex / _params.grainLengthSamples * window_size)]);
 			_currentIndex++;
 		}
 		else

@@ -7,7 +7,9 @@ public:
 		int startPositionCircBuffer = 0;
 		int startOffsetBlock = 0;
 		int grainLengthSamples = 0;
-		int pitchSemitones = 0;
+		float pitchSemitones = 0.0f;
+		float pitchMod = 0.0f;
+		float pitchReadFactor = 1.0f;
 		//WindowType windowType;
 		std::array<float,64> channelWeights;
 		float gainFactor = 1.0f;
@@ -33,7 +35,6 @@ private:
 	
 	/*int _startIndexCircularBuffer;
 	int _grainLengthSamples;*/
-
 	int _currentIndex;
 
 	/*int _startOffset;
