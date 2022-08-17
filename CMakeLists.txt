@@ -103,6 +103,15 @@ include_directories (resources/ /usr/local/include)
 add_compile_definitions (DONT_SET_USING_JUCE_NAMESPACE=1
                          JUCE_MODAL_LOOPS_PERMITTED=1)
 
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost)
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS}) 
+endif()
+
 juce_add_binary_data (LAF_fonts SOURCES
     resources/lookAndFeel/Roboto-Bold.ttf
     resources/lookAndFeel/Roboto-Light.ttf
