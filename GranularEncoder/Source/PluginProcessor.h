@@ -32,10 +32,10 @@
 #include "../../resources/Conversions.h"
 #include "Grain.h"
 #include "Type.h"
-#include <boost/random/beta_distribution.hpp>
+//#include <boost/random/beta_distribution.hpp>
 #include <random>
 
-using boost::random::beta_distribution;
+// using boost::random::beta_distribution;
 
 #define ProcessorClass StereoEncoderAudioProcessor
 #define maxNumGrains 64
@@ -173,7 +173,6 @@ private:
     juce::LinearSmoothedValue<float> smoothAzimuthR, smoothElevationR;
 
     std::mt19937 rng;
-    //  beta_distribution<float>::param_type myparams();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoEncoderAudioProcessor)
 };

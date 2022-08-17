@@ -227,8 +227,15 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection(juce:
 
     // Beta distribution to control shape of rotationally symmetric distribution around centerDir
     jassert(shape > 0.0f);
-    beta_distribution<float> dist(shape, shape);
-    float sym_beta_sample = abs(dist(rng) - 0.5f) * 2.0f;
+    // beta_distribution<float> dist(shape, shape);
+    std::gamma_distribution<float> dist1(shape, 1.0f);
+    std::gamma_distribution<float> dist2(shape, 1.0f);
+    float gamma1 = dist1(rng);
+    float gamma2 = dist2(rng);
+    float beta_val = gamma1 / (gamma1 + gamma2);
+
+    // float sym_beta_sample = abs(dist(rng) - 0.5f) * 2.0f;
+    float sym_beta_sample = abs(beta_val - 0.5f) * 2.0f;
 
     // Input parameter size defines opening angle of distribution cap
     jassert(size >= 0.0f && size <= 360.0f);
