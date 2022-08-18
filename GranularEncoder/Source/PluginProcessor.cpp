@@ -219,8 +219,12 @@ void StereoEncoderAudioProcessor::updateEuler()
     processorUpdatingParams = false;
 }
 
-juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection(juce::Vector3D<float> centerDir, float size, float shape)
+juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
 {
+    float shape_param = std::pow(2, *shape);
+    float size_param = *size;
+    juce::Vector3D<float> centerDir = quaternionDirection.getCartesian();
+
     float azi_center;
     float ele_center;
     Conversions<float>::cartesianToSpherical(centerDir, azi_center, ele_center);
@@ -230,10 +234,10 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection(juce:
     float rand_phi = juce::Random::getSystemRandom().nextFloat() * 2.0f * juce::MathConstants<float>::pi;
 
     // Beta distribution to control shape of rotationally symmetric distribution around centerDir
-    jassert(shape > 0.0f);
+    jassert(shape_param > 0.0f);
     // beta_distribution<float> dist(shape, shape);
-    std::gamma_distribution<float> dist1(shape, 1.0f);
-    std::gamma_distribution<float> dist2(shape, 1.0f);
+    std::gamma_distribution<float> dist1(shape_param, 1.0f);
+    std::gamma_distribution<float> dist2(shape_param, 1.0f);
     float gamma1 = dist1(rng);
     float gamma2 = dist2(rng);
     float eps = 1e-16f;
@@ -243,8 +247,8 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection(juce:
     float sym_beta_sample = abs(beta_val - 0.5f) * 2.0f;
 
     // Input parameter size defines opening angle of distribution cap
-    jassert(size >= 0.0f && size <= 360.0f);
-    float size_factor = (size / 2.0f) / 180.0f;
+    jassert(size_param >= 0.0f && size_param <= 360.0f);
+    float size_factor = (size_param / 2.0f) / 180.0f;
     float beta_sized = sym_beta_sample * size_factor;
 
     // To achieve uniform distribution on a sphere
@@ -267,6 +271,19 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection(juce:
 
     juce::Vector3D<float> vec(target_x, target_y, target_z);
     return vec;
+}
+
+int StereoEncoderAudioProcessor::getStartPositionCircBuffer()
+{
+    int startPositionCircBuffer = circularBufferWriteHead - juce::roundToInt(*position * lastSampleRate);
+    int startMod = juce::roundToInt(*positionMod / 100.0f * juce::Random::getSystemRandom().nextFloat() * (CIRC_BUFFER_SECONDS / 2.0f) * lastSampleRate);
+    startPositionCircBuffer -= startMod;
+    if (startPositionCircBuffer < 0)
+    {
+        startPositionCircBuffer += circularBufferLength;
+    }
+
+    return startPositionCircBuffer;
 }
 
 void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
@@ -363,24 +380,13 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
             {
                 if (!grains[g].isActive())
                 {
-                    float shape_param = std::pow(2, *shape);
-                    float size_param = *size;
-                    juce::Vector3D<float> randDir = getRandomGrainDirection(quatL.getCartesian(), size_param, shape_param);
-
-                    randDir /= randDir.length();
-                    SHEval(ambisonicOrder, randDir.x, randDir.y, randDir.z, _grainSH[g]);
+                    juce::Vector3D<float> grainDir = getRandomGrainDirection();
+                    SHEval(ambisonicOrder, grainDir.x, grainDir.y, grainDir.z, _grainSH[g]);
 
                     std::array<float, 64> channelWeights;
                     std::copy(_grainSH[g], _grainSH[g] + 64, channelWeights.begin());
                     Grain::GrainJobParameters params;
-                    int startPositionCircBuffer = circularBufferWriteHead - juce::roundToInt(*position * lastSampleRate);
-                    int startMod = juce::roundToInt(*positionMod / 100.0f * juce::Random::getSystemRandom().nextFloat() * (CIRC_BUFFER_SECONDS / 2.0f) * lastSampleRate);
-                    startPositionCircBuffer -= startMod;
-                    if (startPositionCircBuffer < 0)
-                    {
-                        startPositionCircBuffer += circularBufferLength;
-                    }
-                    params.startPositionCircBuffer = startPositionCircBuffer;
+                    params.startPositionCircBuffer = getStartPositionCircBuffer();
                     params.grainLengthSamples = grainLengthSamples;
                     params.pitchSemitones = *pitch;
                     params.pitchMod = *pitchMod;

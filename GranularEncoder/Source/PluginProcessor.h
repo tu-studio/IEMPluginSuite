@@ -89,7 +89,8 @@ public:
     inline void updateQuaternions();
     inline void updateEuler();
 
-    juce::Vector3D<float> getRandomGrainDirection(juce::Vector3D<float> centerDir, float size, float shape);
+    juce::Vector3D<float> getRandomGrainDirection();
+    int getStartPositionCircBuffer();
 
     juce::Vector3D<float> posC, posL, posR;
 
