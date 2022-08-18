@@ -65,6 +65,10 @@ StereoEncoderAudioProcessor::StereoEncoderAudioProcessor()
     qz = parameters.getRawParameterValue("qz");
     azimuth = parameters.getRawParameterValue("azimuth");
     elevation = parameters.getRawParameterValue("elevation");
+
+    shape = parameters.getRawParameterValue("shape");
+    size = parameters.getRawParameterValue("size");
+
     roll = parameters.getRawParameterValue("roll");
     width = parameters.getRawParameterValue("width");
 
@@ -232,7 +236,8 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection(juce:
     std::gamma_distribution<float> dist2(shape, 1.0f);
     float gamma1 = dist1(rng);
     float gamma2 = dist2(rng);
-    float beta_val = gamma1 / (gamma1 + gamma2);
+    float eps = 1e-16f;
+    float beta_val = (gamma1 + eps) / (gamma1 + gamma2 + eps);
 
     // float sym_beta_sample = abs(dist(rng) - 0.5f) * 2.0f;
     float sym_beta_sample = abs(beta_val - 0.5f) * 2.0f;
@@ -358,9 +363,9 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
             {
                 if (!grains[g].isActive())
                 {
-                    float size = 45.0f;
-                    float shape = 1.0f;
-                    juce::Vector3D<float> randDir = getRandomGrainDirection(quatL.getCartesian(), size, shape);
+                    float shape_param = std::pow(2, *shape);
+                    float size_param = *size;
+                    juce::Vector3D<float> randDir = getRandomGrainDirection(quatL.getCartesian(), size_param, shape_param);
 
                     randDir /= randDir.length();
                     SHEval(ambisonicOrder, randDir.x, randDir.y, randDir.z, _grainSH[g]);
@@ -610,6 +615,20 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         [](float value)
         { return juce::String(value, 2); },
         nullptr, true));
+
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "shape", "Shape", juce::CharPointer_UTF8(R"()"),
+        juce::NormalisableRange<float>(-10.0f, 10.0f, 0.1f), 0.0,
+        [](float value)
+        { return juce::String(value, 1); },
+        nullptr, true));
+
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "size", "Size", juce::CharPointer_UTF8(R"(°)"),
+        juce::NormalisableRange<float>(0.0f, 360.0f, 0.01f), 0.0,
+        [](float value)
+        { return juce::String(value, 2); },
+        nullptr));
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "roll", "Roll Angle", juce::CharPointer_UTF8(R"(°)"),

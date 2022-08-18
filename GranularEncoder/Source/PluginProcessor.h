@@ -103,8 +103,12 @@ public:
     std::atomic<float> *qz;
     std::atomic<float> *azimuth;
     std::atomic<float> *elevation;
-    std::atomic<float> *roll;
-    std::atomic<float> *width;
+
+    std::atomic<float> *shape; // distribution parameter (circular to peaky, uniform at 0.0)
+    std::atomic<float> *size;  // total opening angle of distribution cap
+
+    std::atomic<float> *roll;  // legacy parameter from StereoEncoder
+    std::atomic<float> *width; // legacy parameter from StereoEncoder
 
     std::atomic<float> *deltaTime;
     std::atomic<float> *deltaTimeMod;

@@ -34,42 +34,42 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 
 //==============================================================================
 /**
-*/
-class StereoEncoderAudioProcessorEditor  : public juce::AudioProcessorEditor,
-private juce::Timer,
-public SpherePanner::Listener,
-private juce::KeyListener
+ */
+class StereoEncoderAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                          private juce::Timer,
+                                          public SpherePanner::Listener,
+                                          private juce::KeyListener
 {
 public:
-
-    StereoEncoderAudioProcessorEditor (StereoEncoderAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    StereoEncoderAudioProcessorEditor(StereoEncoderAudioProcessor &, juce::AudioProcessorValueTreeState &);
     ~StereoEncoderAudioProcessorEditor();
 
     //==============================================================================
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics &) override;
     void resized() override;
 
-    void mouseWheelOnSpherePannerMoved (SpherePanner* sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
+    void mouseWheelOnSpherePannerMoved(SpherePanner *sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
 
-    bool keyPressed (const juce::KeyPress &key, juce::Component *originatingComponent) override;
+    bool keyPressed(const juce::KeyPress &key, juce::Component *originatingComponent) override;
 
 private:
     LaF globalLaF;
 
-    TitleBar<AudioChannelsIOWidget<2,false>, AmbisonicIOWidget<>> title;
+    TitleBar<AudioChannelsIOWidget<2, false>, AmbisonicIOWidget<>> title;
     OSCFooter footer;
 
     void timerCallback() override;
 
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    StereoEncoderAudioProcessor& processor;
-    juce::AudioProcessorValueTreeState& valueTreeState;
+    StereoEncoderAudioProcessor &processor;
+    juce::AudioProcessorValueTreeState &valueTreeState;
 
-    juce::GroupComponent quatGroup,ypGroup,grainGroup,settingsGroup;
-    ReverseSlider azimuthSlider, elevationSlider, rollSlider, widthSlider, qwSlider, qxSlider, qySlider, qzSlider;
-	ReverseSlider deltaTimeSlider, deltaTimeModSlider, grainLengthSlider, grainLengthModSlider;
-	ReverseSlider positionSlider, positionModSlider, pitchSlider, pitchModSlider;
+    juce::GroupComponent quatGroup, ypGroup, grainGroup, settingsGroup;
+    ReverseSlider azimuthSlider, elevationSlider, shapeSlider, sizeSlider, qwSlider, qxSlider, qySlider, qzSlider;
+    ReverseSlider rollSlider, widthSlider;
+    ReverseSlider deltaTimeSlider, deltaTimeModSlider, grainLengthSlider, grainLengthModSlider;
+    ReverseSlider positionSlider, positionModSlider, pitchSlider, pitchModSlider;
     juce::ComboBox inputChooser;
 
     SpherePanner sphere;
@@ -83,20 +83,24 @@ private:
     std::unique_ptr<SliderAttachment> qzAttachment;
     std::unique_ptr<SliderAttachment> azimuthAttachment;
     std::unique_ptr<SliderAttachment> elevationAttachment;
+
+    std::unique_ptr<SliderAttachment> shapeAttachment;
+    std::unique_ptr<SliderAttachment> sizeAttachment;
+
     std::unique_ptr<SliderAttachment> rollAttachment;
     std::unique_ptr<SliderAttachment> widthAttachment;
 
-	std::unique_ptr<SliderAttachment> deltaTimeAttachment;
-	std::unique_ptr<SliderAttachment> deltaTimeModAttachment;
+    std::unique_ptr<SliderAttachment> deltaTimeAttachment;
+    std::unique_ptr<SliderAttachment> deltaTimeModAttachment;
 
-	std::unique_ptr<SliderAttachment> grainLengthAttachment;
-	std::unique_ptr<SliderAttachment> grainLengthModAttachment;
+    std::unique_ptr<SliderAttachment> grainLengthAttachment;
+    std::unique_ptr<SliderAttachment> grainLengthModAttachment;
 
-	std::unique_ptr<SliderAttachment> positionAttachment;
-	std::unique_ptr<SliderAttachment> positionModAttachment;
+    std::unique_ptr<SliderAttachment> positionAttachment;
+    std::unique_ptr<SliderAttachment> positionModAttachment;
 
-	std::unique_ptr<SliderAttachment> pitchAttachment;
-	std::unique_ptr<SliderAttachment> pitchModAttachment;
+    std::unique_ptr<SliderAttachment> pitchAttachment;
+    std::unique_ptr<SliderAttachment> pitchModAttachment;
 
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;
@@ -104,9 +108,10 @@ private:
     juce::TooltipWindow toolTipWin;
 
     // labels
-    SimpleLabel lbAzimuth, lbElevation, lbRoll, lblWidth, lbW, lbX, lbY, lbZ;
-	SimpleLabel lbDeltaTime, lbDeltaTimeMod, lbGrainLength, lbGrainLengthMod;
-	SimpleLabel	lbPosition, lbPositionMod, lbPitch, lbPitchMod;
+    SimpleLabel lbAzimuth, lbElevation, lbShape, lbSize, lbW, lbX, lbY, lbZ;
+    SimpleLabel lbRoll, lblWidth; // legacy
+    SimpleLabel lbDeltaTime, lbDeltaTimeMod, lbGrainLength, lbGrainLengthMod;
+    SimpleLabel lbPosition, lbPositionMod, lbPitch, lbPitchMod;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoEncoderAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoEncoderAudioProcessorEditor)
 };
