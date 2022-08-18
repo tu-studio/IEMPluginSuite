@@ -373,7 +373,14 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                     std::array<float, 64> channelWeights;
                     std::copy(_grainSH[g], _grainSH[g] + 64, channelWeights.begin());
                     Grain::GrainJobParameters params;
-                    params.startPositionCircBuffer = circularBufferWriteHead;
+                    int startPositionCircBuffer = circularBufferWriteHead - juce::roundToInt(*position * lastSampleRate);
+                    int startMod = juce::roundToInt(*positionMod / 100.0f * juce::Random::getSystemRandom().nextFloat() * (CIRC_BUFFER_SECONDS / 2.0f) * lastSampleRate);
+                    startPositionCircBuffer -= startMod;
+                    if (startPositionCircBuffer < 0)
+                    {
+                        startPositionCircBuffer += circularBufferLength;
+                    }
+                    params.startPositionCircBuffer = startPositionCircBuffer;
                     params.grainLengthSamples = grainLengthSamples;
                     params.pitchSemitones = *pitch;
                     params.pitchMod = *pitchMod;
