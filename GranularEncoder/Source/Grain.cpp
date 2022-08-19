@@ -23,10 +23,10 @@ void Grain::startGrain(const GrainJobParameters &grainParameters) // Type envelo
 	_params = grainParameters;
 
 	// Compute readSpeed based on grain pitch
-	float pitchModSemitones = _params.pitchMod / 100.0f * 0.125f * juce::Random::getSystemRandom().nextFloat();
-	_params.pitchReadFactor = std::pow(2.0f, (_params.pitchSemitones - pitchModSemitones) / 12.0f);
+	//float pitchModSemitones = _params.pitchMod / 100.0f * 0.125f * juce::Random::getSystemRandom().nextFloat();
+	//_params.pitchReadFactor = std::pow(2.0f, (_params.pitchSemitones - pitchModSemitones) / 12.0f);
 	// Updated length of grain in samples
-	_params.grainLengthSamples = static_cast<int>(_params.grainLengthSamples * (1 / _params.pitchReadFactor));
+	//_params.grainLengthSamples = static_cast<int>(_params.grainLengthSamples * (1 / _params.pitchReadFactor));
 
 	_isActive = true;
 	_currentIndex = 0;
@@ -61,7 +61,7 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 	int outStart;
 	if (_blockCounter == 0)
 	{
-		outStart = _params.startOffsetBlock;
+		outStart = _params.startOffsetInBlock;
 	}
 	else
 	{

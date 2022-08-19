@@ -90,7 +90,8 @@ public:
     inline void updateEuler();
 
     juce::Vector3D<float> getRandomGrainDirection();
-    int getStartPositionCircBuffer();
+    int getStartPositionCircBuffer() const;
+    std::pair<int, float> getGrainLengthAndPitchFactor() const;
 
     juce::Vector3D<float> posC, posL, posR;
 

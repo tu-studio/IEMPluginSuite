@@ -273,7 +273,7 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
     return vec;
 }
 
-int StereoEncoderAudioProcessor::getStartPositionCircBuffer()
+int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
 {
     int startPositionCircBuffer = circularBufferWriteHead - juce::roundToInt(*position * lastSampleRate);
     int startMod = juce::roundToInt(*positionMod / 100.0f * juce::Random::getSystemRandom().nextFloat() * (CIRC_BUFFER_SECONDS / 2.0f) * lastSampleRate);
@@ -284,6 +284,19 @@ int StereoEncoderAudioProcessor::getStartPositionCircBuffer()
     }
 
     return startPositionCircBuffer;
+}
+
+std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor() const
+{
+    const float maxModulation = 0.125f;
+    // Compute readSpeed based on grain pitch
+	float pitchModSemitones = *pitchMod / 100.0f * maxModulation * juce::Random::getSystemRandom().nextFloat();
+	float pitchReadFactor = std::pow(2.0f, (*pitch - pitchModSemitones) / 12.0f);
+	// Updated length of grain in samples
+    float grainLengthSamplesFloat = *grainLength * lastSampleRate;
+	int grainLengthSamples = static_cast<int>(grainLengthSamplesFloat * (1 / pitchReadFactor));
+
+    return std::make_pair(grainLengthSamples, pitchReadFactor);
 }
 
 void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
@@ -387,10 +400,10 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                     std::copy(_grainSH[g], _grainSH[g] + 64, channelWeights.begin());
                     Grain::GrainJobParameters params;
                     params.startPositionCircBuffer = getStartPositionCircBuffer();
-                    params.grainLengthSamples = grainLengthSamples;
-                    params.pitchSemitones = *pitch;
-                    params.pitchMod = *pitchMod;
-                    params.startOffsetBlock = i;
+                    auto grainLengthAndPitch = getGrainLengthAndPitchFactor();
+                    params.grainLengthSamples = grainLengthAndPitch.first;
+                    params.pitchReadFactor = grainLengthAndPitch.second;
+                    params.startOffsetInBlock = i;
                     params.channelWeights = channelWeights;
                     params.gainFactor = gainFactor;
                     params.mix = mixAmount;

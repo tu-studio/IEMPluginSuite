@@ -5,21 +5,15 @@ class Grain
 public:
 	struct GrainJobParameters{
 		int startPositionCircBuffer = 0;
-		int startOffsetBlock = 0;
+		int startOffsetInBlock = 0;
 		int grainLengthSamples = 0;
-		float pitchSemitones = 0.0f;
-		float pitchMod = 0.0f;
 		float pitchReadFactor = 1.0f;
-		//WindowType windowType;
 		std::array<float,64> channelWeights;
 		float gainFactor = 1.0f;
 		float mix = 1.0f;
 		juce::AudioBuffer<float>* windowBuffer;
-		//juce::Vector3D<float> grainDirection;
-		//int tDesignDirectionIndex = 0;
 	};
 
-	//Grain(references to data for processing);
 	Grain();
 
 	void setBlockSize(int numSampOutBuffer);
@@ -32,21 +26,9 @@ public:
 
 
 private:
-	
-	/*int _startIndexCircularBuffer;
-	int _grainLengthSamples;*/
-	int _currentIndex;
-
-	/*int _startOffset;
-	float* _channelWeights;
-	float* _window;*/
-
 	GrainJobParameters _params;
-
+	int _currentIndex;
 	bool _isActive;
 	int _blockCounter;
 	juce::AudioBuffer<float> _outputBuffer;
-
-	//WindowType _windowType;
-
 };
