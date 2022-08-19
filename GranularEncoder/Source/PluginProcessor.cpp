@@ -149,6 +149,7 @@ void StereoEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
     circularBuffer.clear();
 
     lastSampleRate = sampleRate;
+    deltaTimeSamples = 0;
 
     for (int g = 0; g < maxNumGrains; g++)
     {
@@ -290,7 +291,6 @@ int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
 std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor() const
 {
     // Bidirectional modulation of grain length
-    const float maxLengthModSeconds = 0.5f;
     float grainLengthModSeconds = *grainLengthMod / 100.0f * (*grainLength) * 2*(juce::Random::getSystemRandom().nextFloat()-0.5f);
     float newGrainLengthSeconds = *grainLength + grainLengthModSeconds;
     newGrainLengthSeconds = std::min(newGrainLengthSeconds, 0.5f);
@@ -308,6 +308,18 @@ std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor(
 	int grainLengthSamples = static_cast<int>(grainLengthSamplesFloat * (1 / pitchReadFactor));
 
     return std::make_pair(grainLengthSamples, pitchReadFactor);
+}
+
+int StereoEncoderAudioProcessor::getDeltaTimeSamples()
+{
+    // Bidirectional modulation of deltaTime between grains
+    float deltaTimeModSeconds = *deltaTimeMod / 100.0f * (*deltaTime) * 2.0f *(juce::Random::getSystemRandom().nextFloat()-0.5f);
+    float newDeltaTime = *deltaTime + deltaTimeModSeconds;
+    newDeltaTime = std::min(newDeltaTime, 0.5f);
+    newDeltaTime = std::max(newDeltaTime, 0.001f);
+    jassert(newDeltaTime >= 0.001f && newDeltaTime <= 0.5f);
+    int deltaTimeSamples = juce::roundToInt(lastSampleRate * newDeltaTime);
+    return deltaTimeSamples;
 }
 
 void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
@@ -374,9 +386,6 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const float *leftInput = bufferCopy.getReadPointer(0);
     const float *rightInput = bufferCopy.getReadPointer(1);
 
-    deltaTimeSamples = juce::roundToInt(lastSampleRate * *deltaTime);
-    grainLengthSamples = juce::roundToInt(lastSampleRate * *grainLength);
-
     float gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength), 1.0f);
 
     switch (_currentWindowType)
@@ -399,6 +408,8 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         if (grainTimeCounter >= deltaTimeSamples)
         {
             grainTimeCounter = 0;
+            // reset (possibly modulated) deltaTime after a grain is started
+            deltaTimeSamples = getDeltaTimeSamples(); 
             // start a grain at this sample time stamp
             for (int g = 0; g < maxNumGrains; g++)
             {

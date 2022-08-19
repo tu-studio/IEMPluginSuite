@@ -92,6 +92,7 @@ public:
     juce::Vector3D<float> getRandomGrainDirection();
     int getStartPositionCircBuffer() const;
     std::pair<int, float> getGrainLengthAndPitchFactor() const;
+    int getDeltaTimeSamples();
 
     juce::Vector3D<float> posC, posL, posR;
 
