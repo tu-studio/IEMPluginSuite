@@ -2,14 +2,9 @@
 
 Grain::Grain()
 {
-
 	_isActive = false;
 	_currentIndex = 0;
 	_blockCounter = 0;
-
-	//_startOffset = 0;
-	//_channelWeights = nullptr;
-	//_window = nullptr;
 }
 
 void Grain::setBlockSize(int numSampOutBuffer)
@@ -22,18 +17,11 @@ void Grain::startGrain(const GrainJobParameters &grainParameters) // Type envelo
 {
 	_params = grainParameters;
 
-	// Compute readSpeed based on grain pitch
-	//float pitchModSemitones = _params.pitchMod / 100.0f * 0.125f * juce::Random::getSystemRandom().nextFloat();
-	//_params.pitchReadFactor = std::pow(2.0f, (_params.pitchSemitones - pitchModSemitones) / 12.0f);
-	// Updated length of grain in samples
-	//_params.grainLengthSamples = static_cast<int>(_params.grainLengthSamples * (1 / _params.pitchReadFactor));
-
 	_isActive = true;
 	_currentIndex = 0;
 	_blockCounter = 0;
 
 	_outputBuffer.clear();
-	// preRenderEnvelope(grainLengthSamples, Type envelopeType);
 }
 
 void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<float> &circularBuffer)
@@ -44,8 +32,6 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 	int numSampCircBuffer = circularBuffer.getNumSamples();
 	int numSampOutBuffer = buffer.getNumSamples();
 	jassert(_outputBuffer.getNumSamples() == numSampOutBuffer);
-	// jassert(_channelWeights != nullptr);
-	// jassert(_window != nullptr);
 
 	_outputBuffer.clear();
 	int nChOut = buffer.getNumChannels();
