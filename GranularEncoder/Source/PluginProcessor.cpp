@@ -277,6 +277,7 @@ int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
 {
     int startPositionCircBuffer = circularBufferWriteHead - juce::roundToInt(*position * lastSampleRate);
     int startMod = juce::roundToInt(*positionMod / 100.0f * juce::Random::getSystemRandom().nextFloat() * (CIRC_BUFFER_SECONDS / 2.0f) * lastSampleRate);
+    // Unidirectional modulation of position (due to hard real-time constraint)
     startPositionCircBuffer -= startMod;
     if (startPositionCircBuffer < 0)
     {
@@ -288,12 +289,22 @@ int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
 
 std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor() const
 {
-    const float maxModulation = 0.125f;
-    // Compute readSpeed based on grain pitch
-	float pitchModSemitones = *pitchMod / 100.0f * maxModulation * juce::Random::getSystemRandom().nextFloat();
+    // Bidirectional modulation of grain length
+    const float maxLengthModSeconds = 0.5f;
+    float grainLengthModSeconds = *grainLengthMod / 100.0f * (*grainLength) * 2*(juce::Random::getSystemRandom().nextFloat()-0.5f);
+    float newGrainLengthSeconds = *grainLength + grainLengthModSeconds;
+    newGrainLengthSeconds = std::min(newGrainLengthSeconds, 0.5f);
+    newGrainLengthSeconds = std::max(newGrainLengthSeconds, 0.001f);
+
+    jassert(newGrainLengthSeconds >= 0.001f && newGrainLengthSeconds =< 0.5f);
+    float grainLengthSamplesFloat = newGrainLengthSeconds * lastSampleRate;
+
+    // Unidirectional modulation of pitch (due to hard real-time constraint)
+    const float maxPitchModulation = 0.125f;
+	float pitchModSemitones = *pitchMod / 100.0f * maxPitchModulation * juce::Random::getSystemRandom().nextFloat();
 	float pitchReadFactor = std::pow(2.0f, (*pitch - pitchModSemitones) / 12.0f);
+
 	// Updated length of grain in samples
-    float grainLengthSamplesFloat = *grainLength * lastSampleRate;
 	int grainLengthSamples = static_cast<int>(grainLengthSamplesFloat * (1 / pitchReadFactor));
 
     return std::make_pair(grainLengthSamples, pitchReadFactor);
