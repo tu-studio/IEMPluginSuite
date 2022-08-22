@@ -222,7 +222,8 @@ void StereoEncoderAudioProcessor::updateEuler()
 
 juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
 {
-    float shape_param = std::pow(2, *shape);
+    float shape_abs = std::abs(*shape);
+    float shape_param = std::pow(2, shape_abs);
     float size_param = *size;
     juce::Vector3D<float> centerDir = quaternionDirection.getCartesian();
 
@@ -235,7 +236,7 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
     float rand_phi = juce::Random::getSystemRandom().nextFloat() * 2.0f * juce::MathConstants<float>::pi;
 
     // Beta distribution to control shape of rotationally symmetric distribution around centerDir
-    jassert(shape_param > 0.0f);
+    jassert(shape_param >= 1.0f);
     // beta_distribution<float> dist(shape, shape);
     std::gamma_distribution<float> dist1(shape_param, 1.0f);
     std::gamma_distribution<float> dist2(shape_param, 1.0f);
@@ -245,7 +246,11 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
     float beta_val = (gamma1 + eps) / (gamma1 + gamma2 + eps);
 
     // float sym_beta_sample = abs(dist(rng) - 0.5f) * 2.0f;
-    float sym_beta_sample = abs(beta_val - 0.5f) * 2.0f;
+    float sym_beta_sample;
+    if (*shape < 0.0f)
+        sym_beta_sample = 1.0f - abs(beta_val - 0.5f) * 2.0f;
+    else
+        sym_beta_sample =  abs(beta_val - 0.5f) * 2.0f;
 
     // Input parameter size defines opening angle of distribution cap
     jassert(size_param >= 0.0f && size_param <= 360.0f);
