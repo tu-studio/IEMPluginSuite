@@ -31,6 +31,7 @@
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
+typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
@@ -112,6 +113,9 @@ private:
     SimpleLabel lbRoll, lblWidth; // legacy
     SimpleLabel lbDeltaTime, lbDeltaTimeMod, lbGrainLength, lbGrainLengthMod;
     SimpleLabel lbPosition, lbPositionMod, lbPitch, lbPitchMod;
+
+    juce::ToggleButton tbFreeze;
+    std::unique_ptr<ButtonAttachment> tbFreezeAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoEncoderAudioProcessorEditor)
 };

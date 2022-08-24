@@ -84,6 +84,8 @@ StereoEncoderAudioProcessor::StereoEncoderAudioProcessor()
     pitch = parameters.getRawParameterValue("pitch");
     pitchMod = parameters.getRawParameterValue("pitchMod");
 
+    freeze = parameters.getRawParameterValue("freeze");
+
     highQuality = parameters.getRawParameterValue("highQuality");
 
     processorUpdatingParams = false;
@@ -143,10 +145,17 @@ void StereoEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
     bufferCopy.setSize(2, samplesPerBlock);
     grainOutBuffer.setSize(1, samplesPerBlock);
 
-    circularBuffer.setSize(2, juce::roundToInt(sampleRate * CIRC_BUFFER_SECONDS)); // seconds long circular buffer
-    circularBufferWriteHead = 0;
-    circularBufferLength = circularBuffer.getNumSamples();
-    circularBuffer.clear();
+    if (mode != OperationMode::Freeze)
+    {
+        circularBuffer.setSize(2, juce::roundToInt(sampleRate * CIRC_BUFFER_SECONDS)); // seconds long circular buffer
+        circularBufferWriteHead = 0;
+        circularBufferLength = circularBuffer.getNumSamples();
+        circularBuffer.clear();
+    }
+
+
+    writeGainCircBuffer.reset(sampleRate, 0.1f);
+    writeGainCircBuffer.setCurrentAndTargetValue(1.0f);
 
     lastSampleRate = sampleRate;
     deltaTimeSamples = 0;
@@ -301,7 +310,7 @@ std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor(
     newGrainLengthSeconds = std::min(newGrainLengthSeconds, 0.5f);
     newGrainLengthSeconds = std::max(newGrainLengthSeconds, 0.001f);
 
-    jassert(newGrainLengthSeconds >= 0.001f && newGrainLengthSeconds =< 0.5f);
+    //jassert(newGrainLengthSeconds >= 0.001f && newGrainLengthSeconds =< 0.5f);
     float grainLengthSamplesFloat = newGrainLengthSeconds * lastSampleRate;
 
     // Unidirectional modulation of pitch (due to hard real-time constraint)
@@ -405,10 +414,45 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         break;
     }
 
+    bool freeze_bool;
+    if (*freeze < 0.5f)
+        freeze_bool = false;
+    else
+        freeze_bool = true;
+
+    if (mode == OperationMode::Realtime && freeze_bool)
+    {
+        mode = OperationMode::ToFreeze;
+        writeGainCircBuffer.setTargetValue(0.0f);
+    }
+    if (mode == OperationMode::Freeze && !freeze_bool)
+    {
+        mode = OperationMode::ToRealtime;
+        writeGainCircBuffer.setTargetValue(1.0f);
+    }
+
+
+
     for (int i = 0; i < buffer.getNumSamples(); i++)
     {
-        circularBuffer.setSample(0, circularBufferWriteHead, leftInput[i]);
-        circularBuffer.setSample(1, circularBufferWriteHead, rightInput[i]);
+        float nextCircGain = writeGainCircBuffer.getNextValue();
+        if( mode == OperationMode::ToFreeze && nextCircGain < 0.001f) // Reached Freeze State
+        {
+            mode = OperationMode::Freeze;
+        }
+        if( mode == OperationMode::ToRealtime && nextCircGain > 0.999f) // Reached Realtime State
+        {
+            mode = OperationMode::Realtime;
+        }
+
+
+
+        if (mode != OperationMode::Freeze)
+        {
+            circularBuffer.setSample(0, circularBufferWriteHead, leftInput[i]*nextCircGain);
+            circularBuffer.setSample(1, circularBufferWriteHead, rightInput[i]*nextCircGain); 
+        }
+
 
         if (grainTimeCounter >= deltaTimeSamples)
         {
@@ -451,10 +495,13 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         }*/
 
         // increment circular buffer write head
-        circularBufferWriteHead++;
-        if (circularBufferWriteHead >= circularBufferLength)
+        if (mode != OperationMode::Freeze)
         {
-            circularBufferWriteHead = 0;
+            circularBufferWriteHead++;
+            if (circularBufferWriteHead >= circularBufferLength)
+            {
+                circularBufferWriteHead = 0;
+            }
         }
     }
 
@@ -748,6 +795,15 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         [](float value)
         { return juce::String(value, 1); },
         nullptr));
+
+    params.push_back (OSCParameterInterface::createParameterTheOldWay ("freeze", "Freeze Mode", "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+        [](float value) {
+            if (value >= 0.5f) return "Yes";
+            else return "No";
+        }, nullptr));
+
+
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "highQuality", "Sample-wise Panning", "",

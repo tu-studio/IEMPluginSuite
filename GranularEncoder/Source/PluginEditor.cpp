@@ -266,6 +266,15 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     widthSlider.setTooltip("Stereo Width");
     // widthSlider.setEnabled(*processor.inputMode >= 0.5f);
 
+
+    // FREEZE STATE 
+    addAndMakeVisible(tbFreeze);
+    tbFreezeAttachment.reset(new ButtonAttachment (valueTreeState, "freeze", tbFreeze));
+    tbFreeze.setButtonText("Freeze Buffer");
+    tbFreeze.setColour(juce::ToggleButton::tickColourId, juce::Colours::orange);
+    //tbFreeze.setTooltip("Toogle to switch between a freezed audio buffer and realtime audio input.");
+
+
     // ================ LABELS ===================
     addAndMakeVisible(&lbAzimuth);
     lbAzimuth.setText("Azimuth");
@@ -444,6 +453,10 @@ void StereoEncoderAudioProcessorEditor::resized()
     positionModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
     sliderRow.removeFromLeft(rotSliderSpacing);
     pitchModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+
+    sideBarArea.removeFromTop(20);
+    juce::Rectangle<int> ButtonRow (sideBarArea.removeFromTop(20));
+    tbFreeze.setBounds(ButtonRow.removeFromLeft(20));
 
     // ============== SIDEBAR LEFT ====================
     area.removeFromRight(10); // spacing

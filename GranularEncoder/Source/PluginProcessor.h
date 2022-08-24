@@ -127,11 +127,18 @@ public:
 
     std::atomic<float> *highQuality;
 
+    std::atomic<float> *freeze;
+
     // --------------------
 
     bool sphericalInput;
 
     double phi, theta;
+
+    enum class OperationMode {
+       Realtime, ToFreeze, Freeze, ToRealtime
+    };
+
 
 private:
     //==============================================================================
@@ -180,6 +187,9 @@ private:
     juce::LinearSmoothedValue<float> smoothAzimuthR, smoothElevationR;
 
     std::mt19937 rng;
+
+    juce::SmoothedValue<float> writeGainCircBuffer = 1.0f;
+    OperationMode mode = OperationMode::Realtime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoEncoderAudioProcessor)
 };
