@@ -266,14 +266,15 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     widthSlider.setTooltip("Stereo Width");
     // widthSlider.setEnabled(*processor.inputMode >= 0.5f);
 
-
-    // FREEZE STATE 
+    // FREEZE STATE
     addAndMakeVisible(tbFreeze);
-    tbFreezeAttachment.reset(new ButtonAttachment (valueTreeState, "freeze", tbFreeze));
+    tbFreezeAttachment.reset(new ButtonAttachment(valueTreeState, "freeze", tbFreeze));
     tbFreeze.setButtonText("Freeze Buffer");
     tbFreeze.setColour(juce::ToggleButton::tickColourId, juce::Colours::orange);
-    //tbFreeze.setTooltip("Toogle to switch between a freezed audio buffer and realtime audio input.");
+    tbFreeze.setTooltip("Toggle to switch between a freezed audio buffer and realtime audio input.");
 
+    addAndMakeVisible(&lbFreeze);
+    lbFreeze.setText("Freeze Audio");
 
     // ================ LABELS ===================
     addAndMakeVisible(&lbAzimuth);
@@ -444,7 +445,7 @@ void StereoEncoderAudioProcessorEditor::resized()
     grainArea.removeFromLeft(rotSliderSpacing - 5);
     lbPitch.setBounds(grainArea.removeFromLeft(rotSliderWidth + 10));
 
-    juce::Rectangle<int> grainModArea(sideBarArea.removeFromTop(25 + rotSliderHeight + labelHeight));
+    juce::Rectangle<int> grainModArea(sideBarArea.removeFromTop(rotSliderHeight));
     sliderRow = (grainModArea.removeFromTop(rotSliderHeight));
     deltaTimeModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
     sliderRow.removeFromLeft(rotSliderSpacing);
@@ -454,9 +455,12 @@ void StereoEncoderAudioProcessorEditor::resized()
     sliderRow.removeFromLeft(rotSliderSpacing);
     pitchModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
 
-    sideBarArea.removeFromTop(20);
-    juce::Rectangle<int> ButtonRow (sideBarArea.removeFromTop(20));
+    // FREEZE BUTTON
+    sideBarArea.removeFromTop(15);
+    juce::Rectangle<int> ButtonRow(sideBarArea.removeFromTop(20));
     tbFreeze.setBounds(ButtonRow.removeFromLeft(20));
+    // ButtonRow.removeFromLeft(1);
+    lbFreeze.setBounds(ButtonRow.removeFromLeft(70));
 
     // ============== SIDEBAR LEFT ====================
     area.removeFromRight(10); // spacing

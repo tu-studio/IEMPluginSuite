@@ -115,6 +115,7 @@ private:
     SimpleLabel lbPosition, lbPositionMod, lbPitch, lbPitchMod;
 
     juce::ToggleButton tbFreeze;
+    SimpleLabel lbFreeze;
     std::unique_ptr<ButtonAttachment> tbFreezeAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoEncoderAudioProcessorEditor)
