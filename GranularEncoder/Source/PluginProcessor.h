@@ -38,7 +38,7 @@
 // using boost::random::beta_distribution;
 
 #define ProcessorClass StereoEncoderAudioProcessor
-#define maxNumGrains 64
+#define maxNumGrains 512
 #define windowResolution 1024
 #define CIRC_BUFFER_SECONDS 4.0f
 

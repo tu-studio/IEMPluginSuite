@@ -400,7 +400,15 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const float *leftInput = bufferCopy.getReadPointer(0);
     const float *rightInput = bufferCopy.getReadPointer(1);
 
-    float gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength), 1.0f);
+    float gainFactor;
+    if (*positionMod > 0.0f)
+    {
+        gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength), 1.0f);
+    }
+    else
+    {
+        gainFactor = juce::jmin(*deltaTime / *grainLength, 1.0f);
+    }
 
     switch (_currentWindowType)
     {
