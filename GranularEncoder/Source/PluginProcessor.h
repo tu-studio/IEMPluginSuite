@@ -90,6 +90,7 @@ public:
     inline void updateEuler();
 
     juce::Vector3D<float> getRandomGrainDirection();
+    juce::AudioBuffer<float> getWindowBuffer();
     int getStartPositionCircBuffer() const;
     std::pair<int, float> getGrainLengthAndPitchFactor() const;
     int getDeltaTimeSamples();
@@ -125,6 +126,12 @@ public:
     std::atomic<float> *position;
     std::atomic<float> *positionMod;
 
+    std::atomic<float> *windowAttack;
+    std::atomic<float> *windowAttackMod;
+
+    std::atomic<float> *windowDecay;
+    std::atomic<float> *windowDecayMod;
+
     std::atomic<float> *highQuality;
 
     std::atomic<float> *freeze;
@@ -135,10 +142,13 @@ public:
 
     double phi, theta;
 
-    enum class OperationMode {
-       Realtime, ToFreeze, Freeze, ToRealtime
+    enum class OperationMode
+    {
+        Realtime,
+        ToFreeze,
+        Freeze,
+        ToRealtime
     };
-
 
 private:
     //==============================================================================

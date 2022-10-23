@@ -71,6 +71,7 @@ private:
     ReverseSlider rollSlider, widthSlider;
     ReverseSlider deltaTimeSlider, deltaTimeModSlider, grainLengthSlider, grainLengthModSlider;
     ReverseSlider positionSlider, positionModSlider, pitchSlider, pitchModSlider;
+    ReverseSlider windowAttackSlider, windowAttackModSlider, windowDecaySlider, windowDecayModSlider;
     juce::ComboBox inputChooser;
 
     SpherePanner sphere;
@@ -103,6 +104,12 @@ private:
     std::unique_ptr<SliderAttachment> pitchAttachment;
     std::unique_ptr<SliderAttachment> pitchModAttachment;
 
+    std::unique_ptr<SliderAttachment> windowAttackAttachment;
+    std::unique_ptr<SliderAttachment> windowAttackModAttachment;
+
+    std::unique_ptr<SliderAttachment> windowDecayAttachment;
+    std::unique_ptr<SliderAttachment> windowDecayModAttachment;
+
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;
 
@@ -113,6 +120,7 @@ private:
     SimpleLabel lbRoll, lblWidth; // legacy
     SimpleLabel lbDeltaTime, lbDeltaTimeMod, lbGrainLength, lbGrainLengthMod;
     SimpleLabel lbPosition, lbPositionMod, lbPitch, lbPitchMod;
+    SimpleLabel lbWindowAttack, lbWindowAttackMod, lbWindowDecay, lbWindowDecayMod;
 
     juce::ToggleButton tbFreeze;
     SimpleLabel lbFreeze;

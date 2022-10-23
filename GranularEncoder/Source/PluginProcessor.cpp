@@ -84,6 +84,12 @@ StereoEncoderAudioProcessor::StereoEncoderAudioProcessor()
     pitch = parameters.getRawParameterValue("pitch");
     pitchMod = parameters.getRawParameterValue("pitchMod");
 
+    windowAttack = parameters.getRawParameterValue("windowAttack");
+    windowAttackMod = parameters.getRawParameterValue("windowAttackMod");
+
+    windowDecay = parameters.getRawParameterValue("windowDecay");
+    windowDecayMod = parameters.getRawParameterValue("windowDecayMod");
+
     freeze = parameters.getRawParameterValue("freeze");
 
     highQuality = parameters.getRawParameterValue("highQuality");
@@ -152,7 +158,6 @@ void StereoEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
         circularBufferLength = circularBuffer.getNumSamples();
         circularBuffer.clear();
     }
-
 
     writeGainCircBuffer.reset(sampleRate, 0.1f);
     writeGainCircBuffer.setCurrentAndTargetValue(1.0f);
@@ -259,7 +264,7 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
     if (*shape < 0.0f)
         sym_beta_sample = 1.0f - abs(beta_val - 0.5f) * 2.0f;
     else
-        sym_beta_sample =  abs(beta_val - 0.5f) * 2.0f;
+        sym_beta_sample = abs(beta_val - 0.5f) * 2.0f;
 
     // Input parameter size defines opening angle of distribution cap
     jassert(size_param >= 0.0f && size_param <= 360.0f);
@@ -288,6 +293,44 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
     return vec;
 }
 
+juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer()
+{
+    const float attackPercentage = *windowAttack;
+    const float decayPercentage = *windowDecay;
+    const int windowNumSamples = windowResolution;
+    const int windowHalfNumSamples = windowResolution / 2;
+
+    const int windowAttackSamples =  attackPercentage / 100.0f * windowNumSamples;
+    const int windowDecaySamples =  decayPercentage / 100.0f * windowNumSamples;
+
+    juce::AudioBuffer<float> windowBuffer;
+    windowBuffer.setSize(1, windowResolution);
+
+    float *windowBufferWritePtr = windowBuffer.getWritePointer(0);
+
+    float pi_over_two = (juce::MathConstants<float>::pi / 2.0f);
+
+    for (int i = 0; i < windowAttackSamples; i++)
+    {
+        // sine-squared fade-in
+        windowBufferWritePtr[i] = std::pow(std::sin(static_cast<float>(i) / static_cast<float>(windowAttackSamples) * pi_over_two), 2);
+    }
+    for (int i = windowAttackSamples; i < (windowNumSamples - windowDecaySamples); i++)
+    {
+        // rectangular part
+        windowBufferWritePtr[i] = 1.0f;
+    }
+    int c = 0;
+    for (int i = (windowNumSamples - windowDecaySamples); i < windowNumSamples; i++)
+    {
+        // cosine-squared fade-out
+        windowBufferWritePtr[i] = std::pow(std::cos(static_cast<float>(c) / static_cast<float>(windowDecaySamples) * pi_over_two), 2);
+        c++;
+    }
+
+    return windowBuffer;
+}
+
 int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
 {
     int startPositionCircBuffer = circularBufferWriteHead - juce::roundToInt(*position * lastSampleRate);
@@ -305,21 +348,21 @@ int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
 std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor() const
 {
     // Bidirectional modulation of grain length
-    float grainLengthModSeconds = *grainLengthMod / 100.0f * (*grainLength) * 2*(juce::Random::getSystemRandom().nextFloat()-0.5f);
+    float grainLengthModSeconds = *grainLengthMod / 100.0f * (*grainLength) * 2 * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
     float newGrainLengthSeconds = *grainLength + grainLengthModSeconds;
     newGrainLengthSeconds = std::min(newGrainLengthSeconds, 0.5f);
     newGrainLengthSeconds = std::max(newGrainLengthSeconds, 0.001f);
 
-    //jassert(newGrainLengthSeconds >= 0.001f && newGrainLengthSeconds =< 0.5f);
+    // jassert(newGrainLengthSeconds >= 0.001f && newGrainLengthSeconds =< 0.5f);
     float grainLengthSamplesFloat = newGrainLengthSeconds * lastSampleRate;
 
     // Unidirectional modulation of pitch (due to hard real-time constraint)
     const float maxPitchModulation = 0.125f;
-	float pitchModSemitones = *pitchMod / 100.0f * maxPitchModulation * juce::Random::getSystemRandom().nextFloat();
-	float pitchReadFactor = std::pow(2.0f, (*pitch - pitchModSemitones) / 12.0f);
+    float pitchModSemitones = *pitchMod / 100.0f * maxPitchModulation * juce::Random::getSystemRandom().nextFloat();
+    float pitchReadFactor = std::pow(2.0f, (*pitch - pitchModSemitones) / 12.0f);
 
-	// Updated length of grain in samples
-	int grainLengthSamples = static_cast<int>(grainLengthSamplesFloat * (1 / pitchReadFactor));
+    // Updated length of grain in samples
+    int grainLengthSamples = static_cast<int>(grainLengthSamplesFloat * (1 / pitchReadFactor));
 
     return std::make_pair(grainLengthSamples, pitchReadFactor);
 }
@@ -327,7 +370,7 @@ std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor(
 int StereoEncoderAudioProcessor::getDeltaTimeSamples()
 {
     // Bidirectional modulation of deltaTime between grains
-    float deltaTimeModSeconds = *deltaTimeMod / 100.0f * (*deltaTime) * 2.0f *(juce::Random::getSystemRandom().nextFloat()-0.5f);
+    float deltaTimeModSeconds = *deltaTimeMod / 100.0f * (*deltaTime) * 2.0f * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
     float newDeltaTime = *deltaTime + deltaTimeModSeconds;
     newDeltaTime = std::min(newDeltaTime, 0.5f);
     newDeltaTime = std::max(newDeltaTime, 0.001f);
@@ -439,34 +482,29 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         writeGainCircBuffer.setTargetValue(1.0f);
     }
 
-
-
     for (int i = 0; i < buffer.getNumSamples(); i++)
     {
         float nextCircGain = writeGainCircBuffer.getNextValue();
-        if( mode == OperationMode::ToFreeze && nextCircGain < 0.001f) // Reached Freeze State
+        if (mode == OperationMode::ToFreeze && nextCircGain < 0.001f) // Reached Freeze State
         {
             mode = OperationMode::Freeze;
         }
-        if( mode == OperationMode::ToRealtime && nextCircGain > 0.999f) // Reached Realtime State
+        if (mode == OperationMode::ToRealtime && nextCircGain > 0.999f) // Reached Realtime State
         {
             mode = OperationMode::Realtime;
         }
 
-
-
         if (mode != OperationMode::Freeze)
         {
-            circularBuffer.setSample(0, circularBufferWriteHead, leftInput[i]*nextCircGain);
-            circularBuffer.setSample(1, circularBufferWriteHead, rightInput[i]*nextCircGain); 
+            circularBuffer.setSample(0, circularBufferWriteHead, leftInput[i] * nextCircGain);
+            circularBuffer.setSample(1, circularBufferWriteHead, rightInput[i] * nextCircGain);
         }
-
 
         if (grainTimeCounter >= deltaTimeSamples)
         {
             grainTimeCounter = 0;
             // reset (possibly modulated) deltaTime after a grain is started
-            deltaTimeSamples = getDeltaTimeSamples(); 
+            deltaTimeSamples = getDeltaTimeSamples();
             // start a grain at this sample time stamp
             for (int g = 0; g < maxNumGrains; g++)
             {
@@ -486,7 +524,8 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                     params.channelWeights = channelWeights;
                     params.gainFactor = gainFactor;
                     params.mix = mixAmount;
-                    params.windowBuffer = _currentWindow;
+
+                    params.windowBuffer = getWindowBuffer();
                     grains[g].startGrain(params);
                     break;
                 }
@@ -804,14 +843,42 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         { return juce::String(value, 1); },
         nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("freeze", "Freeze Mode", "",
-        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
-        [](float value) {
-            if (value >= 0.5f) return "Yes";
-            else return "No";
-        }, nullptr));
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "windowAttack", "Window Attack", juce::CharPointer_UTF8(R"(%)"),
+        juce::NormalisableRange<float>(0.0f, 50.0f, 0.1f), 50.0f,
+        [](float value)
+        { return juce::String(value, 1); },
+        nullptr));
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "windowAttackMod", "Window Attack Mod", juce::CharPointer_UTF8(R"(%)"),
+        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+        [](float value)
+        { return juce::String(value, 1); },
+        nullptr));
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "windowDecay", "Window Decay", juce::CharPointer_UTF8(R"(%)"),
+        juce::NormalisableRange<float>(0.0f, 50.0f, 0.1f), 50.0f,
+        [](float value)
+        { return juce::String(value, 1); },
+        nullptr));
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "windowDecayMod", "Window Decay Mod", juce::CharPointer_UTF8(R"(%)"),
+        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+        [](float value)
+        { return juce::String(value, 1); },
+        nullptr));
 
-
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "freeze", "Freeze Mode", "",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 1.0f), 0.0f,
+        [](float value)
+        {
+            if (value >= 0.5f)
+                return "Yes";
+            else
+                return "No";
+        },
+        nullptr));
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "highQuality", "Sample-wise Panning", "",

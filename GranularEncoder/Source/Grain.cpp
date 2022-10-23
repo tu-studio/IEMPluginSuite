@@ -39,8 +39,8 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 	const float *circularLeftChannel = circularBuffer.getReadPointer(0);
 	const float *circularRightChannel = circularBuffer.getReadPointer(1);
 
-	const float *window_ptr = _params.windowBuffer->getReadPointer(0);
-	const int windowNumSamples = _params.windowBuffer->getNumSamples();
+	const float *window_ptr = _params.windowBuffer.getReadPointer(0);
+	const int windowNumSamples = _params.windowBuffer.getNumSamples();
 
 	float *outputBufferWritePtr = _outputBuffer.getWritePointer(0);
 
@@ -59,10 +59,10 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 	{
 		if (_currentIndex < _params.grainLengthSamples) // grain still needs samples
 		{
-			// Linear interpolation of buffer samples 
+			// Linear interpolation of buffer samples
 			float readIndex = _params.startPositionCircBuffer + (_currentIndex * _params.pitchReadFactor);
 			int readIndexInt = static_cast<int>(readIndex);
-			int readIndexIntNext = readIndexInt + 1; 
+			int readIndexIntNext = readIndexInt + 1;
 			float sampleFracWeight = readIndex - readIndexInt;
 			if (readIndexInt >= numSampCircBuffer)
 				readIndexInt = readIndexInt - numSampCircBuffer;
@@ -73,16 +73,16 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 			float sampleValue = sampleIntPart + sampleFracWeight * sampleFracPart;
 
 			// Linear interpolation for grain window function
-			float windowIndex = static_cast<float>(_currentIndex) / static_cast<float>(_params.grainLengthSamples) * (windowNumSamples-1);
+			float windowIndex = static_cast<float>(_currentIndex) / static_cast<float>(_params.grainLengthSamples) * (windowNumSamples - 1);
 			int windowIndexInt = static_cast<int>(windowIndex);
-			jassert(windowIndexInt >= 0 && windowIndexInt < (windowNumSamples-1));
+			jassert(windowIndexInt >= 0 && windowIndexInt < (windowNumSamples - 1));
 
-			int windowIndexIntNext = windowIndexInt + 1;//windowIndexInt < 1023 ? (windowIndexInt + 1) : windowIndexInt;
+			int windowIndexIntNext = windowIndexInt + 1; // windowIndexInt < 1023 ? (windowIndexInt + 1) : windowIndexInt;
 			float windowFracWeight = windowIndex - windowIndexInt;
 			float windowIntPart = window_ptr[windowIndexInt];
 			float windFracPart = window_ptr[windowIndexIntNext] - windowIntPart;
 			float windowValue = windowIntPart + windowFracWeight * windFracPart;
-		    jassert(windowValue >= 0.0f && windowValue <= 1.0f);
+			jassert(windowValue >= 0.0f && windowValue <= 1.0f);
 			outputBufferWritePtr[i] = sampleValue * windowValue;
 
 			_currentIndex++;

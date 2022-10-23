@@ -33,7 +33,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     // setSize(500, 325);
-    setSize(500, 450);
+    setSize(500, 480);
     setLookAndFeel(&globalLaF);
 
     // ==== SPHERE AND ELEMENTS ===============
@@ -216,6 +216,28 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     pitchModSlider.setTooltip("Spread amount for the pitch of grains");
     pitchModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
+    // Window Attack
+    addAndMakeVisible(&windowAttackSlider);
+    windowAttackAttachment.reset(new SliderAttachment(valueTreeState, "windowAttack", windowAttackSlider));
+    windowAttackSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    windowAttackSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    windowAttackSlider.setReverse(false);
+    windowAttackSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    windowAttackSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+    windowAttackSlider.setTooltip("Window attack time in percent of grain length");
+    windowAttackSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+
+    // Window Decay
+    addAndMakeVisible(&windowDecaySlider);
+    windowDecayAttachment.reset(new SliderAttachment(valueTreeState, "windowDecay", windowDecaySlider));
+    windowDecaySlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    windowDecaySlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    windowDecaySlider.setReverse(false);
+    windowDecaySlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    windowDecaySlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+    windowDecaySlider.setTooltip("Window decay time in percent of grain length");
+    windowDecaySlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+
     // ====================== QUATERNION GROUP
     quatGroup.setText("Quaternions");
     quatGroup.setTextLabelPosition(juce::Justification::centredLeft);
@@ -315,6 +337,14 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     addAndMakeVisible(&lbPitchMod);
     lbPitchMod.setText("Pitch-Mod");
 
+    addAndMakeVisible(&lbWindowAttack);
+    lbWindowAttack.setText("Attack");
+
+    addAndMakeVisible(&lbWindowDecay);
+    lbWindowDecay.setText("Decay");
+
+
+
     addAndMakeVisible(&lbW);
     lbW.setText("W");
 
@@ -386,12 +416,14 @@ void StereoEncoderAudioProcessorEditor::resized()
     area.removeFromTop(10);
 
     juce::Rectangle<int> sliderRow;
+    juce::Rectangle<int> sliderRowTwo;
 
     // ============== SIDEBAR RIGHT ====================
     // =================================================
     juce::Rectangle<int> sideBarArea(area.removeFromRight(190));
     const int sliderHeight = 15;
     const int rotSliderHeight = 55;
+    const int modSliderHeight = 40;
     const int rotSliderSpacing = 10;
     const int sliderSpacing = 3;
     const int rotSliderWidth = 40;
@@ -424,7 +456,7 @@ void StereoEncoderAudioProcessorEditor::resized()
     sideBarArea.removeFromTop(20);
 
     // -------------- DeltaTime GrainLength Position Pitch ------------------
-    juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + rotSliderHeight + labelHeight));
+    juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + 2 * rotSliderHeight + 2 * modSliderHeight +  2 * labelHeight));
     grainGroup.setBounds(grainArea);
     grainArea.removeFromTop(25); // for box headline
 
@@ -437,16 +469,17 @@ void StereoEncoderAudioProcessorEditor::resized()
     sliderRow.removeFromLeft(rotSliderSpacing);
     pitchSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
 
-    lbDeltaTime.setBounds(grainArea.removeFromLeft(rotSliderWidth));
-    grainArea.removeFromLeft(rotSliderSpacing - 5);
-    lbGrainLength.setBounds(grainArea.removeFromLeft(rotSliderWidth + 10));
-    grainArea.removeFromLeft(rotSliderSpacing - 10);
-    lbPosition.setBounds(grainArea.removeFromLeft(rotSliderWidth + 10));
-    grainArea.removeFromLeft(rotSliderSpacing - 5);
-    lbPitch.setBounds(grainArea.removeFromLeft(rotSliderWidth + 10));
+    juce::Rectangle<int> labelRow = (grainArea.removeFromTop(labelHeight));
+    lbDeltaTime.setBounds(labelRow.removeFromLeft(rotSliderWidth));
+    labelRow.removeFromLeft(rotSliderSpacing - 5);
+    lbGrainLength.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
+    labelRow.removeFromLeft(rotSliderSpacing - 10);
+    lbPosition.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
+    labelRow.removeFromLeft(rotSliderSpacing - 5);
+    lbPitch.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
 
-    juce::Rectangle<int> grainModArea(sideBarArea.removeFromTop(rotSliderHeight));
-    sliderRow = (grainModArea.removeFromTop(rotSliderHeight));
+    juce::Rectangle<int> grainModArea(grainArea.removeFromTop(modSliderHeight));
+    sliderRow = (grainModArea.removeFromTop(modSliderHeight));
     deltaTimeModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
     sliderRow.removeFromLeft(rotSliderSpacing);
     grainLengthModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
@@ -455,8 +488,20 @@ void StereoEncoderAudioProcessorEditor::resized()
     sliderRow.removeFromLeft(rotSliderSpacing);
     pitchModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
 
+    grainArea.removeFromTop(10);
+    sliderRowTwo = (grainArea.removeFromTop(rotSliderHeight));
+    windowAttackSlider.setBounds(sliderRowTwo.removeFromLeft(rotSliderWidth));
+    sliderRowTwo.removeFromLeft(rotSliderSpacing);
+    windowDecaySlider.setBounds(sliderRowTwo.removeFromLeft(rotSliderWidth));
+    sliderRowTwo.removeFromLeft(rotSliderSpacing);
+
+    labelRow = (grainArea.removeFromTop(labelHeight));
+    lbWindowAttack.setBounds(labelRow.removeFromLeft(rotSliderWidth));
+    labelRow.removeFromLeft(rotSliderSpacing - 5);
+    lbWindowDecay.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
+
     // FREEZE BUTTON
-    sideBarArea.removeFromTop(15);
+    sideBarArea.removeFromTop(5);
     juce::Rectangle<int> ButtonRow(sideBarArea.removeFromTop(20));
     tbFreeze.setBounds(ButtonRow.removeFromLeft(20));
     // ButtonRow.removeFromLeft(1);
