@@ -293,15 +293,27 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
     return vec;
 }
 
-juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer()
+juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer(float modWeight)
 {
     const float attackPercentage = *windowAttack;
     const float decayPercentage = *windowDecay;
+
+    const float attackModPercentage = *windowAttackMod;
+    const float decayModPercentage = *windowDecayMod;
+
+    float newAttackPercentage = attackPercentage + (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f * modWeight *attackModPercentage;
+    newAttackPercentage = std::min(newAttackPercentage, 50.0f);
+    newAttackPercentage = std::max(newAttackPercentage, 0.0f);
+
+    float newDecayPercentage = decayPercentage + (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f * modWeight *decayModPercentage;
+    newDecayPercentage = std::min(newDecayPercentage, 50.0f);
+    newDecayPercentage = std::max(newDecayPercentage, 0.0f);
+
     const int windowNumSamples = windowResolution;
     const int windowHalfNumSamples = windowResolution / 2;
 
-    const int windowAttackSamples =  attackPercentage / 100.0f * windowNumSamples;
-    const int windowDecaySamples =  decayPercentage / 100.0f * windowNumSamples;
+    const int windowAttackSamples =  newAttackPercentage / 100.0f * windowNumSamples;
+    const int windowDecaySamples =  newDecayPercentage / 100.0f * windowNumSamples;
 
     juce::AudioBuffer<float> windowBuffer;
     windowBuffer.setSize(1, windowResolution);
@@ -310,10 +322,12 @@ juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer()
 
     float pi_over_two = (juce::MathConstants<float>::pi / 2.0f);
 
+    float windowAttackSamplesFloat = static_cast<float>(windowAttackSamples);
+    float windowDecaySamplesFloat = static_cast<float>(windowDecaySamples);
     for (int i = 0; i < windowAttackSamples; i++)
     {
         // sine-squared fade-in
-        windowBufferWritePtr[i] = std::pow(std::sin(static_cast<float>(i) / static_cast<float>(windowAttackSamples) * pi_over_two), 2);
+        windowBufferWritePtr[i] = std::pow(std::sin(static_cast<float>(i) / windowAttackSamplesFloat * pi_over_two), 2);
     }
     for (int i = windowAttackSamples; i < (windowNumSamples - windowDecaySamples); i++)
     {
@@ -324,7 +338,7 @@ juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer()
     for (int i = (windowNumSamples - windowDecaySamples); i < windowNumSamples; i++)
     {
         // cosine-squared fade-out
-        windowBufferWritePtr[i] = std::pow(std::cos(static_cast<float>(c) / static_cast<float>(windowDecaySamples) * pi_over_two), 2);
+        windowBufferWritePtr[i] = std::pow(std::cos(static_cast<float>(c) / windowDecaySamplesFloat * pi_over_two), 2);
         c++;
     }
 
@@ -443,14 +457,24 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const float *leftInput = bufferCopy.getReadPointer(0);
     const float *rightInput = bufferCopy.getReadPointer(1);
 
+    juce::AudioBuffer<float> meanWindow = getWindowBuffer(0.0f);
+    const float* meanWindowReadPtr = meanWindow.getReadPointer(0);
+    const int numSamplesWindow = meanWindow.getNumSamples();
+    float windowGain = 0.0f;
+    for(int i = 0; i < numSamplesWindow; i++)
+    {
+        windowGain += meanWindowReadPtr[i];
+    }
+    windowGain = windowGain / static_cast<float>(numSamplesWindow);
+
     float gainFactor;
     if (*positionMod > 0.0f)
     {
-        gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength), 1.0f);
+        gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength / windowGain), 1.0f);
     }
     else
     {
-        gainFactor = juce::jmin(*deltaTime / *grainLength, 1.0f);
+        gainFactor = juce::jmin(*deltaTime / *grainLength / windowGain, 1.0f);
     }
 
     switch (_currentWindowType)
@@ -525,7 +549,7 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                     params.gainFactor = gainFactor;
                     params.mix = mixAmount;
 
-                    params.windowBuffer = getWindowBuffer();
+                    params.windowBuffer = getWindowBuffer(1.0f);
                     grains[g].startGrain(params);
                     break;
                 }
@@ -535,11 +559,6 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         {
             grainTimeCounter++;
         }
-
-        /*for (int g = 0; g < maxNumGrains; g++)
-        {
-            grains[g].processSample(buffer, circLeftCh, circRightCh, circularBufferLength, SHL, mixAmount, gainFactor, i);
-        }*/
 
         // increment circular buffer write head
         if (mode != OperationMode::Freeze)
@@ -825,7 +844,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "positionMod", "Position Mod", juce::CharPointer_UTF8(R"(%)"),
-        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+        juce::NormalisableRange<float>(0.1f, 100.0f, 0.1f), 0.1f,
         [](float value)
         { return juce::String(value, 1); },
         nullptr));

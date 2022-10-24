@@ -90,7 +90,7 @@ public:
     inline void updateEuler();
 
     juce::Vector3D<float> getRandomGrainDirection();
-    juce::AudioBuffer<float> getWindowBuffer();
+    juce::AudioBuffer<float> getWindowBuffer(float modWeight);
     int getStartPositionCircBuffer() const;
     std::pair<int, float> getGrainLengthAndPitchFactor() const;
     int getDeltaTimeSamples();

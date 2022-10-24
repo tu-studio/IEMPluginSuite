@@ -33,7 +33,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     // setSize(500, 325);
-    setSize(500, 480);
+    setSize(500, 490);
     setLookAndFeel(&globalLaF);
 
     // ==== SPHERE AND ELEMENTS ===============
@@ -226,6 +226,15 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     windowAttackSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     windowAttackSlider.setTooltip("Window attack time in percent of grain length");
     windowAttackSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+    addAndMakeVisible(&windowAttackModSlider);
+    windowAttackModAttachment.reset(new SliderAttachment(valueTreeState, "windowAttackMod", windowAttackModSlider));
+    windowAttackModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    windowAttackModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    windowAttackModSlider.setReverse(false);
+    windowAttackModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    windowAttackModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+    windowAttackModSlider.setTooltip("Spread amount for window attack time");
+    windowAttackModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // Window Decay
     addAndMakeVisible(&windowDecaySlider);
@@ -237,6 +246,15 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     windowDecaySlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     windowDecaySlider.setTooltip("Window decay time in percent of grain length");
     windowDecaySlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+    addAndMakeVisible(&windowDecayModSlider);
+    windowDecayModAttachment.reset(new SliderAttachment(valueTreeState, "windowDecayMod", windowDecayModSlider));
+    windowDecayModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    windowDecayModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    windowDecayModSlider.setReverse(false);
+    windowDecayModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    windowDecayModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+    windowDecayModSlider.setTooltip("Spread amount for window decay time");
+    windowAttackModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // ====================== QUATERNION GROUP
     quatGroup.setText("Quaternions");
@@ -456,7 +474,7 @@ void StereoEncoderAudioProcessorEditor::resized()
     sideBarArea.removeFromTop(20);
 
     // -------------- DeltaTime GrainLength Position Pitch ------------------
-    juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + 2 * rotSliderHeight + 2 * modSliderHeight +  2 * labelHeight));
+    juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + 10 + 2 * rotSliderHeight + 2 * modSliderHeight +  2 * labelHeight));
     grainGroup.setBounds(grainArea);
     grainArea.removeFromTop(25); // for box headline
 
@@ -500,6 +518,12 @@ void StereoEncoderAudioProcessorEditor::resized()
     labelRow.removeFromLeft(rotSliderSpacing - 5);
     lbWindowDecay.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
 
+    juce::Rectangle<int> grainModAreaTwo(grainArea.removeFromTop(modSliderHeight));
+    sliderRow = (grainModAreaTwo.removeFromTop(modSliderHeight));
+    windowAttackModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+    sliderRow.removeFromLeft(rotSliderSpacing);
+    windowDecayModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+
     // FREEZE BUTTON
     sideBarArea.removeFromTop(5);
     juce::Rectangle<int> ButtonRow(sideBarArea.removeFromTop(20));
@@ -513,6 +537,7 @@ void StereoEncoderAudioProcessorEditor::resized()
     sphere.setBounds(area.getX(), area.getY(), area.getWidth() - 20, area.getWidth() - 20);
 
     // ------------- Quaternion ------------------------
+    area.removeFromTop(10);
     area.removeFromTop(area.getWidth());
     juce::Rectangle<int> quatArea(area.getX(), area.getY(), area.getWidth() - 20, 165);
     quatGroup.setBounds(quatArea);
