@@ -371,9 +371,16 @@ std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor(
     float grainLengthSamplesFloat = newGrainLengthSeconds * lastSampleRate;
 
     // Unidirectional modulation of pitch (due to hard real-time constraint)
-    const float maxPitchModulation = 0.125f;
-    float pitchModSemitones = *pitchMod / 100.0f * maxPitchModulation * juce::Random::getSystemRandom().nextFloat();
-    float pitchReadFactor = std::pow(2.0f, (*pitch - pitchModSemitones) / 12.0f);
+    const float maxPitchModulation = 12.0f;
+    float pitchModSemitones = *pitchMod / 100.0f * maxPitchModulation * (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f;
+    float pitchToUse = *pitch - pitchModSemitones;
+    if (mode != OperationMode::Freeze)
+    {
+        // If in real-time mode, only pitching down is available.
+        pitchToUse = std::min(pitchToUse, 0.0f);
+        pitchToUse = std::max(pitchToUse, -12.0f);
+    }
+    float pitchReadFactor = std::pow(2.0f, (pitchToUse) / 12.0f);
 
     // Updated length of grain in samples
     int grainLengthSamples = static_cast<int>(grainLengthSamplesFloat * (1 / pitchReadFactor));
@@ -795,7 +802,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "size", "Size", juce::CharPointer_UTF8(R"(°)"),
-        juce::NormalisableRange<float>(0.0f, 360.0f, 0.01f), 0.0,
+        juce::NormalisableRange<float>(0.0f, 360.0f, 0.01f), 90.0f,
         [](float value)
         { return juce::String(value, 2); },
         nullptr));
@@ -816,7 +823,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "deltaTime", "Delta Time", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.001f, 0.5f, 0.0001f), 0.05f,
+        juce::NormalisableRange<float>(0.001f, 0.5f, 0.0001f), 0.001f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
@@ -829,7 +836,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "grainLength", "Grain Length", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.001f, 0.500f, 0.0001f), 0.1f,
+        juce::NormalisableRange<float>(0.001f, 0.500f, 0.0001f), 0.250f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
@@ -848,14 +855,14 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "positionMod", "Position Mod", juce::CharPointer_UTF8(R"(%)"),
-        juce::NormalisableRange<float>(0.1f, 100.0f, 0.1f), 0.1f,
+        juce::NormalisableRange<float>(1.0f, 100.0f, 0.1f), 1.0f,
         [](float value)
         { return juce::String(value, 1); },
         nullptr));
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "pitch", "Pitch", juce::CharPointer_UTF8(R"(st)"),
-        juce::NormalisableRange<float>(-12.0f, 0.0f, 0.1f), 0.0f,
+        juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 0.0f,
         [](float value)
         { return juce::String(value, 1); },
         nullptr));

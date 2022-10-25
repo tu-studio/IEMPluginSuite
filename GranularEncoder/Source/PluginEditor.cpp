@@ -203,7 +203,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     pitchSlider.setReverse(false);
     pitchSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
     pitchSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    pitchSlider.setTooltip("Pitch of grains in semitones");
+    pitchSlider.setTooltip("Pitch of grains in semitones: -12 to +12 in Freeze mode, -12 to 0 in real-time input mode.");
     pitchSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(st)"));
     // Pitch Modulation Amount
     addAndMakeVisible(&pitchModSlider);
