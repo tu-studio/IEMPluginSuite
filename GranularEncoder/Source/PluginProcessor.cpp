@@ -470,7 +470,7 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     float windowGain = 0.0f;
     for(int i = 0; i < numSamplesWindow; i++)
     {
-        windowGain += meanWindowReadPtr[i];
+        windowGain += std::powf(meanWindowReadPtr[i], 2.0f);
     }
     windowGain = windowGain / static_cast<float>(numSamplesWindow);
 
