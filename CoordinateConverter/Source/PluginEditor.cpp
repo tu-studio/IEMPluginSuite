@@ -53,7 +53,7 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     gcCartesian.setText ("Cartesian Coordinates");
 
     addAndMakeVisible (gcRange);
-    gcRange.setText ("Normalization / juce::Range Settings");
+    gcRange.setText ("Normalization / Range Settings");
 
     addAndMakeVisible (gcReference);
     gcReference.setText ("Reference Position");
