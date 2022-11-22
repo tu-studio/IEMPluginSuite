@@ -256,6 +256,17 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     windowDecayModSlider.setTooltip("Spread amount for window decay time");
     windowAttackModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
+    // Mix between Dry Encoding and Granular Encoding
+    addAndMakeVisible(&windowDecaySlider);
+    mixAttachment.reset(new SliderAttachment(valueTreeState, "mix", mixSlider));
+    mixSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    mixSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    mixSlider.setReverse(false);
+    mixSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    mixSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+    mixSlider.setTooltip("Mix between standard encoding (dry) and granular encoding (wet).");
+    mixSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+
     // ====================== QUATERNION GROUP
     quatGroup.setText("Quaternions");
     quatGroup.setTextLabelPosition(juce::Justification::centredLeft);
@@ -361,7 +372,8 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     addAndMakeVisible(&lbWindowDecay);
     lbWindowDecay.setText("Decay");
 
-
+    addAndMakeVisible(&lbMix);
+    lbWindowDecay.setText("Mix");
 
     addAndMakeVisible(&lbW);
     lbW.setText("W");
@@ -474,7 +486,7 @@ void StereoEncoderAudioProcessorEditor::resized()
     sideBarArea.removeFromTop(20);
 
     // -------------- DeltaTime GrainLength Position Pitch ------------------
-    juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + 10 + 2 * rotSliderHeight + 2 * modSliderHeight +  2 * labelHeight));
+    juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + 10 + 2 * rotSliderHeight + 2 * modSliderHeight + 2 * labelHeight));
     grainGroup.setBounds(grainArea);
     grainArea.removeFromTop(25); // for box headline
 
@@ -512,11 +524,14 @@ void StereoEncoderAudioProcessorEditor::resized()
     sliderRowTwo.removeFromLeft(rotSliderSpacing);
     windowDecaySlider.setBounds(sliderRowTwo.removeFromLeft(rotSliderWidth));
     sliderRowTwo.removeFromLeft(rotSliderSpacing);
+    mixSlider.setBounds(sliderRowTwo.removeFromLeft(rotSliderWidth));
 
     labelRow = (grainArea.removeFromTop(labelHeight));
     lbWindowAttack.setBounds(labelRow.removeFromLeft(rotSliderWidth));
     labelRow.removeFromLeft(rotSliderSpacing - 5);
     lbWindowDecay.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
+    labelRow.removeFromLeft(rotSliderSpacing - 5);
+    lbMix.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
 
     juce::Rectangle<int> grainModAreaTwo(grainArea.removeFromTop(modSliderHeight));
     sliderRow = (grainModAreaTwo.removeFromTop(modSliderHeight));

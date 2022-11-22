@@ -301,19 +301,19 @@ juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer(float modW
     const float attackModPercentage = *windowAttackMod;
     const float decayModPercentage = *windowDecayMod;
 
-    float newAttackPercentage = attackPercentage + (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f * modWeight *attackModPercentage;
+    float newAttackPercentage = attackPercentage + (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f * modWeight * attackModPercentage;
     newAttackPercentage = std::min(newAttackPercentage, 50.0f);
     newAttackPercentage = std::max(newAttackPercentage, 0.0f);
 
-    float newDecayPercentage = decayPercentage + (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f * modWeight *decayModPercentage;
+    float newDecayPercentage = decayPercentage + (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f * modWeight * decayModPercentage;
     newDecayPercentage = std::min(newDecayPercentage, 50.0f);
     newDecayPercentage = std::max(newDecayPercentage, 0.0f);
 
     const int windowNumSamples = windowResolution;
     const int windowHalfNumSamples = windowResolution / 2;
 
-    const int windowAttackSamples =  newAttackPercentage / 100.0f * windowNumSamples;
-    const int windowDecaySamples =  newDecayPercentage / 100.0f * windowNumSamples;
+    const int windowAttackSamples = newAttackPercentage / 100.0f * windowNumSamples;
+    const int windowDecaySamples = newDecayPercentage / 100.0f * windowNumSamples;
 
     juce::AudioBuffer<float> windowBuffer;
     windowBuffer.setSize(1, windowResolution);
@@ -465,10 +465,10 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const float *rightInput = bufferCopy.getReadPointer(1);
 
     juce::AudioBuffer<float> meanWindow = getWindowBuffer(0.0f);
-    const float* meanWindowReadPtr = meanWindow.getReadPointer(0);
+    const float *meanWindowReadPtr = meanWindow.getReadPointer(0);
     const int numSamplesWindow = meanWindow.getNumSamples();
     float windowGain = 0.0f;
-    for(int i = 0; i < numSamplesWindow; i++)
+    for (int i = 0; i < numSamplesWindow; i++)
     {
         windowGain += std::powf(meanWindowReadPtr[i], 2.0f);
     }
