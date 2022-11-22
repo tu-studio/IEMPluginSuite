@@ -452,11 +452,13 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const float *leftIn = bufferCopy.getReadPointer(0);
     const float *rightIn = bufferCopy.getReadPointer(1);
     float mixAmount = *mix / 100.0f;
-    float dryAmount = (1 - mixAmount);
+    float sqrtMix = std::powf(mixAmount, 0.5f);
+    float dryFactor = 1 - sqrtMix;
+    float wetFactor = sqrtMix;
     for (int i = 0; i < nChOut; ++i)
     {
-        buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i] * dryAmount, SHL[i] * dryAmount);
-        buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryAmount, SHR[i] * dryAmount);
+        buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i] * dryFactor, SHL[i] * dryFactor);
+        buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryFactor, SHR[i] * dryFactor);
         // buffer.copyFrom(i, 0, leftIn, buffer.getNumSamples(), SHL[i] * dryAmount);
         // buffer.addFrom(i, 0, rightIn, buffer.getNumSamples(), SHR[i] * dryAmount);
     }
@@ -561,7 +563,7 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                     params.startOffsetInBlock = i;
                     params.channelWeights = channelWeights;
                     params.gainFactor = gainFactor;
-                    params.mix = mixAmount;
+                    params.mix = wetFactor;
 
                     params.windowBuffer = getWindowBuffer(1.0f);
                     grains[g].startGrain(params);
