@@ -257,7 +257,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     windowAttackModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // Mix between Dry Encoding and Granular Encoding
-    addAndMakeVisible(&windowDecaySlider);
+    addAndMakeVisible(&mixSlider);
     mixAttachment.reset(new SliderAttachment(valueTreeState, "mix", mixSlider));
     mixSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     mixSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
@@ -373,7 +373,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     lbWindowDecay.setText("Decay");
 
     addAndMakeVisible(&lbMix);
-    lbWindowDecay.setText("Mix");
+    lbMix.setText("Mix");
 
     addAndMakeVisible(&lbW);
     lbW.setText("W");
@@ -531,7 +531,7 @@ void StereoEncoderAudioProcessorEditor::resized()
     labelRow.removeFromLeft(rotSliderSpacing - 5);
     lbWindowDecay.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
     labelRow.removeFromLeft(rotSliderSpacing - 5);
-    lbMix.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
+    lbMix.setBounds(labelRow.removeFromLeft(rotSliderWidth));
 
     juce::Rectangle<int> grainModAreaTwo(grainArea.removeFromTop(modSliderHeight));
     sliderRow = (grainModAreaTwo.removeFromTop(modSliderHeight));

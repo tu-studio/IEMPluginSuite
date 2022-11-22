@@ -90,6 +90,8 @@ StereoEncoderAudioProcessor::StereoEncoderAudioProcessor()
     windowDecay = parameters.getRawParameterValue("windowDecay");
     windowDecayMod = parameters.getRawParameterValue("windowDecayMod");
 
+    mix = parameters.getRawParameterValue("mix");
+
     freeze = parameters.getRawParameterValue("freeze");
 
     highQuality = parameters.getRawParameterValue("highQuality");
@@ -424,39 +426,40 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const auto right = quatR.getCartesian();
 
     // conversion to spherical for high-quality mode
-    // float azimuthL, azimuthR, elevationL, elevationR;
-    // Conversions<float>::cartesianToSpherical(left, azimuthL, elevationL);
-    // Conversions<float>::cartesianToSpherical(right, azimuthR, elevationR);
+    float azimuthL, azimuthR, elevationL, elevationR;
+    Conversions<float>::cartesianToSpherical(left, azimuthL, elevationL);
+    Conversions<float>::cartesianToSpherical(right, azimuthR, elevationR);
 
     // SH eval and mix between grains and direct encoding of audio
-    // if (positionHasChanged.compareAndSetBool(false, true))
-    // {
-    //     smoothAzimuthL.setCurrentAndTargetValue(azimuthL);
-    //     smoothElevationL.setCurrentAndTargetValue(elevationL);
-    //     smoothAzimuthR.setCurrentAndTargetValue(azimuthR);
-    //     smoothElevationR.setCurrentAndTargetValue(elevationR);
+    if (positionHasChanged.compareAndSetBool(false, true))
+    {
+        smoothAzimuthL.setCurrentAndTargetValue(azimuthL);
+        smoothElevationL.setCurrentAndTargetValue(elevationL);
+        smoothAzimuthR.setCurrentAndTargetValue(azimuthR);
+        smoothElevationR.setCurrentAndTargetValue(elevationR);
 
-    //     SHEval(ambisonicOrder, left.x, left.y, left.z, SHL);
-    //     SHEval(ambisonicOrder, right.x, right.y, right.z, SHR);
+        SHEval(ambisonicOrder, left.x, left.y, left.z, SHL);
+        SHEval(ambisonicOrder, right.x, right.y, right.z, SHR);
 
-    //     if (*useSN3D > 0.5f)
-    //     {
-    //         juce::FloatVectorOperations::multiply(SHL, SHL, n3d2sn3d, nChOut);
-    //         juce::FloatVectorOperations::multiply(SHR, SHR, n3d2sn3d, nChOut);
-    //     }
-    // }
+        if (*useSN3D > 0.5f)
+        {
+            juce::FloatVectorOperations::multiply(SHL, SHL, n3d2sn3d, nChOut);
+            juce::FloatVectorOperations::multiply(SHR, SHR, n3d2sn3d, nChOut);
+        }
+    }
 
     // DRY PROCESSING
-    // const float *leftIn = bufferCopy.getReadPointer(0);
-    // const float *rightIn = bufferCopy.getReadPointer(1);
-    // float dryAmount = (1 - mixAmount);
-    // for (int i = 0; i < nChOut; ++i)
-    // {
-    //     // buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i]* dryAmount, SHL[i] * dryAmount);
-    //     // buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryAmount, SHR[i] * dryAmount);
-    //     buffer.copyFrom(i, 0, leftIn, buffer.getNumSamples(), SHL[i] * dryAmount);
-    //     buffer.addFrom(i, 0, rightIn, buffer.getNumSamples(), SHR[i] * dryAmount);
-    // }
+    const float *leftIn = bufferCopy.getReadPointer(0);
+    const float *rightIn = bufferCopy.getReadPointer(1);
+    float mixAmount = *mix / 100.0f;
+    float dryAmount = (1 - mixAmount);
+    for (int i = 0; i < nChOut; ++i)
+    {
+        buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i] * dryAmount, SHL[i] * dryAmount);
+        buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryAmount, SHR[i] * dryAmount);
+        // buffer.copyFrom(i, 0, leftIn, buffer.getNumSamples(), SHL[i] * dryAmount);
+        // buffer.addFrom(i, 0, rightIn, buffer.getNumSamples(), SHR[i] * dryAmount);
+    }
 
     // TEMPORAL PROCESSING
     // Fill circular buffer with audio input
@@ -477,11 +480,11 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     float gainFactor;
     if (*positionMod > 0.0f)
     {
-        gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength / windowGain), 1.0f);
+        gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength / windowGain), 1.0f) * 1.41f;
     }
     else
     {
-        gainFactor = juce::jmin(*deltaTime / *grainLength / windowGain, 1.0f);
+        gainFactor = juce::jmin(*deltaTime / *grainLength / windowGain, 1.0f) * 1.41f;
     }
 
     // switch (_currentWindowType)
@@ -893,6 +896,12 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "windowDecayMod", "Window Decay Mod", juce::CharPointer_UTF8(R"(%)"),
+        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+        [](float value)
+        { return juce::String(value, 1); },
+        nullptr));
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "mix", "Mix", juce::CharPointer_UTF8(R"(%)"),
         juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
         [](float value)
         { return juce::String(value, 1); },

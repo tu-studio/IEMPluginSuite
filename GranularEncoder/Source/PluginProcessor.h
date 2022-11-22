@@ -132,6 +132,8 @@ public:
     std::atomic<float> *windowDecay;
     std::atomic<float> *windowDecayMod;
 
+    std::atomic<float> *mix;
+
     std::atomic<float> *highQuality;
 
     std::atomic<float> *freeze;
@@ -190,8 +192,8 @@ private:
 
     WindowType _currentWindowType = WindowType::hann;
 
-    float mixAmount = 1.0f;
-    // juce::LinearSmoothedValue<float> gainFactor;
+    // float mixAmount = 1.0f;
+    //  juce::LinearSmoothedValue<float> gainFactor;
 
     juce::LinearSmoothedValue<float> smoothAzimuthL, smoothElevationL;
     juce::LinearSmoothedValue<float> smoothAzimuthR, smoothElevationR;
