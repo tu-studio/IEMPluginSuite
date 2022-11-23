@@ -32,7 +32,6 @@
 #include "../../resources/Conversions.h"
 #include "Grain.h"
 #include "Type.h"
-//#include <boost/random/beta_distribution.hpp>
 #include <random>
 
 // using boost::random::beta_distribution;
@@ -94,6 +93,7 @@ public:
     int getStartPositionCircBuffer() const;
     std::pair<int, float> getGrainLengthAndPitchFactor() const;
     int getDeltaTimeSamples();
+    bool getChannelToSeed();
 
     juce::Vector3D<float> posC, posL, posR;
 
@@ -133,6 +133,7 @@ public:
     std::atomic<float> *windowDecayMod;
 
     std::atomic<float> *mix;
+    std::atomic<float> *sourceProbability;
 
     std::atomic<float> *highQuality;
 
@@ -166,7 +167,8 @@ private:
     iem::Quaternion<float> quaternionDirection;
 
     juce::AudioBuffer<float> bufferCopy;
-    juce::AudioBuffer<float> grainOutBuffer;
+    juce::AudioBuffer<float> dryAmbiBuffer;
+    juce::AudioBuffer<float> wetAmbiBuffer;
 
     juce::AudioBuffer<float> circularBuffer;
     int circularBufferWriteHead;

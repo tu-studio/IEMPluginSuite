@@ -91,6 +91,7 @@ StereoEncoderAudioProcessor::StereoEncoderAudioProcessor()
     windowDecayMod = parameters.getRawParameterValue("windowDecayMod");
 
     mix = parameters.getRawParameterValue("mix");
+    sourceProbability = parameters.getRawParameterValue("sourceProbability");
 
     freeze = parameters.getRawParameterValue("freeze");
 
@@ -151,7 +152,6 @@ void StereoEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
     checkInputAndOutput(this, 2, *orderSetting, true);
 
     bufferCopy.setSize(2, samplesPerBlock);
-    grainOutBuffer.setSize(1, samplesPerBlock);
 
     if (mode != OperationMode::Freeze)
     {
@@ -402,6 +402,20 @@ int StereoEncoderAudioProcessor::getDeltaTimeSamples()
     return deltaTimeSamples;
 }
 
+bool StereoEncoderAudioProcessor::getChannelToSeed()
+{
+    float seedSetting = (*sourceProbability / 2.0f) + 0.5f;
+    float randomNumber = juce::Random::getSystemRandom().nextFloat();
+
+    bool seedLeft;
+    if (randomNumber > seedSetting)
+        seedLeft = true;
+    else
+        seedLeft = false;
+
+    return seedLeft;
+}
+
 void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
 {
     checkInputAndOutput(this, 2, *orderSetting);
@@ -414,7 +428,6 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
     for (int i = 0; i < totalNumInputChannels; ++i)
         bufferCopy.copyFrom(i, 0, buffer.getReadPointer(i), buffer.getNumSamples());
-    buffer.clear();
 
     // SPATIAL PROCESSING
     const float widthInRadiansQuarter{Conversions<float>::degreesToRadians(*width) / 4.0f};
@@ -455,15 +468,21 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     float sqrtMix = std::powf(mixAmount, 0.5f);
     float dryFactor = 1 - sqrtMix;
     float wetFactor = sqrtMix;
+    // buffer.makeCopyOf
+
+    // init dry and wet ambi buffers
+    buffer.clear();
+    dryAmbiBuffer.makeCopyOf(buffer);
+    wetAmbiBuffer.makeCopyOf(buffer);
+
+    // float w_channel_weight = SHL[0];
     for (int i = 0; i < nChOut; ++i)
     {
-        buffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i] * dryFactor, SHL[i] * dryFactor);
-        buffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i] * dryFactor, SHR[i] * dryFactor);
-        // buffer.copyFrom(i, 0, leftIn, buffer.getNumSamples(), SHL[i] * dryAmount);
-        // buffer.addFrom(i, 0, rightIn, buffer.getNumSamples(), SHR[i] * dryAmount);
+        dryAmbiBuffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHL[i], SHL[i]);
+        dryAmbiBuffer.addFromWithRamp(i, 0, rightIn, buffer.getNumSamples(), _SHR[i], SHR[i]);
     }
 
-    // TEMPORAL PROCESSING
+    // GRARNULAR TEMPORAL PROCESSING
     // Fill circular buffer with audio input
     // Try to start grains in loop
     const float *leftInput = bufferCopy.getReadPointer(0);
@@ -488,18 +507,6 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     {
         gainFactor = juce::jmin(*deltaTime / *grainLength / windowGain, 1.0f) * 1.41f;
     }
-
-    // switch (_currentWindowType)
-    // {
-    // default:
-    //     break;
-    // case WindowType::hann:
-    //     _currentWindow = &_hannWindowBuffer;
-    //     break;
-    // case WindowType::rectangular:
-    //     _currentWindow = &_rectWindowBuffer;
-    //     break;
-    // }
 
     bool freeze_bool;
     if (*freeze < 0.5f)
@@ -563,7 +570,8 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                     params.startOffsetInBlock = i;
                     params.channelWeights = channelWeights;
                     params.gainFactor = gainFactor;
-                    params.mix = wetFactor;
+                    params.mix = 1.0f;
+                    params.seedFromLeftCircBuffer = getChannelToSeed();
 
                     params.windowBuffer = getWindowBuffer(1.0f);
                     grains[g].startGrain(params);
@@ -591,12 +599,16 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     for (int g = 0; g < maxNumGrains; g++)
     {
         if (grains[g].isActive())
+        {
             numActiveGrains++;
+            grains[g].processBlock(wetAmbiBuffer, circularBuffer);
+        }
     }
 
-    for (int g = 0; g < maxNumGrains; g++)
+    for (int i = 0; i < nChOut; ++i)
     {
-        grains[g].processBlock(buffer, circularBuffer);
+        buffer.addFrom(i, 0, dryAmbiBuffer, i, 0, buffer.getNumSamples(), dryFactor);
+        buffer.addFrom(i, 0, wetAmbiBuffer, i, 0, buffer.getNumSamples(), wetFactor);
     }
 
     juce::FloatVectorOperations::copy(_SHL, SHL, nChOut);
@@ -905,6 +917,12 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "mix", "Mix", juce::CharPointer_UTF8(R"(%)"),
         juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+        [](float value)
+        { return juce::String(value, 1); },
+        nullptr));
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "sourceProbability", "Source Probability", juce::CharPointer_UTF8(R"()"),
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 0.0f,
         [](float value)
         { return juce::String(value, 1); },
         nullptr));

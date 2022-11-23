@@ -267,6 +267,17 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     mixSlider.setTooltip("Mix between standard encoding (dry) and granular encoding (wet).");
     mixSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
+    // Blend between seeding left or right channel (only relevant for stereo input)
+    addAndMakeVisible(&sourceSlider);
+    sourceAttachment.reset(new SliderAttachment(valueTreeState, "sourceProbability", sourceSlider));
+    sourceSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    sourceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    sourceSlider.setReverse(false);
+    sourceSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    sourceSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
+    sourceSlider.setTooltip("Probability to seed grains from left (-1) or right (+1) input channel (for stereo input).");
+    sourceSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
+
     // ====================== QUATERNION GROUP
     quatGroup.setText("Quaternions");
     quatGroup.setTextLabelPosition(juce::Justification::centredLeft);
@@ -374,6 +385,9 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
 
     addAndMakeVisible(&lbMix);
     lbMix.setText("Mix");
+
+    addAndMakeVisible(&lbSource);
+    lbSource.setText("Source");
 
     addAndMakeVisible(&lbW);
     lbW.setText("W");
@@ -525,6 +539,8 @@ void StereoEncoderAudioProcessorEditor::resized()
     windowDecaySlider.setBounds(sliderRowTwo.removeFromLeft(rotSliderWidth));
     sliderRowTwo.removeFromLeft(rotSliderSpacing);
     mixSlider.setBounds(sliderRowTwo.removeFromLeft(rotSliderWidth));
+    sliderRowTwo.removeFromLeft(rotSliderSpacing);
+    sourceSlider.setBounds(sliderRowTwo.removeFromLeft(rotSliderWidth));
 
     labelRow = (grainArea.removeFromTop(labelHeight));
     lbWindowAttack.setBounds(labelRow.removeFromLeft(rotSliderWidth));
@@ -532,6 +548,8 @@ void StereoEncoderAudioProcessorEditor::resized()
     lbWindowDecay.setBounds(labelRow.removeFromLeft(rotSliderWidth + 10));
     labelRow.removeFromLeft(rotSliderSpacing - 5);
     lbMix.setBounds(labelRow.removeFromLeft(rotSliderWidth));
+    labelRow.removeFromLeft(rotSliderSpacing);
+    lbSource.setBounds(labelRow.removeFromLeft(rotSliderWidth));
 
     juce::Rectangle<int> grainModAreaTwo(grainArea.removeFromTop(modSliderHeight));
     sliderRow = (grainModAreaTwo.removeFromTop(modSliderHeight));

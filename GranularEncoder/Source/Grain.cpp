@@ -39,6 +39,12 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 	const float *circularLeftChannel = circularBuffer.getReadPointer(0);
 	const float *circularRightChannel = circularBuffer.getReadPointer(1);
 
+	const float *circularBuffToSeed;
+	if (_params.seedFromLeftCircBuffer)
+		circularBuffToSeed = circularLeftChannel;
+	else
+		circularBuffToSeed = circularRightChannel;
+
 	const float *window_ptr = _params.windowBuffer.getReadPointer(0);
 	const int windowNumSamples = _params.windowBuffer.getNumSamples();
 
@@ -68,8 +74,8 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 				readIndexInt = readIndexInt - numSampCircBuffer;
 			if (readIndexIntNext >= numSampCircBuffer)
 				readIndexIntNext = readIndexIntNext - numSampCircBuffer;
-			float sampleIntPart = circularLeftChannel[readIndexInt];
-			float sampleFracPart = circularLeftChannel[readIndexIntNext] - sampleIntPart;
+			float sampleIntPart = circularBuffToSeed[readIndexInt];
+			float sampleFracPart = circularBuffToSeed[readIndexIntNext] - sampleIntPart;
 			float sampleValue = sampleIntPart + sampleFracWeight * sampleFracPart;
 
 			// Linear interpolation for grain window function
