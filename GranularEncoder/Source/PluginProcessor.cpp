@@ -349,10 +349,10 @@ juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer(float modW
 
 int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
 {
-    int startPositionCircBuffer = circularBufferWriteHead - juce::roundToInt(*position * lastSampleRate);
-    int startMod = juce::roundToInt(*positionMod / 100.0f * juce::Random::getSystemRandom().nextFloat() * (CIRC_BUFFER_SECONDS / 2.0f) * lastSampleRate);
-    // Unidirectional modulation of position (due to hard real-time constraint)
-    startPositionCircBuffer -= startMod;
+    float modulatedPosition = *position + (*positionMod * juce::Random::getSystemRandom().nextFloat());
+
+    //  Unidirectional modulation of seed index parameter
+    int startPositionCircBuffer = circularBufferWriteHead - juce::roundToInt(modulatedPosition * lastSampleRate);
     if (startPositionCircBuffer < 0)
     {
         startPositionCircBuffer += circularBufferLength;
@@ -869,10 +869,10 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         { return juce::String(value, 3); },
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
-        "positionMod", "Position Mod", juce::CharPointer_UTF8(R"(%)"),
-        juce::NormalisableRange<float>(1.0f, 100.0f, 0.1f), 5.0f,
+        "positionMod", "Position Mod", juce::CharPointer_UTF8(R"(s)"),
+        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 0.001f), 0.050f,
         [](float value)
-        { return juce::String(value, 1); },
+        { return juce::String(value, 3); },
         nullptr));
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
@@ -922,7 +922,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         "sourceProbability", "Source Probability", juce::CharPointer_UTF8(R"()"),
         juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 0.0f,
         [](float value)
-        { return juce::String(value, 1); },
+        { return juce::String(value, 2); },
         nullptr));
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
