@@ -465,10 +465,8 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const float *leftIn = bufferCopy.getReadPointer(0);
     const float *rightIn = bufferCopy.getReadPointer(1);
     float mixAmount = *mix / 100.0f;
-    float sqrtMix = std::powf(mixAmount, 0.5f);
-    float dryFactor = 1 - sqrtMix;
-    float wetFactor = sqrtMix;
-    // buffer.makeCopyOf
+    float dryFactor = std::powf(1 - mixAmount, 0.5f);
+    float wetFactor = std::powf(mixAmount, 0.5f);
 
     // init dry and wet ambi buffers
     buffer.clear();
@@ -819,7 +817,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "size", "Size", juce::CharPointer_UTF8(R"(°)"),
-        juce::NormalisableRange<float>(0.0f, 360.0f, 0.01f), 90.0f,
+        juce::NormalisableRange<float>(0.0f, 360.0f, 0.01f), 180.0f,
         [](float value)
         { return juce::String(value, 2); },
         nullptr));
@@ -840,7 +838,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "deltaTime", "Delta Time", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.001f, 0.5f, 0.0001f), 0.001f,
+        juce::NormalisableRange<float>(0.001f, 0.5f, 0.0001f), 0.005f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
@@ -872,7 +870,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "positionMod", "Position Mod", juce::CharPointer_UTF8(R"(%)"),
-        juce::NormalisableRange<float>(1.0f, 100.0f, 0.1f), 1.0f,
+        juce::NormalisableRange<float>(1.0f, 100.0f, 0.1f), 5.0f,
         [](float value)
         { return juce::String(value, 1); },
         nullptr));
@@ -916,7 +914,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "mix", "Mix", juce::CharPointer_UTF8(R"(%)"),
-        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 50.0f,
         [](float value)
         { return juce::String(value, 1); },
         nullptr));

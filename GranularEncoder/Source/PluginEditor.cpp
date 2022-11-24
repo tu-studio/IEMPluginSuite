@@ -80,7 +80,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     azimuthSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     azimuthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     azimuthSlider.setReverse(true);
-    azimuthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    azimuthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     azimuthSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
     azimuthSlider.setTooltip("Azimuth angle");
     azimuthSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(°)"));
@@ -89,7 +89,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     elevationAttachment.reset(new SliderAttachment(valueTreeState, "elevation", elevationSlider));
     elevationSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     elevationSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-    elevationSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
+    elevationSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     elevationSlider.setRotaryParameters(0.5 * juce::MathConstants<float>::pi, 2.5 * juce::MathConstants<float>::pi, false);
     elevationSlider.setTooltip("Elevation angle");
     elevationSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(°)"));
@@ -98,7 +98,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     shapeAttachment.reset(new SliderAttachment(valueTreeState, "shape", shapeSlider));
     shapeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     shapeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-    shapeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
+    shapeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     shapeSlider.setReverse(false);
     shapeSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     shapeSlider.setTooltip("Shape the grain distribution (circular-uniform-peaky)");
@@ -108,7 +108,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     sizeAttachment.reset(new SliderAttachment(valueTreeState, "size", sizeSlider));
     sizeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     sizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-    sizeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
+    sizeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     sizeSlider.setReverse(false);
     sizeSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     sizeSlider.setTooltip("Set the maximum spread of the grain distribution");
@@ -118,7 +118,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     rollAttachment.reset(new SliderAttachment(valueTreeState, "roll", rollSlider));
     rollSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     rollSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-    rollSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
+    rollSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     rollSlider.setReverse(false);
     rollSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
     rollSlider.setTooltip("Roll angle");
@@ -138,7 +138,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     deltaTimeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     deltaTimeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     deltaTimeSlider.setReverse(false);
-    deltaTimeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    deltaTimeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     deltaTimeSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     deltaTimeSlider.setTooltip("Time between grains");
     deltaTimeSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
@@ -148,7 +148,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     deltaTimeModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     deltaTimeModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     deltaTimeModSlider.setReverse(false);
-    deltaTimeModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    deltaTimeModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     deltaTimeModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     deltaTimeModSlider.setTooltip("Spread amount for the time between grains");
     deltaTimeModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -159,7 +159,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     grainLengthSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     grainLengthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     grainLengthSlider.setReverse(false);
-    grainLengthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    grainLengthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     grainLengthSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     grainLengthSlider.setTooltip("Length of grains");
     grainLengthSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
@@ -169,7 +169,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     grainLengthModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     grainLengthModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     grainLengthModSlider.setReverse(false);
-    grainLengthModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    grainLengthModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     grainLengthModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     grainLengthModSlider.setTooltip("Spread amount for the length of grains");
     grainLengthModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -180,7 +180,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     positionSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     positionSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     positionSlider.setReverse(false);
-    positionSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    positionSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     positionSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     positionSlider.setTooltip("Read position in the buffer (relative to write head)");
     positionSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(s)"));
@@ -190,7 +190,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     positionModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     positionModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     positionModSlider.setReverse(false);
-    positionModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    positionModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     positionModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     positionModSlider.setTooltip("Spread amount for the read position in the buffer");
     positionModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -201,7 +201,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     pitchSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     pitchSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     pitchSlider.setReverse(false);
-    pitchSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    pitchSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     pitchSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     pitchSlider.setTooltip("Pitch of grains in semitones: -12 to +12 in Freeze mode, -12 to 0 in real-time input mode.");
     pitchSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(st)"));
@@ -211,7 +211,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     pitchModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     pitchModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     pitchModSlider.setReverse(false);
-    pitchModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    pitchModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     pitchModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     pitchModSlider.setTooltip("Spread amount for the pitch of grains");
     pitchModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -222,7 +222,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     windowAttackSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     windowAttackSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     windowAttackSlider.setReverse(false);
-    windowAttackSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    windowAttackSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     windowAttackSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     windowAttackSlider.setTooltip("Window attack time in percent of grain length");
     windowAttackSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -231,7 +231,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     windowAttackModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     windowAttackModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     windowAttackModSlider.setReverse(false);
-    windowAttackModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    windowAttackModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     windowAttackModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     windowAttackModSlider.setTooltip("Spread amount for window attack time");
     windowAttackModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -242,7 +242,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     windowDecaySlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     windowDecaySlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     windowDecaySlider.setReverse(false);
-    windowDecaySlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    windowDecaySlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     windowDecaySlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     windowDecaySlider.setTooltip("Window decay time in percent of grain length");
     windowDecaySlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -251,7 +251,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     windowDecayModSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     windowDecayModSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     windowDecayModSlider.setReverse(false);
-    windowDecayModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    windowDecayModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     windowDecayModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     windowDecayModSlider.setTooltip("Spread amount for window decay time");
     windowAttackModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -262,7 +262,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     mixSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     mixSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     mixSlider.setReverse(false);
-    mixSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    mixSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     mixSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     mixSlider.setTooltip("Mix between standard encoding (dry) and granular encoding (wet).");
     mixSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -273,7 +273,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     sourceSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     sourceSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     sourceSlider.setReverse(false);
-    sourceSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    sourceSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     sourceSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     sourceSlider.setTooltip("Probability to seed grains from left (-1) or right (+1) input channel (for stereo input).");
     sourceSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
@@ -290,25 +290,25 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     qwAttachment.reset(new SliderAttachment(valueTreeState, "qw", qwSlider));
     qwSlider.setSliderStyle(juce::Slider::LinearHorizontal);
     qwSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 50, 15);
-    qwSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    qwSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
 
     addAndMakeVisible(&qxSlider);
     qxAttachment.reset(new SliderAttachment(valueTreeState, "qx", qxSlider));
     qxSlider.setSliderStyle(juce::Slider::LinearHorizontal);
     qxSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 50, 15);
-    qxSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    qxSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
 
     addAndMakeVisible(&qySlider);
     qyAttachment.reset(new SliderAttachment(valueTreeState, "qy", qySlider));
     qySlider.setSliderStyle(juce::Slider::LinearHorizontal);
     qySlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 50, 15);
-    qySlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    qySlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
 
     addAndMakeVisible(&qzSlider);
     qzAttachment.reset(new SliderAttachment(valueTreeState, "qz", qzSlider));
     qzSlider.setSliderStyle(juce::Slider::LinearHorizontal);
     qzSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 50, 15);
-    qzSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    qzSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
 
     // =========================== SETTINGS GROUP
     addAndMakeVisible(&settingsGroup);
@@ -322,7 +322,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     widthAttachment.reset(new SliderAttachment(valueTreeState, "width", widthSlider));
     widthSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     widthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-    widthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[3]);
+    widthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     widthSlider.setReverse(false);
     widthSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
     widthSlider.setTooltip("Stereo Width");
@@ -332,7 +332,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     addAndMakeVisible(tbFreeze);
     tbFreezeAttachment.reset(new ButtonAttachment(valueTreeState, "freeze", tbFreeze));
     tbFreeze.setButtonText("Freeze Buffer");
-    tbFreeze.setColour(juce::ToggleButton::tickColourId, juce::Colours::orange);
+    tbFreeze.setColour(juce::ToggleButton::tickColourId, juce::Colours::white);
     tbFreeze.setTooltip("Toggle to switch between a freezed audio buffer and realtime audio input.");
 
     addAndMakeVisible(&lbFreeze);
