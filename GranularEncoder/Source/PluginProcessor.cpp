@@ -393,7 +393,7 @@ std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor(
 int StereoEncoderAudioProcessor::getDeltaTimeSamples()
 {
     // Bidirectional modulation of deltaTime between grains
-    float deltaTimeModSeconds = *deltaTimeMod / 100.0f * (*deltaTime) * 2.0f * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
+    float deltaTimeModSeconds = *deltaTimeMod * 2.0f * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
     float newDeltaTime = *deltaTime + deltaTimeModSeconds;
     newDeltaTime = std::min(newDeltaTime, 0.5f);
     newDeltaTime = std::max(newDeltaTime, 0.001f);
@@ -838,15 +838,15 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "deltaTime", "Delta Time", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.001f, 0.5f, 0.0001f), 0.005f,
+        juce::NormalisableRange<float>(0.001f, 0.5f, 1e-6f), 0.005f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
-        "deltaTimeMod", "Delta Time Mod", juce::CharPointer_UTF8(R"(%)"),
-        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+        "deltaTimeMod", "Delta Time Mod", juce::CharPointer_UTF8(R"(s)"),
+        juce::NormalisableRange<float>(0.0f, 0.5f, 1e-6f), 0.0f,
         [](float value)
-        { return juce::String(value, 1); },
+        { return juce::String(value, 3); },
         nullptr));
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
@@ -864,13 +864,13 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "position", "Position", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 0.001f), 0.0f,
+        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f), 0.0f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "positionMod", "Position Mod", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 0.001f), 0.050f,
+        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f), 0.050f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
