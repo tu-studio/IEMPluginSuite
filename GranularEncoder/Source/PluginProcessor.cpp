@@ -676,6 +676,7 @@ void StereoEncoderAudioProcessor::getStateInformation(juce::MemoryBlock &destDat
     }
 
     state.setProperty("WriteHead", circularBufferWriteHead, nullptr);
+    state.setProperty("FreezeModeState", (int)mode, nullptr);
 
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
@@ -714,6 +715,7 @@ void StereoEncoderAudioProcessor::setStateInformation(const void *data, int size
             }
 
             circularBufferWriteHead = parameters.state.getProperty("WriteHead", 0);
+            mode = static_cast<OperationMode>((int)parameters.state.getProperty("FreezeModeState", 0));
         }
 }
 
