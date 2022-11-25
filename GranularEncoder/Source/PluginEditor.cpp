@@ -33,7 +33,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     // setSize(500, 325);
-    setSize(500, 490);
+    setSize(500, 470);
     setLookAndFeel(&globalLaF);
 
     // ==== SPHERE AND ELEMENTS ===============
@@ -150,7 +150,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     deltaTimeModSlider.setReverse(false);
     deltaTimeModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     deltaTimeModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    deltaTimeModSlider.setTooltip("Spread amount for the time between grains");
+    deltaTimeModSlider.setTooltip("Spread in percent of the current time between grains (bipolar)");
     deltaTimeModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // Grain Length
@@ -171,7 +171,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     grainLengthModSlider.setReverse(false);
     grainLengthModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     grainLengthModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    grainLengthModSlider.setTooltip("Spread amount for the length of grains");
+    grainLengthModSlider.setTooltip("Spread in percent of the current grain length (bipolar)");
     grainLengthModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // Buffer Position
@@ -203,7 +203,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     pitchSlider.setReverse(false);
     pitchSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     pitchSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    pitchSlider.setTooltip("Pitch of grains in semitones: -12 to +12 in Freeze mode, -12 to 0 in real-time input mode.");
+    pitchSlider.setTooltip("Pitch of grains in semitones: -12 to +12 in Freeze mode, -12 to 0 in real-time input mode");
     pitchSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(st)"));
     // Pitch Modulation Amount
     addAndMakeVisible(&pitchModSlider);
@@ -556,13 +556,16 @@ void StereoEncoderAudioProcessorEditor::resized()
     windowAttackModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
     sliderRow.removeFromLeft(rotSliderSpacing);
     windowDecayModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
+    sliderRow.removeFromLeft(rotSliderSpacing);
+    tbFreeze.setBounds(sliderRow.removeFromLeft(20));
+    // ButtonRow.removeFromLeft(1);
+    lbFreeze.setBounds(sliderRow.removeFromLeft(70));
 
     // FREEZE BUTTON
-    sideBarArea.removeFromTop(5);
-    juce::Rectangle<int> ButtonRow(sideBarArea.removeFromTop(20));
-    tbFreeze.setBounds(ButtonRow.removeFromLeft(20));
-    // ButtonRow.removeFromLeft(1);
-    lbFreeze.setBounds(ButtonRow.removeFromLeft(70));
+    // sideBarArea.removeFromTop(5);
+    // juce::Rectangle<int> ButtonRow(sideBarArea.removeFromTop(20));
+    // tbFreeze.setBounds(ButtonRow.removeFromLeft(20));
+    // lbFreeze.setBounds(ButtonRow.removeFromLeft(70));
 
     // ============== SIDEBAR LEFT ====================
     area.removeFromRight(10); // spacing

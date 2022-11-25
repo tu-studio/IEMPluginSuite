@@ -153,11 +153,11 @@ void StereoEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
 
     bufferCopy.setSize(2, samplesPerBlock);
 
-    if (mode != OperationMode::Freeze)
+    circularBuffer.setSize(2, juce::roundToInt(sampleRate * CIRC_BUFFER_SECONDS), true); // seconds long circular buffer
+    circularBufferLength = circularBuffer.getNumSamples();
+    if (*freeze < 0.5f) // if in real-time mode, clean up state before processing
     {
-        circularBuffer.setSize(2, juce::roundToInt(sampleRate * CIRC_BUFFER_SECONDS)); // seconds long circular buffer
         circularBufferWriteHead = 0;
-        circularBufferLength = circularBuffer.getNumSamples();
         circularBuffer.clear();
     }
 
@@ -364,7 +364,7 @@ int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
 std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor() const
 {
     // Bidirectional modulation of grain length
-    float grainLengthModSeconds = *grainLengthMod / 100.0f * (*grainLength) * 2 * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
+    float grainLengthModSeconds = *grainLengthMod / 100.0f * *grainLength * 2 * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
     float newGrainLengthSeconds = *grainLength + grainLengthModSeconds;
     newGrainLengthSeconds = std::min(newGrainLengthSeconds, 0.5f);
     newGrainLengthSeconds = std::max(newGrainLengthSeconds, 0.001f);
@@ -374,7 +374,7 @@ std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor(
 
     // Unidirectional modulation of pitch (due to hard real-time constraint)
     const float maxPitchModulation = 12.0f;
-    float pitchModSemitones = *pitchMod / 100.0f * maxPitchModulation * (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f;
+    float pitchModSemitones = *pitchMod * (juce::Random::getSystemRandom().nextFloat() - 0.5f) * 2.0f;
     float pitchToUse = *pitch - pitchModSemitones;
     if (mode != OperationMode::Freeze)
     {
@@ -393,7 +393,7 @@ std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor(
 int StereoEncoderAudioProcessor::getDeltaTimeSamples()
 {
     // Bidirectional modulation of deltaTime between grains
-    float deltaTimeModSeconds = *deltaTimeMod * 2.0f * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
+    float deltaTimeModSeconds = *deltaTimeMod / 100.0f * *deltaTime * 2.0f * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
     float newDeltaTime = *deltaTime + deltaTimeModSeconds;
     newDeltaTime = std::min(newDeltaTime, 0.5f);
     newDeltaTime = std::max(newDeltaTime, 0.001f);
@@ -667,6 +667,16 @@ void StereoEncoderAudioProcessor::getStateInformation(juce::MemoryBlock &destDat
     auto oscConfig = state.getOrCreateChildWithName("OSCConfig", nullptr);
     oscConfig.copyPropertiesFrom(oscParameterInterface.getConfig(), nullptr);
 
+    for (int i = 0; i < circularBuffer.getNumChannels(); i++)
+    {
+        juce::MemoryBlock channelMemory(circularBuffer.getReadPointer(i), circularBuffer.getNumSamples() * sizeof(float));
+        auto strXmlData = channelMemory.toBase64Encoding();
+        juce::String attribute_name = "CircularBufferChannel" + juce::String(i);
+        state.setProperty(attribute_name, strXmlData, nullptr);
+    }
+
+    state.setProperty("WriteHead", circularBufferWriteHead, nullptr);
+
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
 }
@@ -688,6 +698,22 @@ void StereoEncoderAudioProcessor::setStateInformation(const void *data, int size
 
             if (oscConfig.isValid())
                 oscParameterInterface.setConfig(oscConfig);
+
+            for (int i = 0; i < circularBuffer.getNumChannels(); i++)
+            {
+                juce::String attribute_name = "CircularBufferChannel" + juce::String(i);
+
+                if (parameters.state.hasProperty(attribute_name)) // legacy
+                {
+                    juce::String strXmlData = parameters.state.getProperty(attribute_name);
+                    juce::StringRef ref = juce::StringRef(strXmlData);
+                    juce::MemoryBlock channelMemory;
+                    channelMemory.fromBase64Encoding(strXmlData);
+                    circularBuffer.copyFrom(i, 0, static_cast<const float *>(channelMemory.getData()), circularBuffer.getNumSamples());
+                }
+            }
+
+            circularBufferWriteHead = parameters.state.getProperty("WriteHead", 0);
         }
 }
 
@@ -838,20 +864,20 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "deltaTime", "Delta Time", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.001f, 0.5f, 1e-6f), 0.005f,
+        juce::NormalisableRange<float>(0.001f, 0.5f, 1e-6f, 0.4f), 0.005f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
-        "deltaTimeMod", "Delta Time Mod", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.0f, 0.5f, 1e-6f), 0.0f,
+        "deltaTimeMod", "Delta Time Mod", juce::CharPointer_UTF8(R"(%)"),
+        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
         [](float value)
-        { return juce::String(value, 3); },
+        { return juce::String(value, 1); },
         nullptr));
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "grainLength", "Grain Length", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.001f, 0.500f, 0.0001f), 0.250f,
+        juce::NormalisableRange<float>(0.001f, 0.500f, 0.0001f, 0.4f), 0.250f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
@@ -877,15 +903,15 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "pitch", "Pitch", juce::CharPointer_UTF8(R"(st)"),
-        juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f), 0.0f,
+        juce::NormalisableRange<float>(-12.0f, 12.0f, 0.001f), 0.0f,
         [](float value)
         { return juce::String(value, 1); },
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
-        "pitchMod", "Pitch Mod", juce::CharPointer_UTF8(R"(%)"),
-        juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f,
+        "pitchMod", "Pitch Mod", juce::CharPointer_UTF8(R"(st)"),
+        juce::NormalisableRange<float>(0.0f, 12.0f, 0.001f, 0.4f), 0.0f,
         [](float value)
-        { return juce::String(value, 1); },
+        { return juce::String(value, 2); },
         nullptr));
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
