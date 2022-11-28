@@ -40,6 +40,7 @@ set (PLUGINS_TO_BUILD
 option (IEM_USE_SYSTEM_JUCE "Use JUCE found via CMake rather than the bundled one." OFF)
 option (IEM_BUILD_VST2 "Build VST2 version of the plug-ins." OFF)
 option (IEM_BUILD_VST3 "Build VST3 version of the plug-ins." ON)
+option (IEM_BUILD_VST2 "Build LV2 version of the plug-ins." OFF)
 option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." OFF)
 option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." ON)
 
@@ -99,6 +100,11 @@ endif()
 if (IEM_BUILD_VST3)
     message ("-- IEM: Building VST3 versions")
     list (APPEND IEM_FORMATS VST3)
+endif()
+
+if (IEM_BUILD_LV2)
+    message ("-- IEM: Building LV2 versions")
+    list (APPEND IEM_FORMATS LV2)
 endif()
 
 if (IEM_BUILD_STANDALONE)
