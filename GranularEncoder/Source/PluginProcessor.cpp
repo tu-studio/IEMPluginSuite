@@ -421,8 +421,8 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const float *leftIn = bufferCopy.getReadPointer(0);
     const float *rightIn = bufferCopy.getReadPointer(1);
     float mixAmount = *mix / 100.0f;
-    float dryFactor = std::pow(1 - mixAmount, 0.5f);
-    float wetFactor = std::pow(mixAmount, 0.5f);
+    float dryFactor = std::sqrt(1 - mixAmount);
+    float wetFactor = std::sqrt(mixAmount);
 
     for (int i = 0; i < nChOut; ++i)
     {
