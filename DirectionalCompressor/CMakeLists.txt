@@ -7,7 +7,8 @@ juce_add_plugin (DirectionalCompressor
     COMPANY_NAME "IEM"
     PRODUCT_NAME "DirectionalCompressor"
     FORMATS ${IEM_FORMATS}
-    VERSION "1.3.3")
+    VERSION "1.3.4"
+    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/DirectionalCompressor")
 
 
 juce_generate_juce_header (DirectionalCompressor)

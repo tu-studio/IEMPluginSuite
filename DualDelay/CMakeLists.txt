@@ -7,7 +7,8 @@ juce_add_plugin (DualDelay
     COMPANY_NAME "IEM"
     PRODUCT_NAME "DualDelay"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.5.1")
+    VERSION "0.5.2"
+    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/DualDelay")
 
 
 juce_generate_juce_header (DualDelay)

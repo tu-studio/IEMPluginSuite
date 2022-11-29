@@ -48,7 +48,7 @@ option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." ON)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Actual project configuration
-project (IEMPluginSuite VERSION 1.12.1 LANGUAGES C CXX)
+project (IEMPluginSuite VERSION 1.14.0 LANGUAGES C CXX)
 
 set_property (GLOBAL PROPERTY USE_FOLDERS YES)
 set_directory_properties (PROPERTIES JUCE_COPY_PLUGIN_AFTER_BUILD ON)

@@ -7,7 +7,8 @@ juce_add_plugin (DirectivityShaper
     COMPANY_NAME "IEM"
     PRODUCT_NAME "DirectivityShaper"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.8.3")
+    VERSION "0.8.4"
+    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/DirectivityShaper")
 
 
 juce_generate_juce_header (DirectivityShaper)

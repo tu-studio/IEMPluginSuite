@@ -7,7 +7,8 @@ juce_add_plugin (MultiBandCompressor
     COMPANY_NAME "IEM"
     PRODUCT_NAME "MultiBandCompressor"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.2.3")
+    VERSION "0.2.4"
+    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/MultiBandCompressor")
 
 
 juce_generate_juce_header (MultiBandCompressor)
