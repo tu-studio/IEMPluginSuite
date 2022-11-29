@@ -68,7 +68,6 @@ private:
 
     juce::GroupComponent quatGroup, ypGroup, grainGroup, settingsGroup;
     ReverseSlider azimuthSlider, elevationSlider, shapeSlider, sizeSlider, qwSlider, qxSlider, qySlider, qzSlider;
-    ReverseSlider rollSlider, widthSlider;
     ReverseSlider deltaTimeSlider, deltaTimeModSlider, grainLengthSlider, grainLengthModSlider;
     ReverseSlider positionSlider, positionModSlider, pitchSlider, pitchModSlider;
     ReverseSlider windowAttackSlider, windowAttackModSlider, windowDecaySlider, windowDecayModSlider;
@@ -77,8 +76,6 @@ private:
 
     SpherePanner sphere;
     SpherePanner::AzimuthElevationParameterElement centerElement;
-    SpherePanner::RollWidthParameterElement leftElement;
-    SpherePanner::RollWidthParameterElement rightElement;
 
     std::unique_ptr<SliderAttachment> qwAttachment;
     std::unique_ptr<SliderAttachment> qxAttachment;
@@ -121,7 +118,6 @@ private:
 
     // labels
     SimpleLabel lbAzimuth, lbElevation, lbShape, lbSize, lbW, lbX, lbY, lbZ;
-    SimpleLabel lbRoll, lblWidth; // legacy
     SimpleLabel lbDeltaTime, lbDeltaTimeMod, lbGrainLength, lbGrainLengthMod;
     SimpleLabel lbPosition, lbPositionMod, lbPitch, lbPitchMod;
     SimpleLabel lbWindowAttack, lbWindowAttackMod, lbWindowDecay, lbWindowDecayMod;

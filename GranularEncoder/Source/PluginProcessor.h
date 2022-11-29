@@ -31,7 +31,6 @@
 
 #include "../../resources/Conversions.h"
 #include "Grain.h"
-#include "Type.h"
 #include <random>
 
 // using boost::random::beta_distribution;
@@ -40,6 +39,7 @@
 #define maxNumGrains 512
 #define windowResolution 1024
 #define CIRC_BUFFER_SECONDS 4.0f
+#define GUI_SKEW 0.5f
 
 //==============================================================================
 /**
@@ -157,10 +157,8 @@ private:
     //==============================================================================
     bool processorUpdatingParams;
 
-    float SHL[64];
-    float SHR[64];
-    float _SHL[64];
-    float _SHR[64];
+    float SHC[64];
+    float _SHC[64];
 
     juce::Atomic<bool> positionHasChanged = true;
 
@@ -174,11 +172,7 @@ private:
     int circularBufferWriteHead;
     int circularBufferLength;
 
-    // deltaTimeSec = 0.100;
     int deltaTimeSamples = 0;
-
-    // float grainLengthSec = 0.250;
-    int grainLengthSamples = 0;
     float lastSampleRate;
 
     int grainTimeCounter = 0;
@@ -186,19 +180,6 @@ private:
     Grain grains[maxNumGrains];
 
     float _grainSH[maxNumGrains][64];
-    // int maxNumGrains;
-
-    juce::AudioBuffer<float> _hannWindowBuffer;
-    juce::AudioBuffer<float> _rectWindowBuffer;
-    juce::AudioBuffer<float> *_currentWindow;
-
-    WindowType _currentWindowType = WindowType::hann;
-
-    // float mixAmount = 1.0f;
-    //  juce::LinearSmoothedValue<float> gainFactor;
-
-    juce::LinearSmoothedValue<float> smoothAzimuthL, smoothElevationL;
-    juce::LinearSmoothedValue<float> smoothAzimuthR, smoothElevationR;
 
     std::mt19937 rng;
 

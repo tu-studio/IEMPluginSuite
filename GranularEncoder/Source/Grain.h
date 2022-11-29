@@ -11,7 +11,6 @@ public:
 		float pitchReadFactor = 1.0f;
 		std::array<float, 64> channelWeights;
 		float gainFactor = 1.0f;
-		float mix = 1.0f;
 		bool seedFromLeftCircBuffer = true;
 		juce::AudioBuffer<float> windowBuffer;
 	};

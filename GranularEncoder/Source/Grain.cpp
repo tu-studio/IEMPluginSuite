@@ -103,7 +103,7 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
 	const float *outputBufferReadPtr = _outputBuffer.getReadPointer(0);
 	for (int ch = 0; ch < nChOut; ++ch)
 	{
-		buffer.addFrom(ch, 0, outputBufferReadPtr, buffer.getNumSamples(), _params.channelWeights[ch] * _params.mix * _params.gainFactor);
+		buffer.addFrom(ch, 0, outputBufferReadPtr, buffer.getNumSamples(), _params.channelWeights[ch] * _params.gainFactor);
 	}
 
 	_blockCounter++;

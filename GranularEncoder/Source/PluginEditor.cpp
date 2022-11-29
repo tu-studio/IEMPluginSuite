@@ -26,9 +26,7 @@
 //==============================================================================
 StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncoderAudioProcessor &p, juce::AudioProcessorValueTreeState &vts)
     : juce::AudioProcessorEditor(&p), footer(p.getOSCParameterInterface()), processor(p), valueTreeState(vts),
-      centerElement(*valueTreeState.getParameter("azimuth"), valueTreeState.getParameterRange("azimuth"), *valueTreeState.getParameter("elevation"), valueTreeState.getParameterRange("elevation")),
-      leftElement(centerElement, *valueTreeState.getParameter("roll"), valueTreeState.getParameterRange("roll"), *valueTreeState.getParameter("width"), valueTreeState.getParameterRange("width")),
-      rightElement(centerElement, *valueTreeState.getParameter("roll"), valueTreeState.getParameterRange("roll"), *valueTreeState.getParameter("width"), valueTreeState.getParameterRange("width"))
+      centerElement(*valueTreeState.getParameter("azimuth"), valueTreeState.getParameterRange("azimuth"), *valueTreeState.getParameter("elevation"), valueTreeState.getParameterRange("elevation"))
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -40,14 +38,6 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     addAndMakeVisible(&sphere);
     sphere.addListener(this);
 
-    leftElement.setColour(juce::Colours::aqua);
-    sphere.addElement(&leftElement);
-    leftElement.setLabel("L");
-
-    rightElement.setColour(juce::Colours::red);
-    rightElement.setMirrored(true);
-    sphere.addElement(&rightElement);
-    rightElement.setLabel("R");
 
     centerElement.setColour(juce::Colours::white);
     sphere.addElement(&centerElement);
@@ -113,16 +103,6 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     sizeSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
     sizeSlider.setTooltip("Set the maximum spread of the grain distribution");
     sizeSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(°)"));
-
-    addAndMakeVisible(&rollSlider);
-    rollAttachment.reset(new SliderAttachment(valueTreeState, "roll", rollSlider));
-    rollSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    rollSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-    rollSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
-    rollSlider.setReverse(false);
-    rollSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
-    rollSlider.setTooltip("Roll angle");
-    rollSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(°)"));
 
     // ======================== TEMPORAL GRAIN PARAMETERS GROUP
     grainGroup.setText("Grain Parameters");
@@ -318,16 +298,6 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     settingsGroup.setColour(juce::GroupComponent::textColourId, juce::Colours::white);
     settingsGroup.setVisible(true);
 
-    addAndMakeVisible(&widthSlider);
-    widthAttachment.reset(new SliderAttachment(valueTreeState, "width", widthSlider));
-    widthSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    widthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
-    widthSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
-    widthSlider.setReverse(false);
-    widthSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
-    widthSlider.setTooltip("Stereo Width");
-    // widthSlider.setEnabled(*processor.inputMode >= 0.5f);
-
     // FREEZE STATE
     addAndMakeVisible(tbFreeze);
     tbFreezeAttachment.reset(new ButtonAttachment(valueTreeState, "freeze", tbFreeze));
@@ -350,12 +320,6 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
 
     addAndMakeVisible(&lbSize);
     lbSize.setText("Size");
-
-    addAndMakeVisible(&lbRoll);
-    lbRoll.setText("Roll");
-
-    addAndMakeVisible(&lblWidth);
-    lblWidth.setText("Width");
 
     addAndMakeVisible(&lbDeltaTime);
     lbDeltaTime.setText("Delta-t");
@@ -409,11 +373,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
 
 void StereoEncoderAudioProcessorEditor::mouseWheelOnSpherePannerMoved(SpherePanner *sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel)
 {
-    if (event.mods.isCommandDown() && event.mods.isAltDown())
-        rollSlider.mouseWheelMove(event, wheel);
-    else if (event.mods.isShiftDown())
-        widthSlider.mouseWheelMove(event, wheel);
-    else if (event.mods.isAltDown())
+    if (event.mods.isAltDown())
         elevationSlider.mouseWheelMove(event, wheel);
     else if (event.mods.isCommandDown())
         azimuthSlider.mouseWheelMove(event, wheel);
