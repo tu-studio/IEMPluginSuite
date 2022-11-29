@@ -38,7 +38,7 @@
 #define ProcessorClass StereoEncoderAudioProcessor
 #define maxNumGrains 512
 #define windowResolution 1024
-#define CIRC_BUFFER_SECONDS 4.0f
+#define CIRC_BUFFER_SECONDS 8.0f
 #define GUI_SKEW 0.5f
 
 //==============================================================================

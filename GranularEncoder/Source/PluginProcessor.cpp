@@ -421,8 +421,8 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     const float *leftIn = bufferCopy.getReadPointer(0);
     const float *rightIn = bufferCopy.getReadPointer(1);
     float mixAmount = *mix / 100.0f;
-    float dryFactor = std::powf(1 - mixAmount, 0.5f);
-    float wetFactor = std::powf(mixAmount, 0.5f);
+    float dryFactor = std::pow(1 - mixAmount, 0.5f);
+    float wetFactor = std::pow(mixAmount, 0.5f);
 
     for (int i = 0; i < nChOut; ++i)
     {
@@ -442,7 +442,7 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     float windowGain = 0.0f;
     for (int i = 0; i < numSamplesWindow; i++)
     {
-        windowGain += std::powf(meanWindowReadPtr[i], 2.0f);
+        windowGain += std::pow(meanWindowReadPtr[i], 2.0f);
     }
     windowGain = windowGain / static_cast<float>(numSamplesWindow);
 
@@ -841,13 +841,13 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "position", "Position", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f), 0.0f,
+        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f, GUI_SKEW), 0.0f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "positionMod", "Position Mod", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f), 0.050f,
+        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f, GUI_SKEW), 0.050f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
