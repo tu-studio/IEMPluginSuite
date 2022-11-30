@@ -95,6 +95,14 @@ public:
     int getDeltaTimeSamples();
     bool getChannelToSeed();
 
+    bool getFreezeGUIBool();
+    void initializeModeTransition(bool freeze);
+    void finishModeTransition();
+
+    float getMeanWindowGain();
+
+    void writeCircularBufferToDisk(juce::String filename); // Debug function
+
     juce::Vector3D<float> posC, posL, posR;
 
     juce::Atomic<bool> updatedPositionData;

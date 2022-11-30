@@ -147,7 +147,7 @@ void StereoEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
         circularBuffer.clear();
     }
 
-    writeGainCircBuffer.reset(sampleRate, 0.1f);
+    writeGainCircBuffer.reset(sampleRate, 0.005f);
     writeGainCircBuffer.setCurrentAndTargetValue(1.0f);
 
     lastSampleRate = sampleRate;
@@ -385,6 +385,79 @@ bool StereoEncoderAudioProcessor::getChannelToSeed()
     return seedLeft;
 }
 
+bool StereoEncoderAudioProcessor::getFreezeGUIBool()
+{
+    if (*freeze < 0.5f)
+        return false;
+    else
+        return true;
+}
+
+void StereoEncoderAudioProcessor::initializeModeTransition(bool freeze)
+{
+    if (mode == OperationMode::Realtime && freeze)
+    {
+        mode = OperationMode::ToFreeze;
+        writeGainCircBuffer.setTargetValue(0.0f);
+    }
+    if (mode == OperationMode::Freeze && !freeze)
+    {
+        mode = OperationMode::ToRealtime;
+        writeGainCircBuffer.setTargetValue(1.0f);
+    }
+}
+
+void StereoEncoderAudioProcessor::finishModeTransition()
+{
+    if (mode == OperationMode::ToFreeze && !writeGainCircBuffer.isSmoothing())
+    {
+        // Reached Freeze State
+        mode = OperationMode::Freeze;
+        // writeCircularBufferToDisk("/Users/stefanriedel/Documents/CircularBufferFreezed.wav");
+    }
+    if (mode == OperationMode::ToRealtime && !writeGainCircBuffer.isSmoothing())
+    {
+        // Reached Realtime State
+        mode = OperationMode::Realtime;
+    }
+}
+
+float StereoEncoderAudioProcessor::getMeanWindowGain()
+{
+    juce::AudioBuffer<float> meanWindow = getWindowBuffer(0.0f);
+    const float *meanWindowReadPtr = meanWindow.getReadPointer(0);
+    const int numSamplesWindow = meanWindow.getNumSamples();
+    float windowGain = 0.0f;
+    for (int i = 0; i < numSamplesWindow; i++)
+    {
+        windowGain += std::pow(meanWindowReadPtr[i], 2.0f);
+    }
+    windowGain = windowGain / static_cast<float>(numSamplesWindow);
+
+    return windowGain;
+}
+
+void StereoEncoderAudioProcessor::writeCircularBufferToDisk(juce::String filename)
+{
+    // Just a debug function to write buffer state to disk
+    float *writePointerLeft = circularBuffer.getWritePointer(0);
+    float *writePointerRight = circularBuffer.getWritePointer(1);
+
+    writePointerLeft[circularBufferWriteHead] = 0.5f;
+    writePointerRight[circularBufferWriteHead] = -0.5f;
+
+    juce::WavAudioFormat format;
+    std::unique_ptr<juce::AudioFormatWriter> writer;
+    writer.reset(format.createWriterFor(new juce::FileOutputStream(filename),
+                                        lastSampleRate,
+                                        circularBuffer.getNumChannels(),
+                                        24,
+                                        {},
+                                        0));
+    if (writer != nullptr)
+        writer->writeFromAudioSampleBuffer(circularBuffer, 0, circularBuffer.getNumSamples());
+}
+
 void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
 {
     checkInputAndOutput(this, 2, *orderSetting);
@@ -417,13 +490,13 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     dryAmbiBuffer.makeCopyOf(buffer);
     wetAmbiBuffer.makeCopyOf(buffer);
 
-    // DRY PROCESSING
-    const float *leftIn = bufferCopy.getReadPointer(0);
-    const float *rightIn = bufferCopy.getReadPointer(1);
     float mixAmount = *mix / 100.0f;
     float dryFactor = std::sqrt(1 - mixAmount);
     float wetFactor = std::sqrt(mixAmount);
 
+    // DRY PROCESSING
+    const float *leftIn = bufferCopy.getReadPointer(0);
+    const float *rightIn = bufferCopy.getReadPointer(1);
     for (int i = 0; i < nChOut; ++i)
     {
         dryAmbiBuffer.copyFromWithRamp(i, 0, leftIn, buffer.getNumSamples(), _SHC[i], SHC[i]);
@@ -431,77 +504,46 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     }
 
     // GRANULAR PROCESSING
-    // Fill circular buffer with audio input
-    // Try to start grains in loop
-    const float *leftInput = bufferCopy.getReadPointer(0);
-    const float *rightInput = bufferCopy.getReadPointer(1);
-
-    juce::AudioBuffer<float> meanWindow = getWindowBuffer(0.0f);
-    const float *meanWindowReadPtr = meanWindow.getReadPointer(0);
-    const int numSamplesWindow = meanWindow.getNumSamples();
-    float windowGain = 0.0f;
-    for (int i = 0; i < numSamplesWindow; i++)
-    {
-        windowGain += std::pow(meanWindowReadPtr[i], 2.0f);
-    }
-    windowGain = windowGain / static_cast<float>(numSamplesWindow);
-
+    float windowGain = getMeanWindowGain();
     float gainFactor;
     if (*positionMod > 0.0f)
     {
+        // Formula for uncorrelated grain signals
         gainFactor = juce::jmin(std::sqrt(*deltaTime / *grainLength / windowGain), 1.0f) * 1.41f;
     }
     else
     {
+        // More gain reduction if grains are highly correlated
         gainFactor = juce::jmin(*deltaTime / *grainLength / windowGain, 1.0f) * 1.41f;
     }
 
     // Get GUI state of Freeze button
-    bool freeze_bool;
-    if (*freeze < 0.5f)
-        freeze_bool = false;
-    else
-        freeze_bool = true;
-
-    if (mode == OperationMode::Realtime && freeze_bool)
-    {
-        mode = OperationMode::ToFreeze;
-        writeGainCircBuffer.setTargetValue(0.0f);
-    }
-    if (mode == OperationMode::Freeze && !freeze_bool)
-    {
-        mode = OperationMode::ToRealtime;
-        writeGainCircBuffer.setTargetValue(1.0f);
-    }
+    bool freeze_gui_state = getFreezeGUIBool();
+    initializeModeTransition(freeze_gui_state);
 
     for (int i = 0; i < buffer.getNumSamples(); i++)
     {
         float nextCircBuffGain = writeGainCircBuffer.getNextValue();
-        if (mode == OperationMode::ToFreeze && nextCircBuffGain < 0.001f) // Reached Freeze State
-        {
-            mode = OperationMode::Freeze;
-        }
-        if (mode == OperationMode::ToRealtime && nextCircBuffGain > 0.999f) // Reached Realtime State
-        {
-            mode = OperationMode::Realtime;
-        }
+        finishModeTransition();
 
         if (mode != OperationMode::Freeze)
         {
-            circularBuffer.setSample(0, circularBufferWriteHead, leftInput[i] * nextCircBuffGain);
-            circularBuffer.setSample(1, circularBufferWriteHead, rightInput[i] * nextCircBuffGain);
+            // Fill circular buffer with audio input
+            circularBuffer.setSample(0, circularBufferWriteHead, leftIn[i] * nextCircBuffGain);
+            circularBuffer.setSample(1, circularBufferWriteHead, rightIn[i] * nextCircBuffGain);
         }
 
         if (grainTimeCounter >= deltaTimeSamples)
         {
+            // start a grain at this sample time stamp (index i)
             grainTimeCounter = 0;
-            // reset (possibly modulated) deltaTime after a grain is started
+            // reset (possibly modulating) deltaTime after a grain is started
             deltaTimeSamples = getDeltaTimeSamples();
-            // start a grain at this sample time stamp
             for (int g = 0; g < maxNumGrains; g++)
             {
                 if (!grains[g].isActive())
                 {
+                    // find the first free grain processor and pass parameters
                     juce::Vector3D<float> grainDir = getRandomGrainDirection();
                     SHEval(ambisonicOrder, grainDir.x, grainDir.y, grainDir.z, _grainSH[g]);
                     if (*useSN3D > 0.5f)
@@ -529,12 +571,13 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         }
         else
         {
+            // if it's not time for a grain yet, just increment the counter
             grainTimeCounter++;
         }
 
-        // increment circular buffer write head
         if (mode != OperationMode::Freeze)
         {
+            // increment circular buffer write head and wrap if needed
             circularBufferWriteHead++;
             if (circularBufferWriteHead >= circularBufferLength)
             {
@@ -543,6 +586,7 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         }
     }
 
+    // Render all active grains
     int numActiveGrains = 0;
     for (int g = 0; g < maxNumGrains; g++)
     {
@@ -841,13 +885,13 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "position", "Position", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f, GUI_SKEW), 0.0f,
+        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f), 0.0f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
     params.push_back(OSCParameterInterface::createParameterTheOldWay(
         "positionMod", "Position Mod", juce::CharPointer_UTF8(R"(s)"),
-        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f, GUI_SKEW), 0.050f,
+        juce::NormalisableRange<float>(0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f, GUI_SKEW), 0.05f,
         [](float value)
         { return juce::String(value, 3); },
         nullptr));
