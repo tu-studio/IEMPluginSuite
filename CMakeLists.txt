@@ -22,6 +22,7 @@ set (PLUGINS_TO_BUILD
         DualDelay
         EnergyVisualizer
         FdnReverb
+        GranularEncoder
         MatrixMultiplier
         MultiBandCompressor
         MultiEncoder
