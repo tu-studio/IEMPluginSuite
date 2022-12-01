@@ -141,7 +141,18 @@ clang-format:
     paths:
       - clang-format.log
 
+# some static code analysers
+# currently run in 'pre-check' stage, as the build stage takes so long
+sast:
+  stage: pre-check
   allow_failure: true
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  before_script:
+    # we really do not want to run sast on JUCE (not our business)
+    - rm -rf JUCE $(git submodule status | awk '{print $2}')
+include:
+- template: Security/SAST.gitlab-ci.yml
 
 linux:
   extends:
