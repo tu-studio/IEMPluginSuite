@@ -45,8 +45,6 @@ variables:
   image: ubuntu:focal
   tags:
     - docker
-  variables:
-    PKGLIBS: jack fftw3f
   script:
 # install dependencies
     - apt-get update -y
