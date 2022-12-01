@@ -139,6 +139,9 @@ void GranularEncoderAudioProcessor::prepareToPlay(double sampleRate, int samples
 
     bufferCopy.setSize(2, samplesPerBlock);
 
+    dryAmbiBuffer.setSize(64, samplesPerBlock);
+    wetAmbiBuffer.setSize(64, samplesPerBlock);
+
     circularBuffer.setSize(2, juce::roundToInt(sampleRate * CIRC_BUFFER_SECONDS), true); // seconds long circular buffer
     circularBufferLength = circularBuffer.getNumSamples();
     if (*freeze < 0.5f) // if in real-time mode, clean up state before processing
@@ -486,8 +489,8 @@ void GranularEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffe
 
     // init dry and wet ambi buffers
     buffer.clear();
-    dryAmbiBuffer.makeCopyOf(buffer);
-    wetAmbiBuffer.makeCopyOf(buffer);
+    dryAmbiBuffer.clear();
+    wetAmbiBuffer.clear();
 
     float mixAmount = *mix / 100.0f;
     float dryFactor = std::sqrt(1 - mixAmount);

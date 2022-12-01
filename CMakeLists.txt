@@ -13,27 +13,27 @@ cmake_minimum_required (VERSION 3.13)
 # The following list will hold all the plug-ins which will be built.
 # Simply comment them out if you want to build only a subset of the plug-ins.
 set (PLUGINS_TO_BUILD
-       AllRADecoder
-       BinauralDecoder
-       CoordinateConverter
-       DirectionalCompressor
-       DirectivityShaper
-       DistanceCompensator
-       DualDelay
-       EnergyVisualizer
-       FdnReverb
-       GranularEncoder
-       MatrixMultiplier
-       MultiBandCompressor
-       MultiEncoder
-       MultiEQ
-       OmniCompressor
-       ProbeDecoder
-       RoomEncoder
-       SceneRotator
-       SimpleDecoder
-       StereoEncoder
-       ToolBox
+        AllRADecoder
+        BinauralDecoder
+        CoordinateConverter
+        DirectionalCompressor
+        DirectivityShaper
+        DistanceCompensator
+        DualDelay
+        EnergyVisualizer
+        FdnReverb
+        GranularEncoder
+        MatrixMultiplier
+        MultiBandCompressor
+        MultiEncoder
+        MultiEQ
+        OmniCompressor
+        ProbeDecoder
+        RoomEncoder
+        SceneRotator
+        SimpleDecoder
+        StereoEncoder
+        ToolBox
     )
 
 # The following options let you select the plug-ins formats you want to build.
