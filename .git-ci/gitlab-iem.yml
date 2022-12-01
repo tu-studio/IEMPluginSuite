@@ -51,12 +51,9 @@ variables:
 # install dependencies
     - apt-get update -y
     - DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends xvfb xauth curl unzip build-essential ca-certificates wget
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends xvfb xauth curl unzip build-essential ca-certificates wget cmake
     - DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libasound2-dev libfreetype6-dev libcurl4-gnutls-dev libgl1-mesa-dev libx11-dev libxext-dev libxinerama-dev libxrandr-dev libgtk-3-dev
     - DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libjack-dev libfftw3-dev
-# install cmake
-    - wget https://github.com/Kitware/CMake/releases/download/v3.15.7/cmake-3.15.7-Linux-x86_64.sh
-    - sh cmake-3.15.7-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir
     - cmake --version
 # get VST2SDK
     - .git-ci/getvst.sh
