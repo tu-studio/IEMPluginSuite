@@ -1,18 +1,17 @@
-
-juce_add_plugin (EnergyVisualizer
+juce_add_plugin (PluginTemplate
     PLUGIN_MANUFACTURER_CODE IEMA
-    PLUGIN_CODE EnVi
+    PLUGIN_CODE PlTe
     ICON_BIG "../resources/Standalone/IEMPluginSuiteSmall.png"
     ICON_SMALL "../resources/Standalone/IEMPluginSuiteSmall.png"
     COMPANY_NAME "IEM"
-    PRODUCT_NAME "EnergyVisualizer"
+    PRODUCT_NAME "PluginTemplate"
     FORMATS ${IEM_FORMATS}
-    VERSION "1.0.3")
+    VERSION "0.0.1")
 
 
-juce_generate_juce_header (EnergyVisualizer)
+juce_generate_juce_header(PluginTemplate)
 
-target_sources (EnergyVisualizer PRIVATE
+target_sources(PluginTemplate PRIVATE
     Source/PluginEditor.cpp
     Source/PluginEditor.h
     Source/PluginProcessor.cpp
@@ -26,9 +25,10 @@ target_sources (EnergyVisualizer PRIVATE
     ../resources/OSC/OSCUtilities.h
 
     ../resources/efficientSHvanilla.cpp
+
     )
 
-target_compile_definitions (EnergyVisualizer PRIVATE
+target_compile_definitions(PluginTemplate PRIVATE
     JUCE_USE_CURL=0
     JUCE_WEB_BROWSER=0
     JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1
@@ -40,9 +40,9 @@ target_compile_definitions (EnergyVisualizer PRIVATE
     JUCE_DISPLAY_SPLASH_SCREEN=0
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
-target_include_directories (EnergyVisualizer PRIVATE Source)
+target_include_directories(PluginTemplate PRIVATE Source)
 
-target_link_libraries (EnergyVisualizer PRIVATE
+target_link_libraries(PluginTemplate PRIVATE
     LAF_fonts
     juce::juce_audio_utils
     juce::juce_audio_plugin_client

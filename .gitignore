@@ -1,7 +1,6 @@
 ###########
 # Filetypes
 ###########
-
 *.log
 *.asv
 *.vscode
@@ -18,4 +17,8 @@ src
 VST
 VST3
 Standalone
-fftw/
+
+#############
+# macOS Stuff
+#############
+.DS_Store
