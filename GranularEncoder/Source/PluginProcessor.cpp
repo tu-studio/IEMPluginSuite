@@ -1,8 +1,8 @@
 /*
  ==============================================================================
  This file is part of the IEM plug-in suite.
- Author: Daniel Rudrich
- Copyright (c) 2017 - Institute of Electronic Music and Acoustics (IEM)
+ Author: Stefan Riedel
+ Copyright (c) 2022 - Institute of Electronic Music and Acoustics (IEM)
  https://iem.at
 
  The IEM plug-in suite is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-StereoEncoderAudioProcessor::StereoEncoderAudioProcessor()
+GranularEncoderAudioProcessor::GranularEncoderAudioProcessor()
     : AudioProcessorBase(
 #ifndef JucePlugin_PreferredChannelConfigurations
           BusesProperties()
@@ -104,36 +104,36 @@ StereoEncoderAudioProcessor::StereoEncoderAudioProcessor()
     juce::FloatVectorOperations::clear(SHC, 64);
 }
 
-StereoEncoderAudioProcessor::~StereoEncoderAudioProcessor() = default;
+GranularEncoderAudioProcessor::~GranularEncoderAudioProcessor() = default;
 
 //==============================================================================
 
-int StereoEncoderAudioProcessor::getNumPrograms()
+int GranularEncoderAudioProcessor::getNumPrograms()
 {
     return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
     // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int StereoEncoderAudioProcessor::getCurrentProgram()
+int GranularEncoderAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void StereoEncoderAudioProcessor::setCurrentProgram(int index)
+void GranularEncoderAudioProcessor::setCurrentProgram(int index)
 {
 }
 
-const juce::String StereoEncoderAudioProcessor::getProgramName(int index)
+const juce::String GranularEncoderAudioProcessor::getProgramName(int index)
 {
     return juce::String();
 }
 
-void StereoEncoderAudioProcessor::changeProgramName(int index, const juce::String &newName)
+void GranularEncoderAudioProcessor::changeProgramName(int index, const juce::String &newName)
 {
 }
 
 //==============================================================================
-void StereoEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void GranularEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     checkInputAndOutput(this, 2, *orderSetting, true);
 
@@ -167,13 +167,13 @@ void StereoEncoderAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
     positionHasChanged = true; // just to be sure
 }
 
-void StereoEncoderAudioProcessor::releaseResources()
+void GranularEncoderAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
-inline void StereoEncoderAudioProcessor::updateQuaternions()
+inline void GranularEncoderAudioProcessor::updateQuaternions()
 {
     float ypr[3];
     ypr[0] = Conversions<float>::degreesToRadians(*azimuth);
@@ -190,7 +190,7 @@ inline void StereoEncoderAudioProcessor::updateQuaternions()
     processorUpdatingParams = false;
 }
 
-void StereoEncoderAudioProcessor::updateEuler()
+void GranularEncoderAudioProcessor::updateEuler()
 {
     float ypr[3];
     quaternionDirection = iem::Quaternion<float>(*qw, *qx, *qy, *qz);
@@ -205,7 +205,7 @@ void StereoEncoderAudioProcessor::updateEuler()
     processorUpdatingParams = false;
 }
 
-juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
+juce::Vector3D<float> GranularEncoderAudioProcessor::getRandomGrainDirection()
 {
     float shape_abs = std::abs(*shape);
     float shape_param = std::pow(2, shape_abs);
@@ -222,7 +222,7 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
 
     // Beta distribution to control shape of rotationally symmetric distribution around centerDir
     jassert(shape_param >= 1.0f);
-    // beta_distribution<float> dist(shape, shape);
+    // beta_distribution<float> dist(shape, shape); // -> realized with std::gamma_distribution
     std::gamma_distribution<float> dist1(shape_param, 1.0f);
     std::gamma_distribution<float> dist2(shape_param, 1.0f);
     float gamma1 = dist1(rng);
@@ -230,7 +230,6 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
     float eps = 1e-16f;
     float beta_val = (gamma1 + eps) / (gamma1 + gamma2 + eps);
 
-    // float sym_beta_sample = abs(dist(rng) - 0.5f) * 2.0f;
     float sym_beta_sample;
     if (*shape < 0.0f)
         sym_beta_sample = 1.0f - abs(beta_val - 0.5f) * 2.0f;
@@ -264,7 +263,7 @@ juce::Vector3D<float> StereoEncoderAudioProcessor::getRandomGrainDirection()
     return vec;
 }
 
-juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer(float modWeight)
+juce::AudioBuffer<float> GranularEncoderAudioProcessor::getWindowBuffer(float modWeight)
 {
     const float attackPercentage = *windowAttack;
     const float decayPercentage = *windowDecay;
@@ -316,7 +315,7 @@ juce::AudioBuffer<float> StereoEncoderAudioProcessor::getWindowBuffer(float modW
     return windowBuffer;
 }
 
-int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
+int GranularEncoderAudioProcessor::getStartPositionCircBuffer() const
 {
     float modulatedPosition = *position + (*positionMod * juce::Random::getSystemRandom().nextFloat());
 
@@ -330,7 +329,7 @@ int StereoEncoderAudioProcessor::getStartPositionCircBuffer() const
     return startPositionCircBuffer;
 }
 
-std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor() const
+std::pair<int, float> GranularEncoderAudioProcessor::getGrainLengthAndPitchFactor() const
 {
     // Bidirectional modulation of grain length
     float grainLengthModSeconds = *grainLengthMod / 100.0f * *grainLength * 2 * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
@@ -359,7 +358,7 @@ std::pair<int, float> StereoEncoderAudioProcessor::getGrainLengthAndPitchFactor(
     return std::make_pair(grainLengthSamples, pitchReadFactor);
 }
 
-int StereoEncoderAudioProcessor::getDeltaTimeSamples()
+int GranularEncoderAudioProcessor::getDeltaTimeSamples()
 {
     // Bidirectional modulation of deltaTime between grains
     float deltaTimeModSeconds = *deltaTimeMod / 100.0f * *deltaTime * 2.0f * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
@@ -371,7 +370,7 @@ int StereoEncoderAudioProcessor::getDeltaTimeSamples()
     return deltaTimeSamples;
 }
 
-bool StereoEncoderAudioProcessor::getChannelToSeed()
+bool GranularEncoderAudioProcessor::getChannelToSeed()
 {
     float seedSetting = (*sourceProbability / 2.0f) + 0.5f;
     float randomNumber = juce::Random::getSystemRandom().nextFloat();
@@ -385,7 +384,7 @@ bool StereoEncoderAudioProcessor::getChannelToSeed()
     return seedLeft;
 }
 
-bool StereoEncoderAudioProcessor::getFreezeGUIBool()
+bool GranularEncoderAudioProcessor::getFreezeGUIBool()
 {
     if (*freeze < 0.5f)
         return false;
@@ -393,7 +392,7 @@ bool StereoEncoderAudioProcessor::getFreezeGUIBool()
         return true;
 }
 
-void StereoEncoderAudioProcessor::initializeModeTransition(bool freeze)
+void GranularEncoderAudioProcessor::initializeModeTransition(bool freeze)
 {
     if (mode == OperationMode::Realtime && freeze)
     {
@@ -407,7 +406,7 @@ void StereoEncoderAudioProcessor::initializeModeTransition(bool freeze)
     }
 }
 
-void StereoEncoderAudioProcessor::finishModeTransition()
+void GranularEncoderAudioProcessor::finishModeTransition()
 {
     if (mode == OperationMode::ToFreeze && !writeGainCircBuffer.isSmoothing())
     {
@@ -422,7 +421,7 @@ void StereoEncoderAudioProcessor::finishModeTransition()
     }
 }
 
-float StereoEncoderAudioProcessor::getMeanWindowGain()
+float GranularEncoderAudioProcessor::getMeanWindowGain()
 {
     juce::AudioBuffer<float> meanWindow = getWindowBuffer(0.0f);
     const float *meanWindowReadPtr = meanWindow.getReadPointer(0);
@@ -437,28 +436,28 @@ float StereoEncoderAudioProcessor::getMeanWindowGain()
     return windowGain;
 }
 
-void StereoEncoderAudioProcessor::writeCircularBufferToDisk(juce::String filename)
-{
-    // Just a debug function to write buffer state to disk
-    float *writePointerLeft = circularBuffer.getWritePointer(0);
-    float *writePointerRight = circularBuffer.getWritePointer(1);
+// void GranularEncoderAudioProcessor::writeCircularBufferToDisk(juce::String filename)
+// {
+//     // Just a debug function to write buffer state to disk
+//     float *writePointerLeft = circularBuffer.getWritePointer(0);
+//     float *writePointerRight = circularBuffer.getWritePointer(1);
 
-    writePointerLeft[circularBufferWriteHead] = 0.5f;
-    writePointerRight[circularBufferWriteHead] = -0.5f;
+//     writePointerLeft[circularBufferWriteHead] = 0.5f;
+//     writePointerRight[circularBufferWriteHead] = -0.5f;
 
-    juce::WavAudioFormat format;
-    std::unique_ptr<juce::AudioFormatWriter> writer;
-    writer.reset(format.createWriterFor(new juce::FileOutputStream(filename),
-                                        lastSampleRate,
-                                        circularBuffer.getNumChannels(),
-                                        24,
-                                        {},
-                                        0));
-    if (writer != nullptr)
-        writer->writeFromAudioSampleBuffer(circularBuffer, 0, circularBuffer.getNumSamples());
-}
+//     juce::WavAudioFormat format;
+//     std::unique_ptr<juce::AudioFormatWriter> writer;
+//     writer.reset(format.createWriterFor(new juce::FileOutputStream(filename),
+//                                         lastSampleRate,
+//                                         circularBuffer.getNumChannels(),
+//                                         24,
+//                                         {},
+//                                         0));
+//     if (writer != nullptr)
+//         writer->writeFromAudioSampleBuffer(circularBuffer, 0, circularBuffer.getNumSamples());
+// }
 
-void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
+void GranularEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
 {
     checkInputAndOutput(this, 2, *orderSetting);
 
@@ -607,17 +606,17 @@ void StereoEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 }
 
 //==============================================================================
-bool StereoEncoderAudioProcessor::hasEditor() const
+bool GranularEncoderAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor *StereoEncoderAudioProcessor::createEditor()
+juce::AudioProcessorEditor *GranularEncoderAudioProcessor::createEditor()
 {
-    return new StereoEncoderAudioProcessorEditor(*this, parameters);
+    return new GranularEncoderAudioProcessorEditor(*this, parameters);
 }
 
-void StereoEncoderAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue)
+void GranularEncoderAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue)
 {
     if (!processorUpdatingParams)
     {
@@ -653,7 +652,7 @@ void StereoEncoderAudioProcessor::parameterChanged(const juce::String &parameter
 }
 
 //==============================================================================
-void StereoEncoderAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
+void GranularEncoderAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
     auto state = parameters.copyState();
 
@@ -675,7 +674,7 @@ void StereoEncoderAudioProcessor::getStateInformation(juce::MemoryBlock &destDat
     copyXmlToBinary(*xml, destData);
 }
 
-void StereoEncoderAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
+void GranularEncoderAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
     if (xmlState.get() != nullptr)
@@ -714,7 +713,7 @@ void StereoEncoderAudioProcessor::setStateInformation(const void *data, int size
 
 //==============================================================================
 
-const bool StereoEncoderAudioProcessor::processNotYetConsumedOSCMessage(const juce::OSCMessage &message)
+const bool GranularEncoderAudioProcessor::processNotYetConsumedOSCMessage(const juce::OSCMessage &message)
 {
     juce::String prefix("/" + juce::String(JucePlugin_Name));
     if (!message.getAddressPattern().toString().startsWith(prefix))
@@ -744,7 +743,7 @@ const bool StereoEncoderAudioProcessor::processNotYetConsumedOSCMessage(const ju
 }
 
 //==============================================================================
-std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProcessor::createParameterLayout()
+std::vector<std::unique_ptr<juce::RangedAudioParameter>> GranularEncoderAudioProcessor::createParameterLayout()
 {
     // add your audio parameters here
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
@@ -972,5 +971,5 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> StereoEncoderAudioProce
 // This creates new instances of the plugin..
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
-    return new StereoEncoderAudioProcessor();
+    return new GranularEncoderAudioProcessor();
 }

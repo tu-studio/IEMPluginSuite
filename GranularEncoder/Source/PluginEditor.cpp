@@ -1,8 +1,8 @@
 /*
  ==============================================================================
  This file is part of the IEM plug-in suite.
- Author: Daniel Rudrich
- Copyright (c) 2017 - Institute of Electronic Music and Acoustics (IEM)
+ Author: Stefan Riedel
+ Copyright (c) 2022 - Institute of Electronic Music and Acoustics (IEM)
  https://iem.at
 
  The IEM plug-in suite is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncoderAudioProcessor &p, juce::AudioProcessorValueTreeState &vts)
+GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(GranularEncoderAudioProcessor &p, juce::AudioProcessorValueTreeState &vts)
     : juce::AudioProcessorEditor(&p), footer(p.getOSCParameterInterface()), processor(p), valueTreeState(vts),
       centerElement(*valueTreeState.getParameter("azimuth"), valueTreeState.getParameterRange("azimuth"), *valueTreeState.getParameter("elevation"), valueTreeState.getParameterRange("elevation"))
 {
@@ -37,7 +37,6 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     // ==== SPHERE AND ELEMENTS ===============
     addAndMakeVisible(&sphere);
     sphere.addListener(this);
-
 
     centerElement.setColour(juce::Colours::white);
     sphere.addElement(&centerElement);
@@ -371,7 +370,7 @@ StereoEncoderAudioProcessorEditor::StereoEncoderAudioProcessorEditor(StereoEncod
     startTimer(20);
 }
 
-void StereoEncoderAudioProcessorEditor::mouseWheelOnSpherePannerMoved(SpherePanner *sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel)
+void GranularEncoderAudioProcessorEditor::mouseWheelOnSpherePannerMoved(SpherePanner *sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel)
 {
     if (event.mods.isAltDown())
         elevationSlider.mouseWheelMove(event, wheel);
@@ -379,18 +378,18 @@ void StereoEncoderAudioProcessorEditor::mouseWheelOnSpherePannerMoved(SpherePann
         azimuthSlider.mouseWheelMove(event, wheel);
 }
 
-StereoEncoderAudioProcessorEditor::~StereoEncoderAudioProcessorEditor()
+GranularEncoderAudioProcessorEditor::~GranularEncoderAudioProcessorEditor()
 {
     setLookAndFeel(nullptr);
 }
 
 //==============================================================================
-void StereoEncoderAudioProcessorEditor::paint(juce::Graphics &g)
+void GranularEncoderAudioProcessorEditor::paint(juce::Graphics &g)
 {
     g.fillAll(globalLaF.ClBackground);
 }
 
-void StereoEncoderAudioProcessorEditor::timerCallback()
+void GranularEncoderAudioProcessorEditor::timerCallback()
 {
     // === update titleBar widgets according to available input/output channel counts
     title.setMaxSize(processor.getMaxSize());
@@ -403,7 +402,7 @@ void StereoEncoderAudioProcessorEditor::timerCallback()
     }
 }
 
-void StereoEncoderAudioProcessorEditor::resized()
+void GranularEncoderAudioProcessorEditor::resized()
 {
     const int leftRightMargin = 30;
     const int headerHeight = 60;
@@ -560,7 +559,7 @@ void StereoEncoderAudioProcessorEditor::resized()
     quatArea.removeFromTop(sliderSpacing);
 }
 
-bool StereoEncoderAudioProcessorEditor::keyPressed(const juce::KeyPress &key, juce::Component *originatingComponent)
+bool GranularEncoderAudioProcessorEditor::keyPressed(const juce::KeyPress &key, juce::Component *originatingComponent)
 {
     DBG("Key pressed: " << key.getKeyCode());
 

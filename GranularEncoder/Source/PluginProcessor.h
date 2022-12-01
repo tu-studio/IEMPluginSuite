@@ -1,8 +1,8 @@
 /*
  ==============================================================================
  This file is part of the IEM plug-in suite.
- Author: Daniel Rudrich
- Copyright (c) 2017 - Institute of Electronic Music and Acoustics (IEM)
+ Author: Stefan Riedel
+ Copyright (c) 2022 - Institute of Electronic Music and Acoustics (IEM)
  https://iem.at
 
  The IEM plug-in suite is free software: you can redistribute it and/or modify
@@ -33,9 +33,7 @@
 #include "Grain.h"
 #include <random>
 
-// using boost::random::beta_distribution;
-
-#define ProcessorClass StereoEncoderAudioProcessor
+#define ProcessorClass GranularEncoderAudioProcessor
 #define maxNumGrains 512
 #define windowResolution 1024
 #define CIRC_BUFFER_SECONDS 8.0f
@@ -44,15 +42,15 @@
 //==============================================================================
 /**
  */
-class StereoEncoderAudioProcessor : public AudioProcessorBase<IOTypes::AudioChannels<2>, IOTypes::Ambisonics<>>
+class GranularEncoderAudioProcessor : public AudioProcessorBase<IOTypes::AudioChannels<2>, IOTypes::Ambisonics<>>
 {
 public:
     constexpr static int numberOfInputChannels = 2;
     constexpr static int numberOfOutputChannels = 64;
 
     //==============================================================================
-    StereoEncoderAudioProcessor();
-    ~StereoEncoderAudioProcessor();
+    GranularEncoderAudioProcessor();
+    ~GranularEncoderAudioProcessor();
 
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
@@ -101,7 +99,7 @@ public:
 
     float getMeanWindowGain();
 
-    void writeCircularBufferToDisk(juce::String filename); // Debug function
+    // void writeCircularBufferToDisk(juce::String filename); // Debug function
 
     juce::Vector3D<float> posC, posL, posR;
 
@@ -194,5 +192,5 @@ private:
     juce::SmoothedValue<float> writeGainCircBuffer = 1.0f;
     OperationMode mode = OperationMode::Realtime;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoEncoderAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEncoderAudioProcessor)
 };

@@ -1,3 +1,25 @@
+/*
+ ==============================================================================
+ This file is part of the IEM plug-in suite.
+ Author: Stefan Riedel
+ Copyright (c) 2022 - Institute of Electronic Music and Acoustics (IEM)
+ https://iem.at
+
+ The IEM plug-in suite is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ The IEM plug-in suite is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this software.  If not, see <https://www.gnu.org/licenses/>.
+ ==============================================================================
+ */
+
 #include "Grain.h"
 
 Grain::Grain()
@@ -113,27 +135,3 @@ bool Grain::isActive() const
 {
 	return _isActive;
 };
-
-/*void Grain::processSample(juce::AudioBuffer<float>& buffer, const float* circularLeftChannel, const float* circularRightChannel, int numSampCircBuffer, float *channelWeights, float mix, float gainFactor, int bufferIndex)
-{
-	if (!_isActive)
-		return;
-
-	int nChOut = buffer.getNumChannels();
-
-	if (_currentIndex < _grainLengthSamples) // grain still needs a sample
-	{
-		int readIndex = (_startIndexCircularBuffer + _currentIndex) % numSampCircBuffer;
-
-		for (int ch = 0; ch < nChOut; ++ch)
-		{
-			buffer.addSample(ch, bufferIndex, 1.0f*circularLeftChannel[readIndex] * channelWeights[ch] * mix * gainFactor);
-		}
-		_currentIndex++;
-	}
-	else
-	{
-		_isActive = false;
-		return;
-	}
-};*/

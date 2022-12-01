@@ -1,8 +1,8 @@
 /*
  ==============================================================================
  This file is part of the IEM plug-in suite.
- Author: Daniel Rudrich
- Copyright (c) 2017 - Institute of Electronic Music and Acoustics (IEM)
+ Author: Stefan Riedel
+ Copyright (c) 2022 - Institute of Electronic Music and Acoustics (IEM)
  https://iem.at
 
  The IEM plug-in suite is free software: you can redistribute it and/or modify
@@ -36,14 +36,14 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
  */
-class StereoEncoderAudioProcessorEditor : public juce::AudioProcessorEditor,
-                                          private juce::Timer,
-                                          public SpherePanner::Listener,
-                                          private juce::KeyListener
+class GranularEncoderAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                            private juce::Timer,
+                                            public SpherePanner::Listener,
+                                            private juce::KeyListener
 {
 public:
-    StereoEncoderAudioProcessorEditor(StereoEncoderAudioProcessor &, juce::AudioProcessorValueTreeState &);
-    ~StereoEncoderAudioProcessorEditor();
+    GranularEncoderAudioProcessorEditor(GranularEncoderAudioProcessor &, juce::AudioProcessorValueTreeState &);
+    ~GranularEncoderAudioProcessorEditor();
 
     //==============================================================================
     void paint(juce::Graphics &) override;
@@ -63,7 +63,7 @@ private:
 
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    StereoEncoderAudioProcessor &processor;
+    GranularEncoderAudioProcessor &processor;
     juce::AudioProcessorValueTreeState &valueTreeState;
 
     juce::GroupComponent quatGroup, ypGroup, grainGroup, settingsGroup;
@@ -127,5 +127,5 @@ private:
     SimpleLabel lbFreeze;
     std::unique_ptr<ButtonAttachment> tbFreezeAttachment;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoEncoderAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEncoderAudioProcessorEditor)
 };
