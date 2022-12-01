@@ -1,5 +1,11 @@
 # gitlab-ci configuration for the IEM Plugin Suite
 
+stages:
+  - pre-check
+  - build
+  - test
+  - deploy
+
 variables:
 ## leave this uncommented to build all projects (except _PluginTemplate)
   #PROJECTS: AllRADecoder BinauralDecoder CoordinateConverter DirectionalCompressor DirectivityShaper DistanceCompensator DualDelay EnergyVisualizer FdnReverb MatrixMultiplier MultiBandCompressor MultiEncoder MultiEQ OmniCompressor ProbeDecoder RoomEncoder SceneRotator SimpleDecoder StereoEncoder ToolBox
