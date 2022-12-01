@@ -10,7 +10,7 @@ variables:
 ###################################################
 # cleanup after the job (e.g. rename files for the artifacts...)
 .after_script:
-  - test -d IEM && find IEM -type f -exec file {} +
+  - test ! -d IEM || find IEM -type f -exec file {} +
   - find DualDelay/Builds/ -type f -exec file {} +
 
 ###################################################
@@ -108,7 +108,7 @@ variables:
     - cd build
     - cmake ..
     - cmake --build . --target ALL_BUILD --config Release
-    - test -z "${PROJECTS}" && PROJECTS=$(make showprojects)
+    - test -n "${PROJECTS}" || PROJECTS=$(make showprojects)
     - make system CONFIG=$CONFIG BITS=$BITS PROJUCER="/c/JUCE/Projucer.exe"
     - make CONFIG=$CONFIG BITS=$BITS PROJUCER="/c/JUCE/Projucer.exe" PROJECTS="${PROJECTS}" remove_intermediates=yes
 # collect binaries for artifacts
