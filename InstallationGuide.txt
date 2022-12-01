@@ -3,7 +3,7 @@ INSTALLATION GUIDE
 To install the plug-ins, simply move the ‚IEM‘ folder containing the VST-plug-ins to your VST plug-in folder. That folder is usually located here:
 
 macOS: /Library/Audio/Plug-Ins/VST or ~/Library/Audio/Plug-Ins/VST
-windows: C:\Programm Files\Steinberg\VstPlugins
+windows: C:\Program Files\Steinberg\VstPlugins
 Linux: /usr/lib/lxvst or /usr/local/lib/lxvst
 
 You might need to restart your DAW before being able to use the plug-ins.

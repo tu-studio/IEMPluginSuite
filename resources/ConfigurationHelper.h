@@ -596,7 +596,7 @@ public:
 
         for (juce::ValueTree::Iterator it = loudspeakers.begin() ; it != loudspeakers.end(); ++it)
         {
-            auto* loudspeaker = new juce::DynamicObject(); // loudspeaker which get's added to the loudspeakerArray juce::var
+            auto* loudspeaker = new juce::DynamicObject(); // loudspeaker which gets added to the loudspeakerArray juce::var
 
             loudspeaker->setProperty ("Azimuth", (*it).getProperty ("Azimuth"));
             loudspeaker->setProperty ("Elevation", (*it).getProperty ("Elevation"));

@@ -27,7 +27,7 @@
 
 namespace MailBox
 {
-    struct Message { // could become a reference counted object and Display should check regulary if its the only one who holds this reference -> delete
+    struct Message { // could become a reference counted object and Display should check regularly if its the only one who holds this reference -> delete
         juce::String headline = "No Message available";
         juce::String text = "";
         juce::Colour messageColour = juce::Colours::lightgrey;

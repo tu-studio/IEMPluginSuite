@@ -151,7 +151,7 @@ public:
     virtual ~OSCMessageInterceptor() = default;
 
     /**
-     This method is exptected to return true, if the juce::OSCMessage is considered to have been consumed, and should not be passed on.
+     This method is expected to return true, if the juce::OSCMessage is considered to have been consumed, and should not be passed on.
      */
     virtual inline const bool interceptOSCMessage (juce::OSCMessage &message)
     {
