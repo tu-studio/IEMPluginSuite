@@ -117,7 +117,32 @@ variables:
 
 ###################################################
 # expand the templates to real jobs
-#
+
+# check for coding-style compliance
+clang-format:
+  stage: pre-check
+  image: alpine:latest
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  script:
+    - apk add clang-extra-tools git
+    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format -i {} \;
+    - git diff --exit-code > clang-format.log
+    # cleanup, if 'git diff' did not complain
+    - rm clang-format.log
+  after_script:
+    - |
+      if test -f clang-format.log; then
+        echo "Check the clang-format.log artifact for differences..."
+      fi
+  allow_failure: true
+  artifacts:
+    when: on_failure
+    paths:
+      - clang-format.log
+
+  allow_failure: true
+
 linux:
   extends:
     - .artifacts
