@@ -618,7 +618,7 @@ juce::Result AllRADecoderAudioProcessor::checkLayout()
 
         if (normals[i] * a < 0.001f) // origin is not within hull
         {
-            return juce::Result::fail("ERROR 4: juce::Point of origin is not within the convex hull. Try adding imaginary loudspeakers.");
+            return juce::Result::fail("ERROR 4: Point of origin is not within the convex hull. Try adding imaginary loudspeakers.");
         }
 
         const int numberOfImaginaryLspsInTriangle = (int) imaginaryFlags[points[tri.a].lspNum] + (int) imaginaryFlags[points[tri.b].lspNum] + (int) imaginaryFlags[points[tri.c].lspNum];
