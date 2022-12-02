@@ -160,7 +160,7 @@ void MultiEncoderAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, 
     const int nChIn = juce::jmin(buffer.getNumChannels(), input.getSize());
     const int ambisonicOrder = output.getOrder();
 
-    if (*analyzeRMS > 0.5f)
+    if (*analyzeRMS > 0.5f && ! isNonRealtime())
     {
         const float oneMinusTimeConstant = 1.0f - timeConstant;
         for (int ch = 0; ch < nChIn; ++ch)
