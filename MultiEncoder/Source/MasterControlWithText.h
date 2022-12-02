@@ -21,16 +21,13 @@
  */
 
 #pragma once
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/customComponents/ReverseSlider.h"
-
+#include "../JuceLibraryCode/JuceHeader.h"
 
 class MasterControlWithText : public juce::Component
 {
 public:
-    MasterControlWithText (juce::OwnedArray<ReverseSlider>& sliderArray) : elements (sliderArray)
-    {
-    }
+    MasterControlWithText (juce::OwnedArray<ReverseSlider>& sliderArray) : elements (sliderArray) {}
 
     void setText (juce::String newText)
     {
@@ -38,15 +35,9 @@ public:
         repaint();
     }
 
-    void mouseEnter (const juce::MouseEvent& e) override
-    {
-        repaint();
-    }
+    void mouseEnter (const juce::MouseEvent& e) override { repaint(); }
 
-    void mouseExit (const juce::MouseEvent& e) override
-    {
-        repaint();
-    }
+    void mouseExit (const juce::MouseEvent& e) override { repaint(); }
 
     void mouseMove (const juce::MouseEvent& e) override
     {
@@ -81,7 +72,6 @@ public:
         }
     }
 
-
     void mouseWheelMove (const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
     {
         isDragging = true;
@@ -115,7 +105,7 @@ public:
         }
     }
 
-    void mouseUp (const juce::MouseEvent & e) override
+    void mouseUp (const juce::MouseEvent& e) override
     {
         isDragging = false;
         dragDirection = 0;
@@ -163,13 +153,16 @@ public:
 
         upperHalf.removeFromBottom (1);
         triangleUp.clear();
-        triangleUp.addTriangle (upperHalf.getBottomLeft(), upperHalf.getBottomRight(), {upperHalf.getCentreX(), upperHalf.getY()});
+        triangleUp.addTriangle (upperHalf.getBottomLeft(),
+                                upperHalf.getBottomRight(),
+                                { upperHalf.getCentreX(), upperHalf.getY() });
 
         lowerHalf.removeFromTop (1);
         triangleDown.clear();
-        triangleDown.addTriangle (lowerHalf.getTopLeft(), lowerHalf.getTopRight(), {lowerHalf.getCentreX(), lowerHalf.getBottom()});
+        triangleDown.addTriangle (lowerHalf.getTopLeft(),
+                                  lowerHalf.getTopRight(),
+                                  { lowerHalf.getCentreX(), lowerHalf.getBottom() });
     }
-
 
 private:
     juce::OwnedArray<ReverseSlider>& elements;
