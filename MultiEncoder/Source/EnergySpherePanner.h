@@ -22,7 +22,6 @@
 
 #pragma once
 
-
 #include "../../resources/customComponents/SpherePanner.h"
 
 /**
@@ -31,9 +30,7 @@
 class EnergySpherePanner : public SpherePanner
 {
 public:
-    EnergySpherePanner (const std::vector<float>& rmsArray) :
-    rms (rmsArray)
-    {}
+    EnergySpherePanner (const std::vector<float>& rmsArray) : rms (rmsArray) {}
 
     void paintOverChildren (juce::Graphics& g) override
     {
@@ -52,7 +49,8 @@ public:
             const bool isUp = pos.z >= -0.0f;
 
             const float diam = 15.0f + 4.0f * pos.z;
-            const juce::Colour colour = handle->isActive() ? handle->getColour() : juce::Colours::grey;
+            const juce::Colour colour =
+                handle->isActive() ? handle->getColour() : juce::Colours::grey;
             g.setColour (colour);
 
             if (linearElevation)
@@ -62,7 +60,10 @@ public:
                 pos *= factor;
             }
 
-            const juce::Rectangle<float> circleArea (centreX - pos.y * radius - diam / 2, centreY - pos.x * radius - diam / 2, diam, diam);
+            const juce::Rectangle<float> circleArea (centreX - pos.y * radius - diam / 2,
+                                                     centreY - pos.x * radius - diam / 2,
+                                                     diam,
+                                                     diam);
             juce::Path panPos;
 
             panPos.addEllipse (circleArea);
@@ -71,7 +72,8 @@ public:
             if (visualize && i != 0) // assume and hope, the first element is the master control
             {
                 const float level = juce::Decibels::gainToDecibels (rms[i - 1]);
-                const float alpha = juce::jlimit (0.0f, 1.0f, (level - peakLevel) / dynRange + 1.0f);
+                const float alpha =
+                    juce::jlimit (0.0f, 1.0f, (level - peakLevel) / dynRange + 1.0f);
                 g.setColour (colour.withAlpha (alpha));
                 g.drawEllipse (circleArea.withSizeKeepingCentre (1.4f * diam, 1.4f * diam), 1.4f);
             }
@@ -87,26 +89,22 @@ public:
             g.setColour (isUp ? handle->getTextColour() : colour);
 
             g.setFont (isUp ? 15.0f : 10.0f);
-            g.drawText (handle->getLabel(), circleArea.toNearestInt(), juce::Justification::centred, false);
+            g.drawText (handle->getLabel(),
+                        circleArea.toNearestInt(),
+                        juce::Justification::centred,
+                        false);
         }
     };
 
-    void setPeakLevel (float peakLevelInDecibels)
-    {
-        peakLevel = peakLevelInDecibels;
-    }
+    void setPeakLevel (float peakLevelInDecibels) { peakLevel = peakLevelInDecibels; }
 
-    void setDynamicRange (float dynamicRangeInDecibels)
-    {
-        dynRange = dynamicRangeInDecibels;
-    }
+    void setDynamicRange (float dynamicRangeInDecibels) { dynRange = dynamicRangeInDecibels; }
 
     void visualizeRMS (float shouldVisualize)
     {
         visualize = shouldVisualize;
         repaint();
     }
-
 
 private:
     bool visualize = false;

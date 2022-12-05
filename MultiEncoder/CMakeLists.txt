@@ -10,7 +10,6 @@ juce_add_plugin (MultiEncoder
     VERSION "1.0.2"
     LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/MultiEncoder")
 
-
 juce_generate_juce_header(MultiEncoder)
 
 target_sources(MultiEncoder PRIVATE
