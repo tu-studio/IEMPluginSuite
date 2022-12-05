@@ -1,5 +1,11 @@
 # gitlab-ci configuration for the IEM Plugin Suite
 
+stages:
+  - pre-check
+  - build
+  - test
+  - deploy
+
 variables:
 ## leave this uncommented to build all projects (except _PluginTemplate)
   #PROJECTS: AllRADecoder BinauralDecoder CoordinateConverter DirectionalCompressor DirectivityShaper DistanceCompensator DualDelay EnergyVisualizer FdnReverb MatrixMultiplier MultiBandCompressor MultiEncoder MultiEQ OmniCompressor ProbeDecoder RoomEncoder SceneRotator SimpleDecoder StereoEncoder ToolBox
@@ -111,7 +117,43 @@ variables:
 
 ###################################################
 # expand the templates to real jobs
-#
+
+# check for coding-style compliance
+clang-format:
+  stage: pre-check
+  image: alpine:latest
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  script:
+    - apk add clang-extra-tools git
+    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format -i {} \;
+    - git diff --exit-code > clang-format.log
+    # cleanup, if 'git diff' did not complain
+    - rm clang-format.log
+  after_script:
+    - |
+      if test -f clang-format.log; then
+        echo "Check the clang-format.log artifact for differences..."
+      fi
+  allow_failure: true
+  artifacts:
+    when: on_failure
+    paths:
+      - clang-format.log
+
+# some static code analysers
+# currently run in 'pre-check' stage, as the build stage takes so long
+sast:
+  stage: pre-check
+  allow_failure: true
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  before_script:
+    # we really do not want to run sast on JUCE (not our business)
+    - rm -rf JUCE $(git submodule status | awk '{print $2}')
+include:
+- template: Security/SAST.gitlab-ci.yml
+
 linux:
   extends:
     - .artifacts

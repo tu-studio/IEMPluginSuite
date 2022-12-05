@@ -1,7 +1,7 @@
 
 juce_add_plugin (DistanceCompensator
     PLUGIN_MANUFACTURER_CODE IEMA
-    PLUGIN_CODE DiCo
+    PLUGIN_CODE DisC
     ICON_BIG "../resources/Standalone/IEMPluginSuiteSmall.png"
     ICON_SMALL "../resources/Standalone/IEMPluginSuiteSmall.png"
     COMPANY_NAME "IEM"
@@ -9,7 +9,6 @@ juce_add_plugin (DistanceCompensator
     FORMATS ${IEM_FORMATS}
     VERSION "0.3.4"
     LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/DistanceCompensator")
-
 
 juce_generate_juce_header (DistanceCompensator)
 
