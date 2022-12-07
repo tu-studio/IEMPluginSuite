@@ -62,7 +62,7 @@ namespace juce
 {
 
 //==============================================================================
-class StandaloneApp  : public JUCEApplication
+class StandaloneApp : public JUCEApplication
 {
 public:
     StandaloneApp()
@@ -71,42 +71,52 @@ public:
 
         juce::PropertiesFile::Options options;
 
-        options.applicationName     = getApplicationName();
-        options.filenameSuffix      = ".settings";
+        options.applicationName = getApplicationName();
+        options.filenameSuffix = ".settings";
         options.osxLibrarySubFolder = "Application Support";
-       #if JUCE_LINUX || JUCE_BSD
-        options.folderName          = "~/.config";
-       #else
-        options.folderName          = "";
-       #endif
+#if JUCE_LINUX || JUCE_BSD
+        options.folderName = "~/.config";
+#else
+        options.folderName = "";
+#endif
 
         appProperties.setStorageParameters (options);
     }
 
-    const juce::String getApplicationName() override              { return CharPointer_UTF8 (JucePlugin_Name); }
-    const juce::String getApplicationVersion() override           { return JucePlugin_VersionString; }
-    bool moreThanOneInstanceAllowed() override              { return true; }
-    void anotherInstanceStarted (const juce::String&) override    {}
+    const juce::String getApplicationName() override { return CharPointer_UTF8 (JucePlugin_Name); }
+    const juce::String getApplicationVersion() override { return JucePlugin_VersionString; }
+    bool moreThanOneInstanceAllowed() override { return true; }
+    void anotherInstanceStarted (const juce::String&) override {}
 
     virtual MyStandaloneFilterWindow* createWindow()
     {
-       #ifdef JucePlugin_PreferredChannelConfigurations
-        StandalonePluginHolder::PluginInOuts channels[] = { JucePlugin_PreferredChannelConfigurations };
-       #endif
+#ifdef JucePlugin_PreferredChannelConfigurations
+        StandalonePluginHolder::PluginInOuts channels[] = {
+            JucePlugin_PreferredChannelConfigurations
+        };
+#endif
 
-        return new MyStandaloneFilterWindow (getApplicationName(),
-                                           LookAndFeel::getDefaultLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId),
-                                           appProperties.getUserSettings(),
-                                           false, {}, nullptr
-                                          #ifdef JucePlugin_PreferredChannelConfigurations
-                                           , juce::Array<StandalonePluginHolder::PluginInOuts> (channels, juce::numElementsInArray (channels))
-                                          #else
-                                           , {}
-                                          #endif
-                                          #if JUCE_DONT_AUTO_OPEN_MIDI_DEVICES_ON_MOBILE
-                                           , false
-                                          #endif
-                                           );
+        return new MyStandaloneFilterWindow (
+            getApplicationName(),
+            LookAndFeel::getDefaultLookAndFeel().findColour (
+                juce::ResizableWindow::backgroundColourId),
+            appProperties.getUserSettings(),
+            false,
+            {},
+            nullptr
+#ifdef JucePlugin_PreferredChannelConfigurations
+            ,
+            juce::Array<StandalonePluginHolder::PluginInOuts> (channels,
+                                                               juce::numElementsInArray (channels))
+#else
+            ,
+            {}
+#endif
+#if JUCE_DONT_AUTO_OPEN_MIDI_DEVICES_ON_MOBILE
+                ,
+            false
+#endif
+        );
     }
 
     //==============================================================================
@@ -114,9 +124,9 @@ public:
     {
         mainWindow.reset (createWindow());
 
-       #if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
+#if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
         Desktop::getInstance().setKioskModeComponent (mainWindow.get(), false);
-       #endif
+#endif
 
         mainWindow->setVisible (true);
     }
@@ -135,11 +145,12 @@ public:
 
         if (ModalComponentManager::getInstance()->cancelAllModalComponents())
         {
-            juce::Timer::callAfterDelay (100, []()
-            {
-                if (auto app = JUCEApplicationBase::getInstance())
-                    app->systemRequestedQuit();
-            });
+            juce::Timer::callAfterDelay (100,
+                                         []()
+                                         {
+                                             if (auto app = JUCEApplicationBase::getInstance())
+                                                 app->systemRequestedQuit();
+                                         });
         }
         else
         {

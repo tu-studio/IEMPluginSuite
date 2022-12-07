@@ -65,9 +65,9 @@ namespace iem
 
     @tags{Audio}
 */
-class  IEMAudioDeviceSelectorComponent  : public juce::Component,
-                                                private juce::ChangeListener,
-                                                private juce::Timer
+class IEMAudioDeviceSelectorComponent : public juce::Component,
+                                        private juce::ChangeListener,
+                                        private juce::Timer
 {
 public:
     //==============================================================================
@@ -90,14 +90,14 @@ public:
                                         are shown, with an "advanced" button that shows the rest of them
     */
     IEMAudioDeviceSelectorComponent (juce::AudioDeviceManager& deviceManager,
-                                  int minAudioInputChannels,
-                                  int maxAudioInputChannels,
-                                  int minAudioOutputChannels,
-                                  int maxAudioOutputChannels,
-                                  bool showMidiInputOptions,
-                                  bool showMidiOutputSelector,
-                                  bool showChannelsAsStereoPairs,
-                                  bool hideAdvancedOptionsWithButton);
+                                     int minAudioInputChannels,
+                                     int maxAudioInputChannels,
+                                     int minAudioOutputChannels,
+                                     int maxAudioOutputChannels,
+                                     bool showMidiInputOptions,
+                                     bool showMidiOutputSelector,
+                                     bool showChannelsAsStereoPairs,
+                                     bool hideAdvancedOptionsWithButton);
 
     /** Destructor */
     ~IEMAudioDeviceSelectorComponent() override;
@@ -109,7 +109,7 @@ public:
     void setItemHeight (int itemHeight);
 
     /** Returns the standard height used for items in the panel. */
-    int getItemHeight() const noexcept      { return itemHeight; }
+    int getItemHeight() const noexcept { return itemHeight; }
 
     /** Returns the ListBox that's being used to show the midi inputs, or nullptr if there isn't one. */
     juce::ListBox* getMidiInputSelectorListBox() const noexcept;
@@ -147,4 +147,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IEMAudioDeviceSelectorComponent)
 };
 
-} // namespace juce
+} // namespace iem
