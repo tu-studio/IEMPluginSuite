@@ -905,8 +905,7 @@ public:
     std::unique_ptr<MyStandalonePluginHolder> pluginHolder;
 
 private:
-// TODO: check why this don't work
-/*    void updateContent()
+    void updateContent()
     {
         auto* content = new MainContentComponent (*this);
         decoratorConstrainer.setMainContentComponent (content);
@@ -933,12 +932,11 @@ private:
         m.setLookAndFeel (&laf);
         m.showMenuAsync (juce::PopupMenu::Options(),
                          juce::ModalCallbackFunction::forComponent (menuCallback, this));
-    }*/
+    }
 
     //==============================================================================
     class MainContentComponent  :   public juce::Component,
                                     private juce::Value::Listener,
-                                    private juce::Button::Listener,
                                     private juce::ComponentListener,
                                     private juce::Timer
     {
@@ -1238,8 +1236,8 @@ private:
     };
 
     //==============================================================================
-    LaF laf;
     DecoratorConstrainer decoratorConstrainer;
+    LaF laf;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MyStandaloneFilterWindow)
 };
