@@ -1,8 +1,8 @@
 /*
  ==============================================================================
  This file is part of the IEM plug-in suite.
- Author: Daniel Rudrich
- Copyright (c) 2017 - Institute of Electronic Music and Acoustics (IEM)
+ Author: Daniel Rudrich, Felix Holzmueller
+ Copyright (c) 2022 - Institute of Electronic Music and Acoustics (IEM)
  https://iem.at
 
  The IEM plug-in suite is free software: you can redistribute it and/or modify
@@ -25,35 +25,36 @@
  */
 
 /*
-  ==============================================================================
+==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User
+License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-7-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
+WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
+PURPOSE, ARE
    DISCLAIMED.
 
-  ==============================================================================
+  
+==============================================================================
 */
 
 #include <JuceHeader.h>
 #include <PluginProcessor.h>
-
-extern juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 #include "MyStandaloneFilterWindow.h"
 
@@ -73,7 +74,7 @@ public:
         options.applicationName     = getApplicationName();
         options.filenameSuffix      = ".settings";
         options.osxLibrarySubFolder = "Application Support";
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         options.folderName          = "~/.config";
        #else
         options.folderName          = "";
@@ -82,7 +83,7 @@ public:
         appProperties.setStorageParameters (options);
     }
 
-    const juce::String getApplicationName() override              { return JucePlugin_Name; }
+    const juce::String getApplicationName() override              { return CharPointer_UTF8 (JucePlugin_Name); }
     const juce::String getApplicationVersion() override           { return JucePlugin_VersionString; }
     bool moreThanOneInstanceAllowed() override              { return true; }
     void anotherInstanceStarted (const juce::String&) override    {}
@@ -129,6 +130,9 @@ public:
     //==============================================================================
     void systemRequestedQuit() override
     {
+        if (mainWindow.get() != nullptr)
+            mainWindow->pluginHolder->savePluginState();
+
         if (ModalComponentManager::getInstance()->cancelAllModalComponents())
         {
             juce::Timer::callAfterDelay (100, []()
@@ -152,6 +156,8 @@ protected:
 
 #if JucePlugin_Build_Standalone && JUCE_IOS
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
 using namespace juce;
 
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected()
@@ -168,7 +174,6 @@ void JUCE_CALLTYPE juce_switchToHostApplication()
         holder->switchToHostApplication();
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_basics
 Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 {
     if (auto holder = StandalonePluginHolder::getInstance())
@@ -176,7 +181,8 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 
     return Image();
 }
-#endif
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 START_JUCE_APPLICATION (juce::StandaloneApp)
