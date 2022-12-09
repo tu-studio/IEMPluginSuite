@@ -291,7 +291,7 @@ void DualDelayAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juc
 
     delayTempBuffer.clear(0, copyL);
     //delayTempBuffer.clear();
-    const float** readPtrArr = delayInLeft.getArrayOfReadPointers();
+    const float* const* readPtrArr = delayInLeft.getArrayOfReadPointers();
 
     for (int i=0; i<spb; ++i) {
 
@@ -367,7 +367,7 @@ void DualDelayAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juc
 
     delayTempBuffer.clear(0, copyL);
 
-    const float** readPtrArrR = delayInRight.getArrayOfReadPointers();
+    const float* const* readPtrArrR = delayInRight.getArrayOfReadPointers();
 
     for (int i=0; i<spb; ++i) {
         float integer;
