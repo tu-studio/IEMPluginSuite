@@ -41,21 +41,20 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-
 //==============================================================================
-SceneRotatorAudioProcessor::SceneRotatorAudioProcessor()
-: AudioProcessorBase (
+SceneRotatorAudioProcessor::SceneRotatorAudioProcessor() :
+    AudioProcessorBase (
 #ifndef JucePlugin_PreferredChannelConfigurations
-                  BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-                  .withInput  ("Input",  juce::AudioChannelSet::discreteChannels (64), true)
+        BusesProperties()
+    #if ! JucePlugin_IsMidiEffect
+        #if ! JucePlugin_IsSynth
+            .withInput ("Input", juce::AudioChannelSet::discreteChannels (64), true)
+        #endif
+            .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
+    #endif
+            ,
 #endif
-                  .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
-#endif
-                  ,
-#endif
-createParameterLayout())
+        createParameterLayout())
 {
     // get pointers to the parameters
     orderSetting = parameters.getRawParameterValue ("orderSetting");
@@ -72,7 +71,6 @@ createParameterLayout())
     invertRoll = parameters.getRawParameterValue ("invertRoll");
     invertQuaternion = parameters.getRawParameterValue ("invertQuaternion");
     rotationSequence = parameters.getRawParameterValue ("rotationSequence");
-
 
     // add listeners to parameter changes
     parameters.addParameterListener ("orderSetting", this);
@@ -91,12 +89,10 @@ createParameterLayout())
     parameters.addParameterListener ("invertQuaternion", this);
     parameters.addParameterListener ("rotationSequence", this);
 
-
-
     orderMatrices.add (new juce::dsp::Matrix<float> (0, 0)); // 0th
     orderMatricesCopy.add (new juce::dsp::Matrix<float> (0, 0)); // 0th
 
-    for (int l = 1; l <= 7; ++l )
+    for (int l = 1; l <= 7; ++l)
     {
         const int nCh = (2 * l + 1);
         auto elem = orderMatrices.add (new juce::dsp::Matrix<float> (nCh, nCh));
@@ -116,7 +112,7 @@ SceneRotatorAudioProcessor::~SceneRotatorAudioProcessor()
 //==============================================================================
 int SceneRotatorAudioProcessor::getNumPrograms()
 {
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
+    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
     // so this should be at least 1, even if you're not really implementing programs.
 }
 
@@ -150,7 +146,6 @@ void SceneRotatorAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
 
     juce::MidiMessageCollector::reset (sampleRate);
     rotationParamsHaveChanged = true;
-
 }
 
 void SceneRotatorAudioProcessor::releaseResources()
@@ -159,7 +154,8 @@ void SceneRotatorAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-void SceneRotatorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiMessages)
+void SceneRotatorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer,
+                                               juce::MidiBuffer& midiMessages)
 {
     checkInputAndOutput (this, *orderSetting, *orderSetting, false);
     juce::ScopedNoDenormals noDenormals;
@@ -189,27 +185,36 @@ void SceneRotatorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, 
                 case MidiScheme::mrHeadTrackerYprInv:
                     switch (message.getControllerNumber())
                     {
-                        case 48: yawLsb = message.getControllerValue(); break;
-                        case 49: pitchLsb = message.getControllerValue(); break;
-                        case 50: rollLsb = message.getControllerValue(); break;
+                        case 48:
+                            yawLsb = message.getControllerValue();
+                            break;
+                        case 49:
+                            pitchLsb = message.getControllerValue();
+                            break;
+                        case 50:
+                            rollLsb = message.getControllerValue();
+                            break;
 
                         case 16:
                         {
-                            float yawVal = (128 * message.getControllerValue() + yawLsb) * (1.0f / 16384);
+                            float yawVal =
+                                (128 * message.getControllerValue() + yawLsb) * (1.0f / 16384);
                             parameters.getParameter ("yaw")->setValueNotifyingHost (yawVal);
                             break;
                         }
 
                         case 17:
                         {
-                            float pitchVal = (128 * message.getControllerValue() + pitchLsb) * (1.0f / 16384);
+                            float pitchVal =
+                                (128 * message.getControllerValue() + pitchLsb) * (1.0f / 16384);
                             parameters.getParameter ("pitch")->setValueNotifyingHost (pitchVal);
                             break;
                         }
 
                         case 18:
                         {
-                            float rollVal = (128 * message.getControllerValue() + rollLsb) * (1.0f / 16384);
+                            float rollVal =
+                                (128 * message.getControllerValue() + rollLsb) * (1.0f / 16384);
                             parameters.getParameter ("roll")->setValueNotifyingHost (rollVal);
                             break;
                         }
@@ -219,35 +224,47 @@ void SceneRotatorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, 
                 case MidiScheme::mrHeadTrackerQuaternions:
                     switch (message.getControllerNumber())
                     {
-                        case 48: qwLsb = message.getControllerValue(); break;
-                        case 49: qxLsb = message.getControllerValue(); break;
-                        case 50: qyLsb = message.getControllerValue(); break;
-                        case 51: qzLsb = message.getControllerValue(); break;
+                        case 48:
+                            qwLsb = message.getControllerValue();
+                            break;
+                        case 49:
+                            qxLsb = message.getControllerValue();
+                            break;
+                        case 50:
+                            qyLsb = message.getControllerValue();
+                            break;
+                        case 51:
+                            qzLsb = message.getControllerValue();
+                            break;
 
                         case 16:
                         {
-                            float qwVal = (128 * message.getControllerValue() + qwLsb) * (1.0f / 16384);
+                            float qwVal =
+                                (128 * message.getControllerValue() + qwLsb) * (1.0f / 16384);
                             parameters.getParameter ("qw")->setValueNotifyingHost (qwVal);
                             break;
                         }
 
                         case 17:
                         {
-                            float qxVal = (128 * message.getControllerValue() + qxLsb) * (1.0f / 16384);
+                            float qxVal =
+                                (128 * message.getControllerValue() + qxLsb) * (1.0f / 16384);
                             parameters.getParameter ("qx")->setValueNotifyingHost (qxVal);
                             break;
                         }
 
                         case 18:
                         {
-                            float qyVal = (128 * message.getControllerValue() + qyLsb) * (1.0f / 16384);
+                            float qyVal =
+                                (128 * message.getControllerValue() + qyLsb) * (1.0f / 16384);
                             parameters.getParameter ("qy")->setValueNotifyingHost (qyVal);
                             break;
                         }
 
                         case 19:
                         {
-                            float qzVal = (128 * message.getControllerValue() + qzLsb) * (1.0f / 16384);
+                            float qzVal =
+                                (128 * message.getControllerValue() + qzLsb) * (1.0f / 16384);
                             parameters.getParameter ("qz")->setValueNotifyingHost (qzVal);
                             break;
                         }
@@ -258,8 +275,6 @@ void SceneRotatorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, 
             } // switch (currentMidiScheme)
         } //while (i.getNextEvent (message, time))
     } //if (currentMidiScheme != MidiScheme::none)
-
-
 
     bool newRotationMatrix = false;
     if (rotationParamsHaveChanged.get())
@@ -283,12 +298,17 @@ void SceneRotatorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, 
         const int nCh = 2 * l + 1;
         auto R = orderMatrices[l];
         auto Rcopy = orderMatricesCopy[l];
-        for (int o = 0;  o < nCh; ++o)
+        for (int o = 0; o < nCh; ++o)
         {
             const int chOut = offset + o;
             for (int p = 0; p < nCh; ++p)
             {
-                buffer.addFromWithRamp (chOut, 0, copyBuffer.getReadPointer (offset + p), L, Rcopy->operator() (o, p), R->operator() (o, p));
+                buffer.addFromWithRamp (chOut,
+                                        0,
+                                        copyBuffer.getReadPointer (offset + p),
+                                        L,
+                                        Rcopy->operator() (o, p),
+                                        R->operator() (o, p));
             }
         }
     }
@@ -301,31 +321,44 @@ void SceneRotatorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, 
     midiMessages.clear();
 }
 
-double SceneRotatorAudioProcessor::P (int i, int l, int a, int b, juce::dsp::Matrix<float>& R1, juce::dsp::Matrix<float>& Rlm1)
+double SceneRotatorAudioProcessor::P (int i,
+                                      int l,
+                                      int a,
+                                      int b,
+                                      juce::dsp::Matrix<float>& R1,
+                                      juce::dsp::Matrix<float>& Rlm1)
 {
     double ri1 = R1 (i + 1, 2);
     double rim1 = R1 (i + 1, 0);
     double ri0 = R1 (i + 1, 1);
 
     if (b == -l)
-        return ri1 * Rlm1(a + l - 1, 0) + rim1 * Rlm1(a + l - 1, 2 * l - 2);
+        return ri1 * Rlm1 (a + l - 1, 0) + rim1 * Rlm1 (a + l - 1, 2 * l - 2);
     else if (b == l)
-        return ri1 * Rlm1(a + l - 1, 2 * l - 2) - rim1 * Rlm1(a + l-1, 0);
+        return ri1 * Rlm1 (a + l - 1, 2 * l - 2) - rim1 * Rlm1 (a + l - 1, 0);
     else
-        return ri0 * Rlm1(a + l - 1, b + l - 1);
+        return ri0 * Rlm1 (a + l - 1, b + l - 1);
 };
 
-double SceneRotatorAudioProcessor::U (int l, int m, int n, juce::dsp::Matrix<float>& Rone, juce::dsp::Matrix<float>& Rlm1)
+double SceneRotatorAudioProcessor::U (int l,
+                                      int m,
+                                      int n,
+                                      juce::dsp::Matrix<float>& Rone,
+                                      juce::dsp::Matrix<float>& Rlm1)
 {
     return P (0, l, m, n, Rone, Rlm1);
 }
 
-double SceneRotatorAudioProcessor::V (int l, int m, int n, juce::dsp::Matrix<float>& Rone, juce::dsp::Matrix<float>& Rlm1)
+double SceneRotatorAudioProcessor::V (int l,
+                                      int m,
+                                      int n,
+                                      juce::dsp::Matrix<float>& Rone,
+                                      juce::dsp::Matrix<float>& Rlm1)
 {
     if (m == 0)
     {
         auto p0 = P (1, l, 1, n, Rone, Rlm1);
-        auto p1 = P (-1 , l, -1, n, Rone, Rlm1);
+        auto p1 = P (-1, l, -1, n, Rone, Rlm1);
         return p0 + p1;
     }
     else if (m > 0)
@@ -346,7 +379,11 @@ double SceneRotatorAudioProcessor::V (int l, int m, int n, juce::dsp::Matrix<flo
     }
 }
 
-double SceneRotatorAudioProcessor::W (int l, int m, int n, juce::dsp::Matrix<float>& Rone, juce::dsp::Matrix<float>& Rlm1)
+double SceneRotatorAudioProcessor::W (int l,
+                                      int m,
+                                      int n,
+                                      juce::dsp::Matrix<float>& Rone,
+                                      juce::dsp::Matrix<float>& Rlm1)
 {
     if (m > 0)
     {
@@ -356,7 +393,7 @@ double SceneRotatorAudioProcessor::W (int l, int m, int n, juce::dsp::Matrix<flo
     }
     else if (m < 0)
     {
-        auto p0 = P(1, l, m - 1, n, Rone, Rlm1);
+        auto p0 = P (1, l, m - 1, n, Rone, Rlm1);
         auto p1 = P (-1, l, 1 - m, n, Rone, Rlm1);
         return p0 - p1;
     }
@@ -364,12 +401,14 @@ double SceneRotatorAudioProcessor::W (int l, int m, int n, juce::dsp::Matrix<flo
     return 0.0;
 }
 
-
 void SceneRotatorAudioProcessor::calcRotationMatrix (const int order)
 {
-    const auto yawRadians = Conversions<float>::degreesToRadians (*yaw) * (*invertYaw > 0.5 ? -1 : 1);
-    const auto pitchRadians = Conversions<float>::degreesToRadians (*pitch) * (*invertPitch > 0.5 ? -1 : 1);
-    const auto rollRadians = Conversions<float>::degreesToRadians (*roll) * (*invertRoll > 0.5 ? -1 : 1);
+    const auto yawRadians =
+        Conversions<float>::degreesToRadians (*yaw) * (*invertYaw > 0.5 ? -1 : 1);
+    const auto pitchRadians =
+        Conversions<float>::degreesToRadians (*pitch) * (*invertPitch > 0.5 ? -1 : 1);
+    const auto rollRadians =
+        Conversions<float>::degreesToRadians (*roll) * (*invertRoll > 0.5 ? -1 : 1);
 
     auto ca = std::cos (yawRadians);
     auto cb = std::cos (pitchRadians);
@@ -379,53 +418,48 @@ void SceneRotatorAudioProcessor::calcRotationMatrix (const int order)
     auto sb = std::sin (pitchRadians);
     auto sy = std::sin (rollRadians);
 
-
     juce::dsp::Matrix<float> rotMat (3, 3);
 
     if (*rotationSequence >= 0.5f) // roll -> pitch -> yaw (extrinsic rotations)
     {
-        rotMat(0, 0) = ca * cb;
-        rotMat(1, 0) = sa * cb;
-        rotMat(2, 0) = - sb;
+        rotMat (0, 0) = ca * cb;
+        rotMat (1, 0) = sa * cb;
+        rotMat (2, 0) = -sb;
 
-        rotMat(0, 1) = ca * sb * sy - sa * cy;
-        rotMat(1, 1) = sa * sb * sy + ca * cy;
-        rotMat(2, 1) = cb * sy;
+        rotMat (0, 1) = ca * sb * sy - sa * cy;
+        rotMat (1, 1) = sa * sb * sy + ca * cy;
+        rotMat (2, 1) = cb * sy;
 
-        rotMat(0, 2) = ca * sb * cy + sa * sy;
-        rotMat(1, 2) = sa * sb * cy - ca * sy;
-        rotMat(2, 2) = cb * cy;
+        rotMat (0, 2) = ca * sb * cy + sa * sy;
+        rotMat (1, 2) = sa * sb * cy - ca * sy;
+        rotMat (2, 2) = cb * cy;
     }
     else // yaw -> pitch -> roll (extrinsic rotations)
     {
-        rotMat(0, 0) = ca * cb;
-        rotMat(1, 0) = sa * cy + ca * sb * sy;
-        rotMat(2, 0) = sa * sy - ca * sb * cy;
+        rotMat (0, 0) = ca * cb;
+        rotMat (1, 0) = sa * cy + ca * sb * sy;
+        rotMat (2, 0) = sa * sy - ca * sb * cy;
 
-        rotMat(0, 1) = - sa * cb;
-        rotMat(1, 1) = ca * cy - sa * sb * sy;
-        rotMat(2, 1) = ca * sy + sa * sb * cy;
+        rotMat (0, 1) = -sa * cb;
+        rotMat (1, 1) = ca * cy - sa * sb * sy;
+        rotMat (2, 1) = ca * sy + sa * sb * cy;
 
-        rotMat(0, 2) = sb;
-        rotMat(1, 2) = - cb * sy;
-        rotMat(2, 2) = cb * cy;
+        rotMat (0, 2) = sb;
+        rotMat (1, 2) = -cb * sy;
+        rotMat (2, 2) = cb * cy;
     }
-
-
 
     auto Rl = orderMatrices[1];
 
-    Rl->operator() (0, 0) = rotMat(1, 1);
-    Rl->operator() (0, 1) = rotMat(1, 2);
-    Rl->operator() (0, 2) = rotMat(1, 0);
-    Rl->operator() (1, 0) = rotMat(2, 1);
-    Rl->operator() (1, 1) = rotMat(2, 2);
-    Rl->operator() (1, 2) = rotMat(2, 0);
-    Rl->operator() (2, 0) = rotMat(0, 1);
-    Rl->operator() (2, 1) = rotMat(0, 2);
-    Rl->operator() (2, 2) = rotMat(0, 0);
-
-
+    Rl->operator() (0, 0) = rotMat (1, 1);
+    Rl->operator() (0, 1) = rotMat (1, 2);
+    Rl->operator() (0, 2) = rotMat (1, 0);
+    Rl->operator() (1, 0) = rotMat (2, 1);
+    Rl->operator() (1, 1) = rotMat (2, 2);
+    Rl->operator() (1, 2) = rotMat (2, 0);
+    Rl->operator() (2, 0) = rotMat (0, 1);
+    Rl->operator() (2, 1) = rotMat (0, 2);
+    Rl->operator() (2, 2) = rotMat (0, 0);
 
     for (int l = 2; l <= order; ++l)
     {
@@ -438,13 +472,14 @@ void SceneRotatorAudioProcessor::calcRotationMatrix (const int order)
             {
                 const int d = (m == 0) ? 1 : 0;
                 double denom;
-                if (abs(n) == l)
+                if (abs (n) == l)
                     denom = (2 * l) * (2 * l - 1);
                 else
                     denom = l * l - n * n;
 
                 double u = sqrt ((l * l - m * m) / denom);
-                double v = sqrt ((1.0 + d) * (l + abs (m) - 1.0) * (l + abs (m)) / denom) * (1.0 - 2.0 * d) * 0.5;
+                double v = sqrt ((1.0 + d) * (l + abs (m) - 1.0) * (l + abs (m)) / denom)
+                           * (1.0 - 2.0 * d) * 0.5;
                 double w = sqrt ((l - abs (m) - 1.0) * (l - abs (m)) / denom) * (1.0 - d) * (-0.5);
 
                 if (u != 0.0)
@@ -460,9 +495,7 @@ void SceneRotatorAudioProcessor::calcRotationMatrix (const int order)
     }
 
     rotationParamsHaveChanged = false;
-
 }
-
 
 //==============================================================================
 bool SceneRotatorAudioProcessor::hasEditor() const
@@ -484,11 +517,12 @@ void SceneRotatorAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
 
     state.setProperty ("MidiDeviceName", juce::var (currentMidiDeviceInfo.name), nullptr);
-    state.setProperty ("MidiDeviceScheme", juce::var (static_cast<int> (currentMidiScheme)), nullptr);
+    state.setProperty ("MidiDeviceScheme",
+                       juce::var (static_cast<int> (currentMidiScheme)),
+                       nullptr);
     std::unique_ptr<juce::XmlElement> xml (state.createXml());
     copyXmlToBinary (*xml, destData);
 }
-
 
 void SceneRotatorAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
@@ -501,7 +535,8 @@ void SceneRotatorAudioProcessor::setStateInformation (const void* data, int size
             parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
             if (parameters.state.hasProperty ("OSCPort")) // legacy
             {
-                oscParameterInterface.getOSCReceiver().connect (parameters.state.getProperty ("OSCPort", juce::var (-1)));
+                oscParameterInterface.getOSCReceiver().connect (
+                    parameters.state.getProperty ("OSCPort", juce::var (-1)));
                 parameters.state.removeProperty ("OSCPort", nullptr);
             }
 
@@ -510,25 +545,28 @@ void SceneRotatorAudioProcessor::setStateInformation (const void* data, int size
                 oscParameterInterface.setConfig (oscConfig);
 
             if (parameters.state.hasProperty ("MidiDeviceName"))
-                openMidiInput (parameters.state.getProperty ("MidiDeviceName", juce::var ("")), true);
+                openMidiInput (parameters.state.getProperty ("MidiDeviceName", juce::var ("")),
+                               true);
             else
                 closeMidiInput();
 
             if (parameters.state.hasProperty ("MidiDeviceScheme"))
-                setMidiScheme (MidiScheme (static_cast<int> (parameters.state.getProperty ("MidiDeviceScheme", juce::var (0)))));
+                setMidiScheme (MidiScheme (static_cast<int> (
+                    parameters.state.getProperty ("MidiDeviceScheme", juce::var (0)))));
         }
 
     usingYpr = true;
 }
 
 //==============================================================================
-void SceneRotatorAudioProcessor::parameterChanged (const juce::String &parameterID, float newValue)
+void SceneRotatorAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     DBG ("Parameter with ID " << parameterID << " has changed. New value: " << newValue);
 
     if (! updatingParams.get())
     {
-        if (parameterID == "qw" || parameterID == "qx" || parameterID == "qy" || parameterID == "qz")
+        if (parameterID == "qw" || parameterID == "qx" || parameterID == "qy"
+            || parameterID == "qz")
         {
             usingYpr = false;
             updateEuler();
@@ -542,12 +580,12 @@ void SceneRotatorAudioProcessor::parameterChanged (const juce::String &parameter
         }
     }
 
-
     if (parameterID == "orderSetting")
     {
         userChangedIOSettings = true;
     }
-    else if (parameterID == "invertYaw" || parameterID == "invertPitch" || parameterID == "invertRoll" || parameterID == "invertQuaternion")
+    else if (parameterID == "invertYaw" || parameterID == "invertPitch"
+             || parameterID == "invertRoll" || parameterID == "invertQuaternion")
     {
         if (usingYpr.get())
             updateQuaternions();
@@ -570,11 +608,14 @@ void SceneRotatorAudioProcessor::parameterChanged (const juce::String &parameter
 inline void SceneRotatorAudioProcessor::updateQuaternions()
 {
     const float wa = cos (Conversions<float>::degreesToRadians (*yaw) * 0.5f);
-    const float za = sin (Conversions<float>::degreesToRadians (*yaw) * (*invertYaw >= 0.5 ? -0.5f : 0.5f));
+    const float za =
+        sin (Conversions<float>::degreesToRadians (*yaw) * (*invertYaw >= 0.5 ? -0.5f : 0.5f));
     const float wb = cos (Conversions<float>::degreesToRadians (*pitch) * 0.5f);
-    const float yb = sin (Conversions<float>::degreesToRadians (*pitch) * (*invertPitch >= 0.5 ? -0.5f : 0.5f));
+    const float yb =
+        sin (Conversions<float>::degreesToRadians (*pitch) * (*invertPitch >= 0.5 ? -0.5f : 0.5f));
     const float wc = cos (Conversions<float>::degreesToRadians (*roll) * 0.5f);
-    const float xc = sin (Conversions<float>::degreesToRadians (*roll) * (*invertRoll >= 0.5 ? -0.5f : 0.5f));
+    const float xc =
+        sin (Conversions<float>::degreesToRadians (*roll) * (*invertRoll >= 0.5 ? -0.5f : 0.5f));
 
     float qw, qx, qy, qz;
 
@@ -600,12 +641,15 @@ inline void SceneRotatorAudioProcessor::updateQuaternions()
         qz = -qz;
     }
 
-
     updatingParams = true;
-    parameters.getParameter ("qw")->setValueNotifyingHost (parameters.getParameterRange ("qw").convertTo0to1 (qw));
-    parameters.getParameter ("qx")->setValueNotifyingHost (parameters.getParameterRange ("qx").convertTo0to1 (qx));
-    parameters.getParameter ("qy")->setValueNotifyingHost (parameters.getParameterRange ("qy").convertTo0to1 (qy));
-    parameters.getParameter ("qz")->setValueNotifyingHost (parameters.getParameterRange ("qz").convertTo0to1 (qz));
+    parameters.getParameter ("qw")->setValueNotifyingHost (
+        parameters.getParameterRange ("qw").convertTo0to1 (qw));
+    parameters.getParameter ("qx")->setValueNotifyingHost (
+        parameters.getParameterRange ("qx").convertTo0to1 (qx));
+    parameters.getParameter ("qy")->setValueNotifyingHost (
+        parameters.getParameterRange ("qy").convertTo0to1 (qy));
+    parameters.getParameter ("qz")->setValueNotifyingHost (
+        parameters.getParameterRange ("qz").convertTo0to1 (qz));
     updatingParams = false;
 }
 
@@ -617,7 +661,6 @@ void SceneRotatorAudioProcessor::updateEuler()
 
     if (*invertQuaternion >= 0.5f)
         quaternionDirection = quaternionDirection.getConjugate();
-
 
     // Thanks to Amy de Buitléir for this great algorithm!
 
@@ -638,7 +681,7 @@ void SceneRotatorAudioProcessor::updateEuler()
     t0 = juce::jlimit (-1.0f, 1.0f, t0);
     ypr[1] = asin (t0);
 
-    if (ypr[1] == juce::MathConstants<float>::pi || ypr[1] == - juce::MathConstants<float>::pi)
+    if (ypr[1] == juce::MathConstants<float>::pi || ypr[1] == -juce::MathConstants<float>::pi)
     {
         ypr[2] = 0.0f;
         ypr[0] = atan2 (p1, p0);
@@ -665,13 +708,17 @@ void SceneRotatorAudioProcessor::updateEuler()
 
     //updating not active params
     updatingParams = true;
-    parameters.getParameter ("yaw")->setValueNotifyingHost (parameters.getParameterRange ("yaw").convertTo0to1 (Conversions<float>::radiansToDegrees (ypr[0])));
-    parameters.getParameter ("pitch")->setValueNotifyingHost (parameters.getParameterRange ("pitch").convertTo0to1 (Conversions<float>::radiansToDegrees (ypr[1])));
-    parameters.getParameter ("roll")->setValueNotifyingHost (parameters.getParameterRange ("roll").convertTo0to1 (Conversions<float>::radiansToDegrees (ypr[2])));
+    parameters.getParameter ("yaw")->setValueNotifyingHost (
+        parameters.getParameterRange ("yaw").convertTo0to1 (
+            Conversions<float>::radiansToDegrees (ypr[0])));
+    parameters.getParameter ("pitch")->setValueNotifyingHost (
+        parameters.getParameterRange ("pitch").convertTo0to1 (
+            Conversions<float>::radiansToDegrees (ypr[1])));
+    parameters.getParameter ("roll")->setValueNotifyingHost (
+        parameters.getParameterRange ("roll").convertTo0to1 (
+            Conversions<float>::radiansToDegrees (ypr[2])));
     updatingParams = false;
 }
-
-
 
 void SceneRotatorAudioProcessor::updateBuffers()
 {
@@ -681,12 +728,13 @@ void SceneRotatorAudioProcessor::updateBuffers()
     copyBuffer.setSize (input.getNumberOfChannels(), copyBuffer.getNumSamples());
 }
 
-
 //==============================================================================
-const bool SceneRotatorAudioProcessor::interceptOSCMessage (juce::OSCMessage &message)
+const bool SceneRotatorAudioProcessor::interceptOSCMessage (juce::OSCMessage& message)
 {
     juce::String prefix ("/" + juce::String (JucePlugin_Name));
-    if (message.getAddressPattern().toString().equalsIgnoreCase ("/" + juce::String (JucePlugin_Name) + "/quaternions") && message.size() == 4)
+    if (message.getAddressPattern().toString().equalsIgnoreCase (
+            "/" + juce::String (JucePlugin_Name) + "/quaternions")
+        && message.size() == 4)
     {
         float qs[4];
         for (int i = 0; i < 4; ++i)
@@ -701,7 +749,9 @@ const bool SceneRotatorAudioProcessor::interceptOSCMessage (juce::OSCMessage &me
         oscParameterInterface.setValue ("qz", qs[3]);
         return true;
     }
-    else if (message.getAddressPattern().toString().equalsIgnoreCase ("/" + juce::String (JucePlugin_Name) + "/ypr") && message.size() == 3)
+    else if (message.getAddressPattern().toString().equalsIgnoreCase (
+                 "/" + juce::String (JucePlugin_Name) + "/ypr")
+             && message.size() == 3)
     {
         float ypr[3];
         for (int i = 0; i < 3; ++i)
@@ -719,85 +769,171 @@ const bool SceneRotatorAudioProcessor::interceptOSCMessage (juce::OSCMessage &me
     return false;
 }
 
-
-
 //==============================================================================
-std::vector<std::unique_ptr<juce::RangedAudioParameter>> SceneRotatorAudioProcessor::createParameterLayout()
+std::vector<std::unique_ptr<juce::RangedAudioParameter>>
+    SceneRotatorAudioProcessor::createParameterLayout()
 {
     // add your audio parameters here
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "orderSetting",
+        "Ambisonics Order",
+        "",
+        juce::NormalisableRange<float> (0.0f, 8.0f, 1.0f),
+        0.0f,
+        [] (float value)
+        {
+            if (value >= 0.5f && value < 1.5f)
+                return "0th";
+            else if (value >= 1.5f && value < 2.5f)
+                return "1st";
+            else if (value >= 2.5f && value < 3.5f)
+                return "2nd";
+            else if (value >= 3.5f && value < 4.5f)
+                return "3rd";
+            else if (value >= 4.5f && value < 5.5f)
+                return "4th";
+            else if (value >= 5.5f && value < 6.5f)
+                return "5th";
+            else if (value >= 6.5f && value < 7.5f)
+                return "6th";
+            else if (value >= 7.5f)
+                return "7th";
+            else
+                return "Auto";
+        },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("orderSetting", "Ambisonics Order", "",
-                                                       juce::NormalisableRange<float> (0.0f, 8.0f, 1.0f), 0.0f,
-                                                       [](float value) {
-                                                           if (value >= 0.5f && value < 1.5f) return "0th";
-                                                           else if (value >= 1.5f && value < 2.5f) return "1st";
-                                                           else if (value >= 2.5f && value < 3.5f) return "2nd";
-                                                           else if (value >= 3.5f && value < 4.5f) return "3rd";
-                                                           else if (value >= 4.5f && value < 5.5f) return "4th";
-                                                           else if (value >= 5.5f && value < 6.5f) return "5th";
-                                                           else if (value >= 6.5f && value < 7.5f) return "6th";
-                                                           else if (value >= 7.5f) return "7th";
-                                                           else return "Auto";
-                                                       }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "useSN3D",
+        "Normalization",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        1.0f,
+        [] (float value)
+        {
+            if (value >= 0.5f)
+                return "SN3D";
+            else
+                return "N3D";
+        },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("useSN3D", "Normalization", "",
-                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f,
-                                                       [](float value)
-                                                       {
-                                                           if (value >= 0.5f ) return "SN3D";
-                                                           else return "N3D";
-                                                       }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "yaw",
+        "Yaw Angle",
+        juce::CharPointer_UTF8 (R"(°)"),
+        juce::NormalisableRange<float> (-180.0f, 180.0f, 0.01f),
+        0.0,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr,
+        true));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("yaw", "Yaw Angle", juce::CharPointer_UTF8 (R"(°)"),
-                                                       juce::NormalisableRange<float> (-180.0f, 180.0f, 0.01f), 0.0,
-                                                       [](float value) { return juce::String(value, 2); }, nullptr, true));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "pitch",
+        "Pitch Angle",
+        juce::CharPointer_UTF8 (R"(°)"),
+        juce::NormalisableRange<float> (-180.0f, 180.0f, 0.01f),
+        0.0,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr,
+        true));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("pitch", "Pitch Angle", juce::CharPointer_UTF8 (R"(°)"),
-                                                       juce::NormalisableRange<float> (-180.0f, 180.0f, 0.01f), 0.0,
-                                                       [](float value) { return juce::String(value, 2); }, nullptr, true));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "roll",
+        "Roll Angle",
+        juce::CharPointer_UTF8 (R"(°)"),
+        juce::NormalisableRange<float> (-180.0f, 180.0f, 0.01f),
+        0.0,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr,
+        true));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("roll", "Roll Angle", juce::CharPointer_UTF8 (R"(°)"),
-                                                       juce::NormalisableRange<float> (-180.0f, 180.0f, 0.01f), 0.0,
-                                                       [](float value) { return juce::String(value, 2); }, nullptr, true));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "qw",
+        "Quaternion W",
+        "",
+        juce::NormalisableRange<float> (-1.0f, 1.0f, 0.001f),
+        1.0,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr,
+        true));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("qw", "Quaternion W", "",
-                                                       juce::NormalisableRange<float> (-1.0f, 1.0f, 0.001f), 1.0,
-                                                       [](float value) { return juce::String(value, 2); }, nullptr, true));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "qx",
+        "Quaternion X",
+        "",
+        juce::NormalisableRange<float> (-1.0f, 1.0f, 0.001f),
+        0.0,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr,
+        true));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("qx", "Quaternion X", "",
-                                                       juce::NormalisableRange<float> (-1.0f, 1.0f, 0.001f), 0.0,
-                                                       [](float value) { return juce::String(value, 2); }, nullptr, true));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "qy",
+        "Quaternion Y",
+        "",
+        juce::NormalisableRange<float> (-1.0f, 1.0f, 0.001f),
+        0.0,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr,
+        true));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("qy", "Quaternion Y", "",
-                                                       juce::NormalisableRange<float> (-1.0f, 1.0f, 0.001f), 0.0,
-                                                       [](float value) { return juce::String(value, 2); }, nullptr, true));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "qz",
+        "Quaternion Z",
+        "",
+        juce::NormalisableRange<float> (-1.0f, 1.0f, 0.001f),
+        0.0,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr,
+        true));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("qz", "Quaternion Z", "",
-                                                       juce::NormalisableRange<float> (-1.0f, 1.0f, 0.001f), 0.0,
-                                                       [](float value) { return juce::String(value, 2); }, nullptr, true));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "invertYaw",
+        "Invert Yaw",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        0.0,
+        [] (float value) { return value >= 0.5f ? "ON" : "OFF"; },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("invertYaw", "Invert Yaw", "",
-                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0,
-                                                       [](float value) { return value >= 0.5f ? "ON" : "OFF"; }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "invertPitch",
+        "Invert Pitch",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        0.0,
+        [] (float value) { return value >= 0.5f ? "ON" : "OFF"; },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("invertPitch", "Invert Pitch", "",
-                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0,
-                                                       [](float value) { return value >= 0.5f ? "ON" : "OFF"; }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "invertRoll",
+        "Invert Roll",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        0.0,
+        [] (float value) { return value >= 0.5f ? "ON" : "OFF"; },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("invertRoll", "Invert Roll", "",
-                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0,
-                                                       [](float value) { return value >= 0.5f ? "ON" : "OFF"; }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "invertQuaternion",
+        "Invert Quaternion",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        0.0,
+        [] (float value) { return value >= 0.5f ? "ON" : "OFF"; },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("invertQuaternion", "Invert Quaternion", "",
-                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0,
-                                                       [](float value) { return value >= 0.5f ? "ON" : "OFF"; }, nullptr));
-
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("rotationSequence", "Sequence of Rotations", "",
-                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0,
-                                                       [](float value) { return value >= 0.5f ? "Roll->Pitch->Yaw" : "Yaw->Pitch->Roll"; }, nullptr));
-
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "rotationSequence",
+        "Sequence of Rotations",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        1.0,
+        [] (float value) { return value >= 0.5f ? "Roll->Pitch->Yaw" : "Yaw->Pitch->Roll"; },
+        nullptr));
 
     return params;
 }
@@ -810,7 +946,6 @@ void SceneRotatorAudioProcessor::timerCallback()
         openMidiInput (currentMidiDeviceInfo);
 }
 
-
 //==============================================================================
 juce::MidiDeviceInfo SceneRotatorAudioProcessor::getCurrentMidiDeviceInfo()
 {
@@ -820,27 +955,29 @@ juce::MidiDeviceInfo SceneRotatorAudioProcessor::getCurrentMidiDeviceInfo()
 /**
  Open Midi input with just a given device name as string. Overloaded method for compatibility reasons
  */
-void SceneRotatorAudioProcessor::openMidiInput (const juce::String midiDeviceName, bool forceUpdatingcurrentMidiDeviceInfo)
+void SceneRotatorAudioProcessor::openMidiInput (const juce::String midiDeviceName,
+                                                bool forceUpdatingcurrentMidiDeviceInfo)
 {
     const juce::ScopedLock scopedLock (changingMidiDevice);
-    
+
     juce::Array<juce::MidiDeviceInfo> devices = juce::MidiInput::getAvailableDevices();
     juce::MidiDeviceInfo selectedMidiDevice;
-    
+
     // Check which available device corresponds to the given device name
     for (int i = 0; i < devices.size(); ++i)
     {
-        if (devices[i].name.compare(midiDeviceName) == 0)
+        if (devices[i].name.compare (midiDeviceName) == 0)
         {
             selectedMidiDevice = devices[i];
             break;
         }
     }
-    
+
     openMidiInput (selectedMidiDevice, forceUpdatingcurrentMidiDeviceInfo);
 }
 
-void SceneRotatorAudioProcessor::openMidiInput (juce::MidiDeviceInfo midiDevice, bool forceUpdatingcurrentMidiDeviceInfo)
+void SceneRotatorAudioProcessor::openMidiInput (juce::MidiDeviceInfo midiDevice,
+                                                bool forceUpdatingcurrentMidiDeviceInfo)
 {
     if (midiDevice.identifier.isEmpty())
         return closeMidiInput(); // <- not sure if that syntax is totally wrong or brilliant!
@@ -909,11 +1046,13 @@ void SceneRotatorAudioProcessor::setMidiScheme (MidiScheme newMidiScheme)
             break;
 
         case MidiScheme::mrHeadTrackerYprDir:
-            parameters.getParameter ("rotationSequence")->setValueNotifyingHost (1.0f); // roll->pitch->yaw
+            parameters.getParameter ("rotationSequence")
+                ->setValueNotifyingHost (1.0f); // roll->pitch->yaw
             break;
 
         case MidiScheme::mrHeadTrackerYprInv:
-            parameters.getParameter ("rotationSequence")->setValueNotifyingHost (1.0f); // roll->pitch->yaw
+            parameters.getParameter ("rotationSequence")
+                ->setValueNotifyingHost (1.0f); // roll->pitch->yaw
             break;
 
         case MidiScheme::mrHeadTrackerQuaternions:

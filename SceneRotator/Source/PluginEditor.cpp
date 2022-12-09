@@ -20,13 +20,17 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "PluginProcessor.h"
 
 //==============================================================================
-SceneRotatorAudioProcessorEditor::SceneRotatorAudioProcessorEditor (SceneRotatorAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
-    : juce::AudioProcessorEditor (&p), processor (p), valueTreeState (vts), footer (p.getOSCParameterInterface())
+SceneRotatorAudioProcessorEditor::SceneRotatorAudioProcessorEditor (
+    SceneRotatorAudioProcessor& p,
+    juce::AudioProcessorValueTreeState& vts) :
+    juce::AudioProcessorEditor (&p),
+    processor (p),
+    valueTreeState (vts),
+    footer (p.getOSCParameterInterface())
 {
     // ============== BEGIN: essentials ======================
     // set GUI size and lookAndFeel
@@ -41,12 +45,15 @@ SceneRotatorAudioProcessorEditor::SceneRotatorAudioProcessorEditor (SceneRotator
     addAndMakeVisible (&footer);
     // ============= END: essentials ========================
 
-
     // create the connection between title component's comboBoxes and parameters
-    cbOrderAttachement.reset (new ComboBoxAttachment (valueTreeState, "orderSetting", *title.getInputWidgetPtr()->getOrderCbPointer()));
-    cbNormalizationAttachement.reset (new ComboBoxAttachment (valueTreeState, "useSN3D", *title.getInputWidgetPtr()->getNormCbPointer()));
-
-
+    cbOrderAttachement.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "orderSetting",
+                                *title.getInputWidgetPtr()->getOrderCbPointer()));
+    cbNormalizationAttachement.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "useSN3D",
+                                *title.getInputWidgetPtr()->getNormCbPointer()));
 
     // ======================== YAW, PITCH, ROLL GROUP
     yprGroup.setText ("Yaw, Pitch & Roll");
@@ -59,7 +66,9 @@ SceneRotatorAudioProcessorEditor::SceneRotatorAudioProcessorEditor (SceneRotator
     slYaw.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slYaw.setReverse (true);
     slYaw.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
-    slYaw.setRotaryParameters (juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
+    slYaw.setRotaryParameters (juce::MathConstants<float>::pi,
+                               3 * juce::MathConstants<float>::pi,
+                               false);
     slYaw.setTooltip ("Yaw angle: rotation around z-axis");
     slYaw.setTextValueSuffix (juce::CharPointer_UTF8 (R"(°)"));
 
@@ -69,7 +78,9 @@ SceneRotatorAudioProcessorEditor::SceneRotatorAudioProcessorEditor (SceneRotator
     slPitch.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slPitch.setReverse (true);
     slPitch.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
-    slPitch.setRotaryParameters (0.5 * juce::MathConstants<float>::pi, 2.5 * juce::MathConstants<float>::pi, false);
+    slPitch.setRotaryParameters (0.5 * juce::MathConstants<float>::pi,
+                                 2.5 * juce::MathConstants<float>::pi,
+                                 false);
     slPitch.setTooltip ("Pitch angle: rotation around y-axis");
     slPitch.setTextValueSuffix (juce::CharPointer_UTF8 (R"(°)"));
 
@@ -79,38 +90,46 @@ SceneRotatorAudioProcessorEditor::SceneRotatorAudioProcessorEditor (SceneRotator
     slRoll.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slRoll.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
     slRoll.setReverse (false);
-    slRoll.setRotaryParameters (juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
+    slRoll.setRotaryParameters (juce::MathConstants<float>::pi,
+                                3 * juce::MathConstants<float>::pi,
+                                false);
     slRoll.setTooltip ("Roll angle: rotation around x-axis");
     slRoll.setTextValueSuffix (juce::CharPointer_UTF8 (R"(°)"));
 
     addAndMakeVisible (tbInvertYaw);
     tbInvertYawAttachment.reset (new ButtonAttachment (valueTreeState, "invertYaw", tbInvertYaw));
-    tbInvertYaw.setColour (juce::ToggleButton::ColourIds::tickColourId, globalLaF.ClWidgetColours[0]);
+    tbInvertYaw.setColour (juce::ToggleButton::ColourIds::tickColourId,
+                           globalLaF.ClWidgetColours[0]);
     tbInvertYaw.setButtonText ("Flip");
 
     addAndMakeVisible (tbInvertPitch);
-    tbInvertPitchAttachment.reset (new ButtonAttachment (valueTreeState, "invertPitch", tbInvertPitch));
-    tbInvertPitch.setColour (juce::ToggleButton::ColourIds::tickColourId, globalLaF.ClWidgetColours[1]);
+    tbInvertPitchAttachment.reset (
+        new ButtonAttachment (valueTreeState, "invertPitch", tbInvertPitch));
+    tbInvertPitch.setColour (juce::ToggleButton::ColourIds::tickColourId,
+                             globalLaF.ClWidgetColours[1]);
     tbInvertPitch.setButtonText ("Flip");
 
     addAndMakeVisible (tbInvertRoll);
     tbRollFlipAttachment.reset (new ButtonAttachment (valueTreeState, "invertRoll", tbInvertRoll));
-    tbInvertRoll.setColour (juce::ToggleButton::ColourIds::tickColourId, globalLaF.ClWidgetColours[2]);
+    tbInvertRoll.setColour (juce::ToggleButton::ColourIds::tickColourId,
+                            globalLaF.ClWidgetColours[2]);
     tbInvertRoll.setButtonText ("Flip");
 
     addAndMakeVisible (tbInvertQuaternion);
-    tbInvertQuaternionAttachment.reset (new ButtonAttachment (valueTreeState, "invertQuaternion", tbInvertQuaternion));
-    tbInvertQuaternion.setColour (juce::ToggleButton::ColourIds::tickColourId, globalLaF.ClWidgetColours[0]);
+    tbInvertQuaternionAttachment.reset (
+        new ButtonAttachment (valueTreeState, "invertQuaternion", tbInvertQuaternion));
+    tbInvertQuaternion.setColour (juce::ToggleButton::ColourIds::tickColourId,
+                                  globalLaF.ClWidgetColours[0]);
     tbInvertQuaternion.setButtonText ("Invert Quaternions");
 
     addAndMakeVisible (cbRotationSequence);
     cbRotationSequence.setTooltip ("Sequence of intrinsic rotations");
     cbRotationSequence.addSectionHeading ("Rotation sequence");
-    cbRotationSequence.addItem("Yaw -> Pitch -> Roll", 1);
-    cbRotationSequence.addItem("Roll -> Pitch -> Yaw", 2);
+    cbRotationSequence.addItem ("Yaw -> Pitch -> Roll", 1);
+    cbRotationSequence.addItem ("Roll -> Pitch -> Yaw", 2);
     cbRotationSequence.setJustificationType (juce::Justification::centred);
-    cbRotationSequenceAttachment.reset (new ComboBoxAttachment (valueTreeState, "rotationSequence", cbRotationSequence));
-
+    cbRotationSequenceAttachment.reset (
+        new ComboBoxAttachment (valueTreeState, "rotationSequence", cbRotationSequence));
 
     // ====================== QUATERNION GROUP
     quatGroup.setText ("Quaternions");
@@ -141,29 +160,27 @@ SceneRotatorAudioProcessorEditor::SceneRotatorAudioProcessorEditor (SceneRotator
     slQZ.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 15);
     slQZ.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
 
-
     // ================ LABELS ===================
     addAndMakeVisible (&lbYaw);
     lbYaw.setText ("Yaw");
 
     addAndMakeVisible (&lbPitch);
-    lbPitch.setText("Pitch");
+    lbPitch.setText ("Pitch");
 
     addAndMakeVisible (&lbRoll);
-    lbRoll.setText("Roll");
+    lbRoll.setText ("Roll");
 
     addAndMakeVisible (&lbQW);
-    lbQW.setText("W");
+    lbQW.setText ("W");
 
     addAndMakeVisible (&lbQX);
-    lbQX.setText("X");
+    lbQX.setText ("X");
 
     addAndMakeVisible (&lbQY);
-    lbQY.setText("Y");
+    lbQY.setText ("Y");
 
     addAndMakeVisible (&lbQZ);
-    lbQZ.setText("Z");
-
+    lbQZ.setText ("Z");
 
     // ====================== MIDI GROUP
     addAndMakeVisible (midiGroup);
@@ -227,7 +244,6 @@ void SceneRotatorAudioProcessorEditor::resized()
     area.removeFromBottom (5);
     // =========== END: header and footer =================
 
-
     const int sliderHeight = 17;
     const int rotSliderHeight = 55;
     const int rotSliderSpacing = 10;
@@ -269,7 +285,6 @@ void SceneRotatorAudioProcessorEditor::resized()
     sliderRow = yprArea.removeFromTop (20);
     sliderRow.reduce (10, 0);
     cbRotationSequence.setBounds (sliderRow);
-
 
     // ------------- Quaternions ------------------------
     auto quatArea (topArea.removeFromRight (190));
@@ -314,7 +329,6 @@ void SceneRotatorAudioProcessorEditor::resized()
     row.removeFromLeft (10);
     slMidiScheme.setBounds (row.removeFromLeft (48));
     cbMidiScheme.setBounds (row.removeFromLeft (140));
-
 }
 
 void SceneRotatorAudioProcessorEditor::timerCallback()
@@ -336,11 +350,13 @@ void SceneRotatorAudioProcessorEditor::timerCallback()
         updateSelectedMidiScheme();
     }
 
-
     if (processor.showMidiOpenError.get())
     {
         processor.showMidiOpenError = false;
-        juce::AlertWindow alert ("Could no open device", "The MIDI device could not be opened, although it's listed in the available device list. This can happen if this process has already opened that device. Please visit https://plugins.iem.at/docs/scenerotator/ for troubleshooting.", juce::AlertWindow::NoIcon);
+        juce::AlertWindow alert (
+            "Could no open device",
+            "The MIDI device could not be opened, although it's listed in the available device list. This can happen if this process has already opened that device. Please visit https://plugins.iem.at/docs/scenerotator/ for troubleshooting.",
+            juce::AlertWindow::NoIcon);
         alert.setLookAndFeel (&globalLaF);
         alert.addButton ("OK", 1, juce::KeyPress (juce::KeyPress::returnKey, 0, 0));
         alert.addButton ("Visit website", 2);
@@ -349,8 +365,7 @@ void SceneRotatorAudioProcessorEditor::timerCallback()
     }
 }
 
-
-void SceneRotatorAudioProcessorEditor::comboBoxChanged (juce::ComboBox *comboBoxThatHasChanged)
+void SceneRotatorAudioProcessorEditor::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
 {
     if (comboBoxThatHasChanged == &cbMidiDevices && ! refreshingMidiDevices.get())
     {
@@ -371,9 +386,9 @@ void SceneRotatorAudioProcessorEditor::comboBoxChanged (juce::ComboBox *comboBox
     }
     else if (comboBoxThatHasChanged == &cbMidiScheme && ! updatingMidiScheme.get())
     {
-        processor.setMidiScheme (SceneRotatorAudioProcessor::MidiScheme (cbMidiScheme.getSelectedId() - 1));
+        processor.setMidiScheme (
+            SceneRotatorAudioProcessor::MidiScheme (cbMidiScheme.getSelectedId() - 1));
     }
-
 }
 
 void SceneRotatorAudioProcessorEditor::refreshMidiDeviceList()

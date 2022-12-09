@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #include "../../resources/Conversions.h"
 #include "../../resources/Quaternion.h"
@@ -32,9 +32,10 @@
 #define ProcessorClass SceneRotatorAudioProcessor
 
 //==============================================================================
-class SceneRotatorAudioProcessor  : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>, true>,
-                                    private juce::MidiMessageCollector,
-                                    private juce::Timer
+class SceneRotatorAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>, true>,
+      private juce::MidiMessageCollector,
+      private juce::Timer
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -65,21 +66,22 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
-
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
 
     //======= OSC ==================================================================
-    inline const bool interceptOSCMessage (juce::OSCMessage &message) override;
+    inline const bool interceptOSCMessage (juce::OSCMessage& message) override;
 
     //==============================================================================
     inline void updateQuaternions();
     inline void updateEuler();
 
-    void rotateBuffer (juce::AudioBuffer<float>* bufferToRotate, const int nChannels, const int samples);
+    void rotateBuffer (juce::AudioBuffer<float>* bufferToRotate,
+                       const int nChannels,
+                       const int samples);
     void calcRotationMatrix (const int order);
 
     //======= MIDI Connection ======================================================
@@ -91,25 +93,21 @@ public:
         mrHeadTrackerQuaternions
     };
 
-    const juce::StringArray midiSchemeNames
-    {
-        "none (link only)",
-        "MrHT YPR Direct",
-        "MrHT YPR Inverse",
-        "MrHT Quaternions"
-    };
+    const juce::StringArray midiSchemeNames { "none (link only)",
+                                              "MrHT YPR Direct",
+                                              "MrHT YPR Inverse",
+                                              "MrHT Quaternions" };
 
-    const juce::Identifier midiSchemeIdentifieres[4]
-    {
-        "none",
-        "MrHT_YprDir",
-        "MrHT_YprInv",
-        "MrHT_Quat"
-    };
+    const juce::Identifier midiSchemeIdentifieres[4] { "none",
+                                                       "MrHT_YprDir",
+                                                       "MrHT_YprInv",
+                                                       "MrHT_Quat" };
 
     juce::MidiDeviceInfo getCurrentMidiDeviceInfo();
-    void openMidiInput (juce::MidiDeviceInfo midiDevice, bool forceUpdatingCurrentMidiDeviceName = false);
-    void openMidiInput (juce::String midiDeviceName, bool forceUpdatingCurrentMidiDeviceName = false);
+    void openMidiInput (juce::MidiDeviceInfo midiDevice,
+                        bool forceUpdatingCurrentMidiDeviceName = false);
+    void openMidiInput (juce::String midiDeviceName,
+                        bool forceUpdatingCurrentMidiDeviceName = false);
     void closeMidiInput();
 
     const juce::StringArray getMidiSchemes() { return midiSchemeNames; };
@@ -144,15 +142,20 @@ private:
     std::atomic<float>* invertQuaternion;
     std::atomic<float>* rotationSequence;
 
-    juce::Atomic<bool> updatingParams {false};
-    juce::Atomic<bool> rotationParamsHaveChanged {true};
+    juce::Atomic<bool> updatingParams { false };
+    juce::Atomic<bool> rotationParamsHaveChanged { true };
 
     juce::AudioBuffer<float> copyBuffer;
 
     juce::OwnedArray<juce::dsp::Matrix<float>> orderMatrices;
     juce::OwnedArray<juce::dsp::Matrix<float>> orderMatricesCopy;
 
-    double P (int i, int l, int a, int b, juce::dsp::Matrix<float>& R1, juce::dsp::Matrix<float>& Rlm1);
+    double P (int i,
+              int l,
+              int a,
+              int b,
+              juce::dsp::Matrix<float>& R1,
+              juce::dsp::Matrix<float>& Rlm1);
     double U (int l, int m, int n, juce::dsp::Matrix<float>& Rone, juce::dsp::Matrix<float>& Rlm1);
     double V (int l, int m, int n, juce::dsp::Matrix<float>& Rone, juce::dsp::Matrix<float>& Rlm1);
     double W (int l, int m, int n, juce::dsp::Matrix<float>& Rone, juce::dsp::Matrix<float>& Rlm1);
