@@ -73,6 +73,8 @@ public:
     void getStateInformation(juce::MemoryBlock &destData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
 
+    void resampleAudioBuffer(juce::AudioBuffer<float> &inAudioBuffer, float inSampleRate, juce::AudioBuffer<float> &outAudioBuffer, float outSampleRate);
+
     void parameterChanged(const juce::String &parameterID, float newValue) override;
 
     // ====== OSC ==================================================================
@@ -180,6 +182,7 @@ private:
 
     int deltaTimeSamples = 0;
     float lastSampleRate;
+    float sampleRateAtSerialize;
 
     int grainTimeCounter = 0;
 

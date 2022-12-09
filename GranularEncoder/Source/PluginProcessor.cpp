@@ -670,6 +670,9 @@ void GranularEncoderAudioProcessor::getStateInformation(juce::MemoryBlock &destD
         state.setProperty(attribute_name, strXmlData, nullptr);
     }
 
+    sampleRateAtSerialize = lastSampleRate;
+
+    state.setProperty("SampleRateAtSerialize", sampleRateAtSerialize, nullptr);
     state.setProperty("WriteHead", circularBufferWriteHead, nullptr);
     state.setProperty("FreezeModeState", (int)mode, nullptr);
 
@@ -695,6 +698,11 @@ void GranularEncoderAudioProcessor::setStateInformation(const void *data, int si
             if (oscConfig.isValid())
                 oscParameterInterface.setConfig(oscConfig);
 
+            sampleRateAtSerialize = parameters.state.getProperty("SampleRateAtSerialize", lastSampleRate);
+            juce::AudioBuffer<float> tempCircularBuffer;
+            tempCircularBuffer.setSize(2, juce::roundToInt(sampleRateAtSerialize * CIRC_BUFFER_SECONDS));
+            tempCircularBuffer.clear();
+
             for (int i = 0; i < circularBuffer.getNumChannels(); i++)
             {
                 juce::String attribute_name = "CircularBufferChannel" + juce::String(i);
@@ -705,13 +713,33 @@ void GranularEncoderAudioProcessor::setStateInformation(const void *data, int si
                     juce::StringRef ref = juce::StringRef(strXmlData);
                     juce::MemoryBlock channelMemory;
                     channelMemory.fromBase64Encoding(strXmlData);
-                    circularBuffer.copyFrom(i, 0, static_cast<const float *>(channelMemory.getData()), circularBuffer.getNumSamples());
+                    tempCircularBuffer.copyFrom(i, 0, static_cast<const float *>(channelMemory.getData()), tempCircularBuffer.getNumSamples());
                 }
             }
 
+            if (sampleRateAtSerialize != lastSampleRate)
+                resampleAudioBuffer(tempCircularBuffer, sampleRateAtSerialize, circularBuffer, lastSampleRate);
+            else
+                circularBuffer = tempCircularBuffer;
+
             circularBufferWriteHead = parameters.state.getProperty("WriteHead", 0);
+            circularBufferWriteHead = static_cast<int>(lastSampleRate / sampleRateAtSerialize * static_cast<float>(circularBufferWriteHead));
             mode = static_cast<OperationMode>((int)parameters.state.getProperty("FreezeModeState", 0));
         }
+}
+
+void GranularEncoderAudioProcessor::resampleAudioBuffer(juce::AudioBuffer<float> &inAudioBuffer, float inSampleRate, juce::AudioBuffer<float> &outAudioBuffer, float outSampleRate)
+{
+    double ratio = static_cast<double>(inSampleRate / outSampleRate);
+
+    const float **inputs = inAudioBuffer.getArrayOfReadPointers();
+    float **outputs = outAudioBuffer.getArrayOfWritePointers();
+    for (int c = 0; c < outAudioBuffer.getNumChannels(); c++)
+    {
+        std::unique_ptr<juce::LagrangeInterpolator> resampler = std::make_unique<juce::LagrangeInterpolator>();
+        resampler->reset();
+        resampler->process(ratio, inputs[c], outputs[c], outAudioBuffer.getNumSamples());
+    }
 }
 
 //==============================================================================
