@@ -37,7 +37,7 @@ MultiBandCompressorAudioProcessor::MultiBandCompressorAudioProcessor()
                            ,
 #endif
                            createParameterLayout()),
-       maxNumFilters (ceil (64 / filterRegisterSize))
+       maxNumFilters (ceil (64 / IIRfloat_elements))
 {
     const juce::String inputSettingID = "orderSetting";
     orderSetting = parameters.getRawParameterValue (inputSettingID);
@@ -362,10 +362,10 @@ void MultiBandCompressorAudioProcessor::prepareToPlay (double sampleRate, int sa
 
     copyCoeffsToProcessor();
 
-    interleaved.clear();
+    interleavedData.clear();
     for (int ch = 0; ch < maxNumFilters; ++ch)
     {
-        interleaved.add (new juce::dsp::AudioBlock<filterFloatType> (interleavedBlockData[ch], 1, samplesPerBlock));
+        interleavedData.add (new juce::dsp::AudioBlock<filterFloatType> (interleavedBlockData[ch], 1, samplesPerBlock));
     }
 
     for (int i = 0; i < numFreqBands-1; ++i)
@@ -402,7 +402,7 @@ void MultiBandCompressorAudioProcessor::prepareToPlay (double sampleRate, int sa
         }
     }
 
-    zero = juce::dsp::AudioBlock<float> (zeroData, filterRegisterSize, samplesPerBlock);
+    zero = juce::dsp::AudioBlock<float> (zeroData, IIRfloat_elements, samplesPerBlock);
     zero.clear();
 
     temp = juce::dsp::AudioBlock<float> (tempData, 64, samplesPerBlock);
@@ -449,7 +449,7 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
 
     auto* inout = channelPointers.getData();
     const int L = buffer.getNumSamples();
-    const int numSimdFilters =  1 + (numChannels - 1) / filterRegisterSize;
+    const int numSimdFilters =  1 + (numChannels - 1) / IIRfloat_elements;
     gainChannelPointer = gains.getChannelPointer (0);
 
     tempBuffer.clear();
@@ -462,18 +462,20 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
         copyCoeffsToProcessor();
 
     inputPeak = juce::Decibels::gainToDecibels (buffer.getMagnitude (0, 0, L));
+    
+    using Format = juce::AudioData::Format<juce::AudioData::Float32, juce::AudioData::NativeEndian>;
 
     // Interleave
-    int partial = numChannels % filterRegisterSize;
+    int partial = numChannels % IIRfloat_elements;
     if (partial == 0)
     {
         for (int i = 0; i < numSimdFilters; ++i)
         {
-            // interleaved[i]->clear(); // broken with JUCE 5.4.5
-            clear (*interleaved[i]);
-            juce::AudioDataConverters::interleaveSamples (buffer.getArrayOfReadPointers() + i* filterRegisterSize,
-                                                    reinterpret_cast<float*> (interleaved[i]->getChannelPointer (0)),
-                                                    L, filterRegisterSize);
+            // interleavedData[i]->clear(); // broken with JUCE 5.4.5
+            clear (*interleavedData[i]);
+            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers(), IIRfloat_elements},
+                                                juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
+                                                L);
         }
     }
     else
@@ -481,28 +483,28 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
         int i;
         for (i = 0; i < numSimdFilters-1; ++i)
         {
-            // interleaved[i]->clear(); // broken with JUCE 5.4.5
-            clear (*interleaved[i]);
-            juce::AudioDataConverters::interleaveSamples (buffer.getArrayOfReadPointers() + i* filterRegisterSize,
-                                                    reinterpret_cast<float*> (interleaved[i]->getChannelPointer (0)),
-                                                    L, filterRegisterSize);
+            // interleavedData[i]->clear(); // broken with JUCE 5.4.5
+            clear (*interleavedData[i]);
+            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers(), IIRfloat_elements},
+                                                juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
+                                                L);
         }
 
-        const float* addr[filterRegisterSize];
+        const float* addr[IIRfloat_elements];
         int ch;
         for (ch = 0; ch < partial; ++ch)
         {
-            addr[ch] = buffer.getReadPointer (i * filterRegisterSize + ch);
+            addr[ch] = buffer.getReadPointer (i * IIRfloat_elements + ch);
         }
-        for (; ch < filterRegisterSize; ++ch)
+        for (; ch < IIRfloat_elements; ++ch)
         {
             addr[ch] = zero.getChannelPointer (ch);
         }
-        // interleaved[i]->clear(); // broken with JUCE 5.4.5
-        clear (*interleaved[i]);
-        juce::AudioDataConverters::interleaveSamples (addr,
-                                                reinterpret_cast<float*> (interleaved[i]->getChannelPointer (0)),
-                                                L, filterRegisterSize);
+        // interleavedData[i]->clear(); // broken with JUCE 5.4.5
+        clear (*interleavedData[i]);
+        juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {addr, IIRfloat_elements},
+                                            juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
+                                            L);
     }
 
 
@@ -516,8 +518,8 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
     //                                | ---> LP1 ---> |
     for (int i = 0; i < numSimdFilters; ++i)
     {
-        const filterFloatType* chPtrInterleaved[1] = {interleaved[i]->getChannelPointer (0)};
-        juce::dsp::AudioBlock<filterFloatType> abInterleaved (const_cast<filterFloatType**> (chPtrInterleaved), 1, L);
+        const filterFloatType* chPtrinterleavedData[1] = {interleavedData[i]->getChannelPointer (0)};
+        juce::dsp::AudioBlock<filterFloatType> abInterleaved (const_cast<filterFloatType**> (chPtrinterleavedData), 1, L);
 
         const filterFloatType* chPtrLow[1] = {freqBands[FrequencyBands::Low][i]->getChannelPointer (0)};
         juce::dsp::AudioBlock<filterFloatType> abLow (const_cast<filterFloatType**> (chPtrLow), 1, L);
@@ -577,9 +579,9 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
         {
             for (int n = 0; n < numSimdFilters; ++n)
             {
-                  juce::AudioDataConverters::deinterleaveSamples (reinterpret_cast<float*>(freqBands[i][n]->getChannelPointer (0)),
-                                                           const_cast<float**>(inout + n*filterRegisterSize),
-                                                           L, filterRegisterSize);
+                juce::AudioData::deinterleaveSamples (juce::AudioData::InterleavedSource<Format> {reinterpret_cast<float*>(freqBands[i][n]->getChannelPointer (0)), IIRfloat_elements},
+                                                      juce::AudioData::NonInterleavedDest<Format> {const_cast<float* const*>(inout), IIRfloat_elements},
+                                                      L);
             }
         }
         else
@@ -587,22 +589,24 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
             int n;
             for (n = 0; n < numSimdFilters-1; ++n)
             {
-                juce::AudioDataConverters::deinterleaveSamples (reinterpret_cast<float*> (freqBands[i][n]->getChannelPointer (0)),
-                                                          const_cast<float**>(inout + n*filterRegisterSize),
-                                                          L, filterRegisterSize);
+                juce::AudioData::deinterleaveSamples (juce::AudioData::InterleavedSource<Format> {reinterpret_cast<float*>(freqBands[i][n]->getChannelPointer (0)), IIRfloat_elements},
+                                                      juce::AudioData::NonInterleavedDest<Format> {const_cast<float* const*>(inout), IIRfloat_elements},
+                                                      L);
             }
 
-            float* addr[filterRegisterSize];
+            float* addr[IIRfloat_elements];
             int ch;
             for (ch = 0; ch < partial; ++ch)
             {
-                addr[ch] = const_cast<float*> (inout[n*filterRegisterSize + ch]);
+                addr[ch] = const_cast<float*> (inout[n*IIRfloat_elements + ch]);
             }
-            for (; ch < filterRegisterSize; ++ch)
+            for (; ch < IIRfloat_elements; ++ch)
             {
                 addr[ch] = zero.getChannelPointer (ch);
             }
-            juce::AudioDataConverters::deinterleaveSamples (reinterpret_cast<float*> (freqBands[i][n]->getChannelPointer (0)), addr, L, filterRegisterSize);
+            juce::AudioData::deinterleaveSamples (juce::AudioData::InterleavedSource<Format> {reinterpret_cast<float*>(freqBands[i][n]->getChannelPointer (0)), IIRfloat_elements},
+                                                  juce::AudioData::NonInterleavedDest<Format> {addr, IIRfloat_elements},
+                                                  L);
             zero.clear();
         }
 
@@ -756,7 +760,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 
 inline void MultiBandCompressorAudioProcessor::clear (juce::dsp::AudioBlock<filterFloatType>& ab)
 {
-    const int N = static_cast<int> (ab.getNumSamples()) * filterRegisterSize;
+    const int N = static_cast<int> (ab.getNumSamples()) * IIRfloat_elements;
     const int nCh = static_cast<int> (ab.getNumChannels());
 
     for (int ch = 0; ch < nCh; ++ch)

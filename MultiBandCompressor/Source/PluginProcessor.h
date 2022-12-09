@@ -79,10 +79,10 @@ public:
 
     #if JUCE_USE_SIMD
       using filterFloatType = SIMDRegister<float>;
-      static constexpr int filterRegisterSize = SIMDRegister<float>::size();
+      static constexpr int IIRfloat_elements = SIMDRegister<float>::size();
     #else /* !JUCE_USE_SIMD */
       using filterFloatType = float;
-      static constexpr int filterRegisterSize = 1;
+      static constexpr int IIRfloat_elements = 1;
     #endif
 
     static constexpr int numFreqBands {4};
@@ -143,7 +143,7 @@ private:
                                              iirLP2[numFreqBands-1], iirHP2[numFreqBands-1],
                                              iirAP[numFreqBands-1];
 
-    juce::OwnedArray<juce::dsp::AudioBlock<filterFloatType>> interleaved, freqBands[numFreqBands];
+    juce::OwnedArray<juce::dsp::AudioBlock<filterFloatType>> interleavedData, freqBands[numFreqBands];
     juce::dsp::AudioBlock<float> zero, temp, gains;
     juce::AudioBuffer<float> tempBuffer;
     float* gainChannelPointer;
