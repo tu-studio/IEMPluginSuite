@@ -382,18 +382,18 @@ void SceneRotatorAudioProcessorEditor::refreshMidiDeviceList()
     cbMidiDevices.addItem ("(refresh list...)", -3);
     cbMidiDevices.addItem ("none / use DAW input", -2);
 
-    juce::String currentDevice = processor.getCurrentMidiDeviceName();
+    juce::MidiDeviceInfo currentDevice = processor.getCurrentMidiDeviceInfo();
 
     int select = -2;
 
-    juce::StringArray devices = juce::MidiInput::getDevices();
-    if (! currentDevice.isEmpty())
+    juce::Array<juce::MidiDeviceInfo> devices = juce::MidiInput::getAvailableDevices();
+    if (! currentDevice.identifier.isEmpty())
     {
         if (devices.contains (currentDevice))
             select = devices.indexOf (currentDevice) + 1;
         else
         {
-            cbMidiDevices.addItem (currentDevice + " (not available)", -1);
+            cbMidiDevices.addItem (currentDevice.name + " (not available)", -1);
             select = -1;
         }
     }
@@ -402,7 +402,7 @@ void SceneRotatorAudioProcessorEditor::refreshMidiDeviceList()
     cbMidiDevices.addSectionHeading ("Available Devices");
     for (int i = 0; i < devices.size(); ++i)
     {
-        cbMidiDevices.addItem (devices[i], i + 1);
+        cbMidiDevices.addItem (devices[i].name, i + 1);
     }
 
     juce::ScopedValueSetter<juce::Atomic<bool>> refreshing (refreshingMidiDevices, true, false);

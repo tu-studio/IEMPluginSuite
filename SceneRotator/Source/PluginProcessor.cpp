@@ -483,7 +483,7 @@ void SceneRotatorAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
     oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
 
-    state.setProperty ("MidiDeviceName", juce::var (currentMidiDeviceName), nullptr);
+    state.setProperty ("MidiDeviceName", juce::var (currentMidiDeviceInfo.name), nullptr);
     state.setProperty ("MidiDeviceScheme", juce::var (static_cast<int> (currentMidiScheme)), nullptr);
     std::unique_ptr<juce::XmlElement> xml (state.createXml());
     copyXmlToBinary (*xml, destData);
@@ -806,30 +806,54 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> SceneRotatorAudioProces
 void SceneRotatorAudioProcessor::timerCallback()
 {
     // retrying to connect to a desired device which might not be physically connected
-    if (currentMidiDeviceName != "" && midiInput == nullptr)
-        openMidiInput (currentMidiDeviceName);
+    if (currentMidiDeviceInfo.identifier != "" && midiInput == nullptr)
+        openMidiInput (currentMidiDeviceInfo);
 }
 
 
 //==============================================================================
-juce::String SceneRotatorAudioProcessor::getCurrentMidiDeviceName()
+juce::MidiDeviceInfo SceneRotatorAudioProcessor::getCurrentMidiDeviceInfo()
 {
-    return currentMidiDeviceName;
+    return currentMidiDeviceInfo;
 }
 
-void SceneRotatorAudioProcessor::openMidiInput (juce::String midiDeviceName, bool forceUpdatingCurrentMidiDeviceName)
+/**
+ Open Midi input with just a given device name as string. Overloaded method for compatibility reasons
+ */
+void SceneRotatorAudioProcessor::openMidiInput (const juce::String midiDeviceName, bool forceUpdatingcurrentMidiDeviceInfo)
 {
-    if (midiDeviceName.isEmpty())
+    const juce::ScopedLock scopedLock (changingMidiDevice);
+    
+    juce::Array<juce::MidiDeviceInfo> devices = juce::MidiInput::getAvailableDevices();
+    juce::MidiDeviceInfo selectedMidiDevice;
+    
+    // Check which available device corresponds to the given device name
+    for (int i = 0; i < devices.size(); ++i)
+    {
+        if (devices[i].name.compare(midiDeviceName) == 0)
+        {
+            selectedMidiDevice = devices[i];
+            break;
+        }
+    }
+    
+    openMidiInput (selectedMidiDevice, forceUpdatingcurrentMidiDeviceInfo);
+}
+
+void SceneRotatorAudioProcessor::openMidiInput (juce::MidiDeviceInfo midiDevice, bool forceUpdatingcurrentMidiDeviceInfo)
+{
+    if (midiDevice.identifier.isEmpty())
         return closeMidiInput(); // <- not sure if that syntax is totally wrong or brilliant!
 
     const juce::ScopedLock scopedLock (changingMidiDevice);
 
-    juce::StringArray devices = juce::MidiInput::getDevices();
+    juce::Array<juce::MidiDeviceInfo> devices = juce::MidiInput::getAvailableDevices();
 
-    const int index = devices.indexOf (midiDeviceName);
+    const int index = devices.indexOf (midiDevice);
+    //const auto deviceIdentifier 0;
     if (index != -1)
     {
-        midiInput = juce::MidiInput::openDevice (index, this);
+        midiInput = juce::MidiInput::openDevice (devices[index].identifier, this);
         if (midiInput == nullptr)
         {
             deviceHasChanged = true;
@@ -839,17 +863,17 @@ void SceneRotatorAudioProcessor::openMidiInput (juce::String midiDeviceName, boo
 
         midiInput->start();
 
-        DBG ("Opened juce::MidiInput: " << midiInput->getName());
+        DBG ("Opened MidiInput: " << midiInput->getName());
 
-        currentMidiDeviceName = midiDeviceName;
+        currentMidiDeviceInfo = midiDevice;
         deviceHasChanged = true;
 
         return;
     }
 
-    if (forceUpdatingCurrentMidiDeviceName)
+    if (forceUpdatingcurrentMidiDeviceInfo)
     {
-        currentMidiDeviceName = midiDeviceName;
+        currentMidiDeviceInfo = midiDevice;
         deviceHasChanged = true;
     }
 
@@ -863,10 +887,12 @@ void SceneRotatorAudioProcessor::closeMidiInput()
     {
         midiInput->stop();
         midiInput.reset();
-        DBG ("Closed juce::MidiInput");
+        DBG ("Closed MidiInput");
     }
 
-    currentMidiDeviceName = ""; // hoping there's not actually a MidiDevice without a name!
+    // It ain't beautiful, but it's honest work
+    currentMidiDeviceInfo.name = "";
+    currentMidiDeviceInfo.identifier = "";
     deviceHasChanged = true;
 
     return;

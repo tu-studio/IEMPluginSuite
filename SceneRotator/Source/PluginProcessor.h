@@ -107,7 +107,8 @@ public:
         "MrHT_Quat"
     };
 
-    juce::String getCurrentMidiDeviceName();
+    juce::MidiDeviceInfo getCurrentMidiDeviceInfo();
+    void openMidiInput (juce::MidiDeviceInfo midiDevice, bool forceUpdatingCurrentMidiDeviceName = false);
     void openMidiInput (juce::String midiDeviceName, bool forceUpdatingCurrentMidiDeviceName = false);
     void closeMidiInput();
 
@@ -164,7 +165,7 @@ private:
     int qwLsb = 0, qxLsb = 0, qyLsb = 0, qzLsb = 0;
 
     std::unique_ptr<juce::MidiInput> midiInput;
-    juce::String currentMidiDeviceName = "";
+    juce::MidiDeviceInfo currentMidiDeviceInfo;
     MidiScheme currentMidiScheme = MidiScheme::none;
     juce::CriticalSection changingMidiDevice;
     //==============================================================================
