@@ -88,7 +88,8 @@ public:
     inline void updateQuaternions();
     inline void updateEuler();
 
-    juce::Vector3D<float> getRandomGrainDirection();
+    juce::Vector3D<float> getRandomGrainDirection3D();
+    juce::Vector3D<float> getRandomGrainDirection2D();
     juce::AudioBuffer<float> getWindowBuffer(float modWeight);
     int getStartPositionCircBuffer() const;
     std::pair<int, float> getGrainLengthAndPitchFactor() const;
@@ -146,6 +147,7 @@ public:
     std::atomic<float> *highQuality;
 
     std::atomic<float> *freeze;
+    std::atomic<float> *spatialize2D;
 
     // --------------------
 

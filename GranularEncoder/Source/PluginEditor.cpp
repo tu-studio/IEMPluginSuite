@@ -31,7 +31,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(Granula
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     // setSize(500, 325);
-    setSize(500, 470);
+    // setSize(500, 470);
+    setSize(500, 480);
     setLookAndFeel(&globalLaF);
 
     // ==== SPHERE AND ELEMENTS ===============
@@ -307,6 +308,16 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(Granula
     addAndMakeVisible(&lbFreeze);
     lbFreeze.setText("Freeze Audio");
 
+    // 2D/3D Spatialization Toggle
+    addAndMakeVisible(tb2D);
+    tb2DAttachment.reset(new ButtonAttachment(valueTreeState, "spatialize2D", tb2D));
+    tb2D.setButtonText("");
+    tb2D.setColour(juce::ToggleButton::tickColourId, juce::Colours::white);
+    tb2D.setTooltip("Toggle for 2D spatialization mode (azimuth spread only).");
+
+    addAndMakeVisible(&lb2D);
+    lb2D.setText("2D");
+
     // ================ LABELS ===================
     addAndMakeVisible(&lbAzimuth);
     lbAzimuth.setText("Azimuth");
@@ -456,7 +467,12 @@ void GranularEncoderAudioProcessorEditor::resized()
     yprArea.removeFromLeft(rotSliderSpacing);
     lbShape.setBounds(yprArea.removeFromLeft(rotSliderWidth));
 
-    sideBarArea.removeFromTop(20);
+    juce::Rectangle<int> ModeArea2D(sideBarArea.removeFromTop(25));
+    lb2D.setBounds(ModeArea2D.removeFromRight(20));
+    tb2D.setBounds(ModeArea2D.removeFromRight(20));
+    // ButtonRow.removeFromLeft(1);
+
+    // sideBarArea.removeFromTop(20);
 
     // -------------- DeltaTime GrainLength Position Pitch ------------------
     juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + 10 + 2 * rotSliderHeight + 2 * modSliderHeight + 2 * labelHeight));

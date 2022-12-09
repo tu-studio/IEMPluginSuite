@@ -125,7 +125,12 @@ private:
 
     juce::ToggleButton tbFreeze;
     SimpleLabel lbFreeze;
+
+    juce::ToggleButton tb2D;
+    SimpleLabel lb2D;
+
     std::unique_ptr<ButtonAttachment> tbFreezeAttachment;
+    std::unique_ptr<ButtonAttachment> tb2DAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEncoderAudioProcessorEditor)
 };

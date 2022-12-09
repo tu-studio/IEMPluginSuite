@@ -94,6 +94,7 @@ GranularEncoderAudioProcessor::GranularEncoderAudioProcessor()
     sourceProbability = parameters.getRawParameterValue("sourceProbability");
 
     freeze = parameters.getRawParameterValue("freeze");
+    spatialize2D = parameters.getRawParameterValue("spatialize2D");
 
     highQuality = parameters.getRawParameterValue("highQuality");
 
@@ -208,7 +209,7 @@ void GranularEncoderAudioProcessor::updateEuler()
     processorUpdatingParams = false;
 }
 
-juce::Vector3D<float> GranularEncoderAudioProcessor::getRandomGrainDirection()
+juce::Vector3D<float> GranularEncoderAudioProcessor::getRandomGrainDirection3D()
 {
     float shape_abs = std::abs(*shape);
     float shape_param = std::pow(2, shape_abs);
@@ -263,6 +264,55 @@ juce::Vector3D<float> GranularEncoderAudioProcessor::getRandomGrainDirection()
     float target_z = -sinZen * x + cosZen * z;
 
     juce::Vector3D<float> vec(target_x, target_y, target_z);
+    return vec;
+}
+
+juce::Vector3D<float> GranularEncoderAudioProcessor::getRandomGrainDirection2D()
+{
+    float shape_abs = std::abs(*shape);
+    float shape_param = std::pow(2, shape_abs);
+    float size_param = *size;
+    juce::Vector3D<float> centerDir = quaternionDirection.getCartesian();
+
+    float azi_center;
+    float ele_center;
+    Conversions<float>::cartesianToSpherical(centerDir, azi_center, ele_center);
+    float zen_center = (juce::MathConstants<float>::pi / 2.0f) - ele_center;
+
+    // Uniform random distribution in [0,2*pi]
+    // float rand_phi = juce::Random::getSystemRandom().nextFloat() * 2.0f * juce::MathConstants<float>::pi;
+
+    // Beta distribution to control shape of rotationally symmetric distribution around centerDir
+    jassert(shape_param >= 1.0f);
+    // beta_distribution<float> dist(shape, shape); // -> realized with std::gamma_distribution
+    std::gamma_distribution<float> dist1(shape_param, 1.0f);
+    std::gamma_distribution<float> dist2(shape_param, 1.0f);
+    float gamma1 = dist1(rng);
+    float gamma2 = dist2(rng);
+    float eps = 1e-16f;
+    float beta_val = (gamma1 + eps) / (gamma1 + gamma2 + eps);
+
+    float sym_beta_sample;
+    if (*shape < 0.0f)
+        sym_beta_sample = 1.0f - abs(beta_val - 0.5f) * 2.0f;
+    else
+        sym_beta_sample = abs(beta_val - 0.5f) * 2.0f;
+
+    // Input parameter size defines opening angle of distribution cap
+    jassert(size_param >= 0.0f && size_param <= 360.0f);
+    float size_factor = (size_param / 2.0f) / 180.0f;
+    float beta_sized = sym_beta_sample * size_factor;
+
+    // azi_center +- random spread
+    float sign = (juce::Random::getSystemRandom().nextFloat() > 0.5f) * 2.0f - 1.0f;
+    float rand_phi = azi_center + juce::MathConstants<float>::pi * beta_sized * sign;
+
+    float sinZenith = sin(zen_center);
+    float x = cos(rand_phi) * sinZenith;
+    float y = sin(rand_phi) * sinZenith;
+    float z = cos(zen_center);
+
+    juce::Vector3D<float> vec(x, y, z);
     return vec;
 }
 
@@ -546,7 +596,11 @@ void GranularEncoderAudioProcessor::processBlock(juce::AudioBuffer<float> &buffe
                 if (!grains[g].isActive())
                 {
                     // find the first free grain processor and pass parameters
-                    juce::Vector3D<float> grainDir = getRandomGrainDirection();
+                    juce::Vector3D<float> grainDir;
+                    if (*spatialize2D > 0.5f)
+                        grainDir = getRandomGrainDirection2D();
+                    else
+                        grainDir = getRandomGrainDirection3D();
                     SHEval(ambisonicOrder, grainDir.x, grainDir.y, grainDir.z, _grainSH[g]);
                     if (*useSN3D > 0.5f)
                     {
@@ -985,6 +1039,18 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> GranularEncoderAudioPro
                 return "Yes";
             else
                 return "No";
+        },
+        nullptr));
+
+    params.push_back(OSCParameterInterface::createParameterTheOldWay(
+        "spatialize2D", "2D", "",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 1.0f), 0.0f,
+        [](float value)
+        {
+            if (value >= 0.5f)
+                return "2D";
+            else
+                return "3D";
         },
         nullptr));
 
