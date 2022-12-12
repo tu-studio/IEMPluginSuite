@@ -126,8 +126,11 @@ private:
     juce::ToggleButton tbFreeze;
     SimpleLabel lbFreeze;
 
-    juce::ToggleButton tb2D;
-    SimpleLabel lb2D;
+    // juce::ToggleButton tb2D;
+    // SimpleLabel lb2D;
+
+    juce::ComboBox cb2D3D;
+    std::unique_ptr<ComboBoxAttachment> cb2D3DAtachement;
 
     std::unique_ptr<ButtonAttachment> tbFreezeAttachment;
     std::unique_ptr<ButtonAttachment> tb2DAttachment;

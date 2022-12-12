@@ -91,7 +91,7 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(Granula
     shapeSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     shapeSlider.setReverse(false);
     shapeSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    shapeSlider.setTooltip("Shape the grain distribution (circular-uniform-peaky)");
+    shapeSlider.setTooltip("Shape the grain distribution: edgy(-) / uniform(0) / peaky(+)");
     shapeSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"()"));
 
     addAndMakeVisible(&sizeSlider);
@@ -172,7 +172,7 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(Granula
     positionModSlider.setReverse(false);
     positionModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     positionModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    positionModSlider.setTooltip("Spread amount for the read position in the buffer");
+    positionModSlider.setTooltip("Spread amount for the read position in the buffer (unipolar)");
     positionModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // Pitch
@@ -193,7 +193,7 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(Granula
     pitchModSlider.setReverse(false);
     pitchModSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     pitchModSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    pitchModSlider.setTooltip("Spread amount for the pitch of grains");
+    pitchModSlider.setTooltip("Spread amount for the pitch of grains (bipolar)");
     pitchModSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // Window Attack
@@ -244,7 +244,7 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(Granula
     mixSlider.setReverse(false);
     mixSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     mixSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    mixSlider.setTooltip("Mix between standard encoding (dry) and granular encoding (wet).");
+    mixSlider.setTooltip("Mix between standard encoding (0) and granular encoding (100).");
     mixSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // Blend between seeding left or right channel (only relevant for stereo input)
@@ -255,7 +255,7 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(Granula
     sourceSlider.setReverse(false);
     sourceSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
     sourceSlider.setRotaryParameters(juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, true);
-    sourceSlider.setTooltip("Probability to seed grains from left (-1) or right (+1) input channel (for stereo input).");
+    sourceSlider.setTooltip("Seed grains from left (-1), both (0), or right (+1) input channel (for stereo input).");
     sourceSlider.setTextValueSuffix(juce::CharPointer_UTF8(R"(%)"));
 
     // ====================== QUATERNION GROUP
@@ -309,14 +309,24 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor(Granula
     lbFreeze.setText("Freeze Audio");
 
     // 2D/3D Spatialization Toggle
+    /*
     addAndMakeVisible(tb2D);
     tb2DAttachment.reset(new ButtonAttachment(valueTreeState, "spatialize2D", tb2D));
     tb2D.setButtonText("");
     tb2D.setColour(juce::ToggleButton::tickColourId, juce::Colours::white);
-    tb2D.setTooltip("Toggle for 2D spatialization mode (azimuth spread only).");
+    tb2D.setTooltip("Toggle for 2D spatialization mode (azimuth spread only).");*/
 
-    addAndMakeVisible(&lb2D);
-    lb2D.setText("2D");
+    addAndMakeVisible(cb2D3D);
+    cb2D3D.setJustificationType(juce::Justification::centred);
+    cb2D3D.addSectionHeading("Distribution");
+    // cb2D3D.addItem("3D", 1);
+    // cb2D3D.addItem("2D", 2);
+    cb2D3D.addItem("Spherical", 1);
+    cb2D3D.addItem("Circular", 2);
+    cb2D3DAtachement.reset(new ComboBoxAttachment(valueTreeState, "spatialize2D", cb2D3D));
+
+    // addAndMakeVisible(&lb2D);
+    // lb2D.setText("2D");
 
     // ================ LABELS ===================
     addAndMakeVisible(&lbAzimuth);
@@ -467,12 +477,13 @@ void GranularEncoderAudioProcessorEditor::resized()
     yprArea.removeFromLeft(rotSliderSpacing);
     lbShape.setBounds(yprArea.removeFromLeft(rotSliderWidth));
 
-    juce::Rectangle<int> ModeArea2D(sideBarArea.removeFromTop(25));
-    lb2D.setBounds(ModeArea2D.removeFromRight(20));
-    tb2D.setBounds(ModeArea2D.removeFromRight(20));
-    // ButtonRow.removeFromLeft(1);
-
-    // sideBarArea.removeFromTop(20);
+    sideBarArea.removeFromTop(5);
+    juce::Rectangle<int> ModeArea2D(sideBarArea.removeFromTop(15));
+    // lb2D.setBounds(ModeArea2D.removeFromRight(20));
+    // tb2D.setBounds(ModeArea2D.removeFromRight(20));
+    ModeArea2D.removeFromRight(5);
+    cb2D3D.setBounds(ModeArea2D.removeFromRight(70));
+    sideBarArea.removeFromTop(5);
 
     // -------------- DeltaTime GrainLength Position Pitch ------------------
     juce::Rectangle<int> grainArea(sideBarArea.removeFromTop(25 + 10 + 2 * rotSliderHeight + 2 * modSliderHeight + 2 * labelHeight));
@@ -533,14 +544,7 @@ void GranularEncoderAudioProcessorEditor::resized()
     windowDecayModSlider.setBounds(sliderRow.removeFromLeft(rotSliderWidth));
     sliderRow.removeFromLeft(rotSliderSpacing);
     tbFreeze.setBounds(sliderRow.removeFromLeft(20));
-    // ButtonRow.removeFromLeft(1);
     lbFreeze.setBounds(sliderRow.removeFromLeft(70));
-
-    // FREEZE BUTTON
-    // sideBarArea.removeFromTop(5);
-    // juce::Rectangle<int> ButtonRow(sideBarArea.removeFromTop(20));
-    // tbFreeze.setBounds(ButtonRow.removeFromLeft(20));
-    // lbFreeze.setBounds(ButtonRow.removeFromLeft(70));
 
     // ============== SIDEBAR LEFT ====================
     area.removeFromRight(10); // spacing
