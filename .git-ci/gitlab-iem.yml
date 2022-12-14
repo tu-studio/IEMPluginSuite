@@ -35,6 +35,7 @@ variables:
     - master
     - develop
     - ci-test
+    - 148-JUCE7.0.3
 
 .build:linux:
   stage: build
