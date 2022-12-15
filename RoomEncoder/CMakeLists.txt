@@ -8,7 +8,7 @@ juce_add_plugin (RoomEncoder
     PRODUCT_NAME "RoomEncoder"
     FORMATS ${IEM_FORMATS}
     VERSION "1.3.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/RoomEncoder")
+    LV2URI "http://plugins.iem.at/RoomEncoder")
 
 
 juce_generate_juce_header(RoomEncoder)

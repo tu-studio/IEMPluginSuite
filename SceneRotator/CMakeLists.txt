@@ -8,7 +8,7 @@ juce_add_plugin (SceneRotator
     PRODUCT_NAME "SceneRotator"
     FORMATS ${IEM_FORMATS}
     VERSION "0.4.5"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/SceneRotator")
+    LV2URI "http://plugins.iem.at/SceneRotator")
 
 
 juce_generate_juce_header(SceneRotator)

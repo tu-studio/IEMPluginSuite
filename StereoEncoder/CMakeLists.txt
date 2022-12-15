@@ -8,7 +8,7 @@ juce_add_plugin (StereoEncoder
     PRODUCT_NAME "StereoEncoder"
     FORMATS ${IEM_FORMATS}
     VERSION "1.4.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/StereoEncoder")
+    LV2URI "http://plugins.iem.at/StereoEncoder")
 
 
 juce_generate_juce_header (StereoEncoder)

@@ -8,7 +8,7 @@ juce_add_plugin (CoordinateConverter
     PRODUCT_NAME "CoordinateConverter"
     FORMATS ${IEM_FORMATS}
     VERSION "0.4.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/CoordinateConverter")
+    LV2URI "http://plugins.iem.at/CoordinateConverter")
 
 
 juce_generate_juce_header (CoordinateConverter)

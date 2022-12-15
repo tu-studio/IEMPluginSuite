@@ -8,7 +8,7 @@ juce_add_plugin (MatrixMultiplier
     PRODUCT_NAME "MatrixMultiplier"
     FORMATS ${IEM_FORMATS}
     VERSION "0.3.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/MatrixMultiplier")
+    LV2URI "http://plugins.iem.at/MatrixMultiplier")
 
 
 juce_generate_juce_header (MatrixMultiplier)

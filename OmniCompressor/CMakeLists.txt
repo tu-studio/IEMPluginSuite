@@ -8,7 +8,7 @@ juce_add_plugin (OmniCompressor
     PRODUCT_NAME "OmniCompressor"
     FORMATS ${IEM_FORMATS}
     VERSION "1.4.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/OmniCompressor")
+    LV2URI "http://plugins.iem.at/OmniCompressor")
 
 
 juce_generate_juce_header(OmniCompressor)
