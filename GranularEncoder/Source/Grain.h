@@ -39,9 +39,9 @@ public:
 
     Grain();
 
-    void setBlockSize(int numSampOutBuffer);
-    void startGrain(const GrainJobParameters &grainParameters);
-    void processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<float> &circularBuffer);
+    void setBlockSize (int numSampOutBuffer);
+    void startGrain (const GrainJobParameters& grainParameters);
+    void processBlock (juce::AudioBuffer<float>& buffer, juce::AudioBuffer<float>& circularBuffer);
 
     bool isActive() const;
 

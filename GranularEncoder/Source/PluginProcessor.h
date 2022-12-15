@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #include "../../resources/Quaternion.h"
-#include "../../resources/efficientSHvanilla.h"
 #include "../../resources/ambisonicTools.h"
+#include "../../resources/efficientSHvanilla.h"
 
 #include "../../resources/Conversions.h"
 #include "Grain.h"
@@ -42,7 +42,8 @@
 //==============================================================================
 /**
  */
-class GranularEncoderAudioProcessor : public AudioProcessorBase<IOTypes::AudioChannels<2>, IOTypes::Ambisonics<>>
+class GranularEncoderAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<2>, IOTypes::Ambisonics<>>
 {
 public:
     constexpr static int numberOfInputChannels = 2;
@@ -53,32 +54,35 @@ public:
     ~GranularEncoderAudioProcessor();
 
     //==============================================================================
-    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
+    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-    void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
+    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
-    juce::AudioProcessorEditor *createEditor() override;
+    juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
-    void setCurrentProgram(int index) override;
-    const juce::String getProgramName(int index) override;
-    void changeProgramName(int index, const juce::String &newName) override;
+    void setCurrentProgram (int index) override;
+    const juce::String getProgramName (int index) override;
+    void changeProgramName (int index, const juce::String& newName) override;
 
     //==============================================================================
-    void getStateInformation(juce::MemoryBlock &destData) override;
-    void setStateInformation(const void *data, int sizeInBytes) override;
+    void getStateInformation (juce::MemoryBlock& destData) override;
+    void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void resampleAudioBuffer(juce::AudioBuffer<float> &inAudioBuffer, float inSampleRate, juce::AudioBuffer<float> &outAudioBuffer, float outSampleRate);
+    void resampleAudioBuffer (juce::AudioBuffer<float>& inAudioBuffer,
+                              float inSampleRate,
+                              juce::AudioBuffer<float>& outAudioBuffer,
+                              float outSampleRate);
 
-    void parameterChanged(const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     // ====== OSC ==================================================================
-    const bool processNotYetConsumedOSCMessage(const juce::OSCMessage &message) override;
+    const bool processNotYetConsumedOSCMessage (const juce::OSCMessage& message) override;
     // =================
 
     //======= Parameters ===========================================================
@@ -90,14 +94,14 @@ public:
 
     juce::Vector3D<float> getRandomGrainDirection3D();
     juce::Vector3D<float> getRandomGrainDirection2D();
-    juce::AudioBuffer<float> getWindowBuffer(float modWeight);
+    juce::AudioBuffer<float> getWindowBuffer (float modWeight);
     int getStartPositionCircBuffer() const;
     std::pair<int, float> getGrainLengthAndPitchFactor() const;
     int getDeltaTimeSamples();
     bool getChannelToSeed();
 
     bool getFreezeGUIBool();
-    void initializeModeTransition(bool freeze);
+    void initializeModeTransition (bool freeze);
     void finishModeTransition();
 
     float getMeanWindowGain();
@@ -108,46 +112,46 @@ public:
 
     juce::Atomic<bool> updatedPositionData;
 
-    std::atomic<float> *orderSetting;
-    std::atomic<float> *useSN3D;
-    std::atomic<float> *qw;
-    std::atomic<float> *qx;
-    std::atomic<float> *qy;
-    std::atomic<float> *qz;
-    std::atomic<float> *azimuth;
-    std::atomic<float> *elevation;
+    std::atomic<float>* orderSetting;
+    std::atomic<float>* useSN3D;
+    std::atomic<float>* qw;
+    std::atomic<float>* qx;
+    std::atomic<float>* qy;
+    std::atomic<float>* qz;
+    std::atomic<float>* azimuth;
+    std::atomic<float>* elevation;
 
-    std::atomic<float> *shape; // distribution parameter (circular to peaky, uniform at 0.0)
-    std::atomic<float> *size;  // total opening angle of distribution cap
+    std::atomic<float>* shape; // distribution parameter (circular to peaky, uniform at 0.0)
+    std::atomic<float>* size; // total opening angle of distribution cap
 
-    std::atomic<float> *roll;  // legacy parameter from StereoEncoder
-    std::atomic<float> *width; // legacy parameter from StereoEncoder
+    std::atomic<float>* roll; // legacy parameter from StereoEncoder
+    std::atomic<float>* width; // legacy parameter from StereoEncoder
 
-    std::atomic<float> *deltaTime;
-    std::atomic<float> *deltaTimeMod;
+    std::atomic<float>* deltaTime;
+    std::atomic<float>* deltaTimeMod;
 
-    std::atomic<float> *grainLength;
-    std::atomic<float> *grainLengthMod;
+    std::atomic<float>* grainLength;
+    std::atomic<float>* grainLengthMod;
 
-    std::atomic<float> *pitch;
-    std::atomic<float> *pitchMod;
+    std::atomic<float>* pitch;
+    std::atomic<float>* pitchMod;
 
-    std::atomic<float> *position;
-    std::atomic<float> *positionMod;
+    std::atomic<float>* position;
+    std::atomic<float>* positionMod;
 
-    std::atomic<float> *windowAttack;
-    std::atomic<float> *windowAttackMod;
+    std::atomic<float>* windowAttack;
+    std::atomic<float>* windowAttackMod;
 
-    std::atomic<float> *windowDecay;
-    std::atomic<float> *windowDecayMod;
+    std::atomic<float>* windowDecay;
+    std::atomic<float>* windowDecayMod;
 
-    std::atomic<float> *mix;
-    std::atomic<float> *sourceProbability;
+    std::atomic<float>* mix;
+    std::atomic<float>* sourceProbability;
 
-    std::atomic<float> *highQuality;
+    std::atomic<float>* highQuality;
 
-    std::atomic<float> *freeze;
-    std::atomic<float> *spatialize2D;
+    std::atomic<float>* freeze;
+    std::atomic<float>* spatialize2D;
 
     // --------------------
 
@@ -197,5 +201,5 @@ private:
     juce::SmoothedValue<float> writeGainCircBuffer = 1.0f;
     OperationMode mode = OperationMode::Realtime;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEncoderAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GranularEncoderAudioProcessor)
 };
