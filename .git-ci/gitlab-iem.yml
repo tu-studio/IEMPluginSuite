@@ -55,6 +55,7 @@ variables:
 # get VST2SDK
     - .git-ci/getvst.sh
 # run the actual build
+    - rm -rf build
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release -DIEM_BUILD_VST2=ON -DVST2SDKPATH=src/VST_SDK/VST2_SDK/ -DIEM_BUILD_STANDALONE=ON
@@ -79,6 +80,7 @@ variables:
 # get VST2SDK
     - .git-ci/getvst.sh
 # run the actual build
+    - rm -rf build
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release  -DIEM_BUILD_VST2=ON -DVST2SDKPATH=src/VST_SDK/VST2_SDK/ -DIEM_BUILD_STANDALONE=ON
