@@ -7,7 +7,8 @@ juce_add_plugin (GranularEncoder
     COMPANY_NAME "IEM"
     PRODUCT_NAME "GranularEncoder"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.0.1")
+    VERSION "0.0.1"
+    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/GranularEncoder")
 
 
 juce_generate_juce_header (GranularEncoder)

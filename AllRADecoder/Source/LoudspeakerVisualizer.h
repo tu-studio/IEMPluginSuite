@@ -513,10 +513,10 @@ public:
 
     juce::Matrix3D<float> getViewMatrix()
     {
-        juce::Matrix3D<float> translationMatrix (juce::Vector3D<float> (0.0f, 0.0f, -500.0f * zoom)); // move object further away
+        auto translationMatrix = juce::Matrix3D<float>::fromTranslation ({0.0f, 0.0f, -500.0f * zoom}); // move object further away
         juce::Matrix3D<float> tiltMatrix = createRotationMatrix (juce::Vector3D<float> (tilt, 0.0f, 0.0f));
         juce::Matrix3D<float> rotationMatrix = createRotationMatrix (juce::Vector3D<float> (0.0f, yaw, 0.0f));
-        return rotationMatrix * tiltMatrix  * translationMatrix;
+        return translationMatrix * tiltMatrix * rotationMatrix;
     }
 
 private:

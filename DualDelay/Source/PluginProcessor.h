@@ -22,17 +22,18 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include "../../resources/AudioProcessorBase.h"
 #include "../../resources/ambisonicTools.h"
 #include "../../resources/interpLagrangeWeights.h"
-#include "../../resources/AudioProcessorBase.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define ProcessorClass DualDelayAudioProcessor
 
 //==============================================================================
 /**
 */
-class DualDelayAudioProcessor  : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>, true>
+class DualDelayAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>, true>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -62,9 +63,8 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override;
-
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
@@ -107,11 +107,9 @@ private:
 
     juce::AudioBuffer<float> delayTempBuffer;
 
-
     juce::Array<float> delay;
     juce::Array<int> interpCoeffIdx;
     juce::Array<int> idx;
-
 
     juce::dsp::Oscillator<float> LFOLeft, LFORight;
 
@@ -124,8 +122,10 @@ private:
     juce::Array<float> sin_z;
     juce::Array<float> cos_z;
 
-    void calcParams(float phi);
-    void rotateBuffer(juce::AudioBuffer<float>* bufferToRotate, const int nChannels, const int samples);
+    void calcParams (float phi);
+    void rotateBuffer (juce::AudioBuffer<float>* bufferToRotate,
+                       const int nChannels,
+                       const int samples);
     float feedback = 0.8f;
 
     juce::OwnedArray<juce::IIRFilter> lowPassFiltersLeft;

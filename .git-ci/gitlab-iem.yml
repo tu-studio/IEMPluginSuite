@@ -1,28 +1,28 @@
 # gitlab-ci configuration for the IEM Plugin Suite
 
+stages:
+  - pre-check
+  - build
+  - test
+  - deploy
+
 variables:
 ## leave this uncommented to build all projects (except _PluginTemplate)
   #PROJECTS: AllRADecoder BinauralDecoder CoordinateConverter DirectionalCompressor DirectivityShaper DistanceCompensator DualDelay EnergyVisualizer FdnReverb MatrixMultiplier MultiBandCompressor MultiEncoder MultiEQ OmniCompressor ProbeDecoder RoomEncoder SceneRotator SimpleDecoder StereoEncoder ToolBox
   GIT_SUBMODULE_STRATEGY: recursive
   CONFIG: Release
-  JUCEVERSION: 6.0.7
+  JUCEVERSION: 7.0.3
 
 ###################################################
 # cleanup after the job (e.g. rename files for the artifacts...)
 .after_script:
-  - test -d IEM && find IEM -type f -exec file {} +
+  - test ! -d IEM || find IEM -type f -exec file {} +
   - find DualDelay/Builds/ -type f -exec file {} +
 
 ###################################################
-### configuration templates (to be used for snapshot and release builds)
-.build:snapshot: &snapshot
-  only:
-    - master
-    - develop
-    - ci-test
-  except:
-    - tags
-  artifacts: &snapshot_artifacts
+### configuration templates
+.artifacts:
+  artifacts:
     paths:
       - VST3
       - VST
@@ -30,33 +30,27 @@ variables:
       - ChangeLog.md
     expire_in: 1 week
 
-.build:release: &release
+.run_selected:
   only:
-    - tags
-  artifacts: &release_artifacts
-    paths:
-      - VST3
-      - VST
-      - Standalone
-      - ChangeLog.md
+    - master
+    - develop
+    - ci-test
+    - 148-JUCE7.0.3
 
-.build:linux: &build_linux
+.build:linux:
   stage: build
   image: ubuntu:focal
   tags:
     - docker
   variables:
-    PKGLIBS: jack fftw3f
+    DEBIAN_FRONTEND: noninteractive
   script:
 # install dependencies
     - apt-get update -y
-    - DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends xvfb xauth curl unzip build-essential ca-certificates wget
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libasound2-dev libfreetype6-dev libcurl4-gnutls-dev libgl1-mesa-dev libx11-dev libxext-dev libxinerama-dev libxrandr-dev libgtk-3-dev
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libjack-dev libfftw3-dev
-# install cmake
-    - wget https://github.com/Kitware/CMake/releases/download/v3.15.7/cmake-3.15.7-Linux-x86_64.sh
-    - sh cmake-3.15.7-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir
+    - apt-get dist-upgrade -y
+    - apt-get install -y --no-install-recommends xvfb xauth curl unzip build-essential ca-certificates wget cmake
+    - apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libasound2-dev libfreetype6-dev libcurl4-gnutls-dev libgl1-mesa-dev libx11-dev libxext-dev libxinerama-dev libxrandr-dev libgtk-3-dev
+    - apt-get install -y --no-install-recommends libjack-dev libfftw3-dev
     - cmake --version
 # get VST2SDK
     - .git-ci/getvst.sh
@@ -75,7 +69,7 @@ variables:
     - mkdir Standalone
     - find build/*/*_artefacts/Release/Standalone/ -maxdepth 1 -type f -executable -not -name "*.so" -exec cp {} Standalone/ ";"
 
-.build:osx: &build_osx
+.build:osx:
   stage: build
   tags:
     - osx10.14
@@ -98,20 +92,19 @@ variables:
     - mkdir Standalone
     - cp -r build/*/*_artefacts/Release/Standalone/*.app Standalone/
 
-.build:windows: &build_windows
+.build:windows:
   stage: build
   tags:
     - windows
   variables:
     IEMCI_CONFIGURATIONS: vs2017
   script:
-    - test -f .myenv && . .myenv
 # run the actual build
     - mkdir build
     - cd build
     - cmake ..
     - cmake --build . --target ALL_BUILD --config Release
-    - test -z "${PROJECTS}" && PROJECTS=$(make showprojects)
+    - test -n "${PROJECTS}" || PROJECTS=$(make showprojects)
     - make system CONFIG=$CONFIG BITS=$BITS PROJUCER="/c/JUCE/Projucer.exe"
     - make CONFIG=$CONFIG BITS=$BITS PROJUCER="/c/JUCE/Projucer.exe" PROJECTS="${PROJECTS}" remove_intermediates=yes
 # collect binaries for artifacts
@@ -125,69 +118,79 @@ variables:
 
 ###################################################
 # expand the templates to real jobs
-#
-# development snapshots
-linux_snapshot:
-  <<: *snapshot
-  <<: *build_linux
+
+# check for coding-style compliance
+clang-format:
+  stage: pre-check
+  image: alpine:latest
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  script:
+    - apk add clang-extra-tools git
+    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format -i {} \;
+    - git diff --exit-code > clang-format.log
+    # cleanup, if 'git diff' did not complain
+    - rm clang-format.log
+  after_script:
+    - |
+      if test -f clang-format.log; then
+        echo "Check the clang-format.log artifact for differences..."
+      fi
+  allow_failure: true
   artifacts:
-    <<: *snapshot_artifacts
+    when: on_failure
+    paths:
+      - clang-format.log
+
+# some static code analysers
+# currently run in 'pre-check' stage, as the build stage takes so long
+sast:
+  stage: pre-check
+  allow_failure: true
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  before_script:
+    # we really do not want to run sast on JUCE (not our business)
+    - rm -rf JUCE $(git submodule status | awk '{print $2}')
+include:
+- template: Security/SAST.gitlab-ci.yml
+
+linux:
+  extends:
+    - .artifacts
+    - .run_selected
+    - .build:linux
+  artifacts:
     name: IEMPluginSuite_linux
 
-osx_snapshot:
-  <<: *build_osx
-  <<: *snapshot
+osx:
+  extends:
+    - .artifacts
+    - .run_selected
+    - .build:osx
   artifacts:
-    <<: *snapshot_artifacts
     name: IEMPluginSuite_macOS
 
-# windows32_snapshot:
-#   before_script:
-#     - echo "BITS=32" > .myenv
-#   <<: *build_windows
-#   <<: *snapshot
-#   artifacts:
-#     <<: *snapshot_artifacts
-#     name: IEMPluginSuite_w32
+.windows:
+  variables:
+    IEMCI_CONFIGURATIONS: vs2017
+  extends:
+    - .artifacts
+    - .run_selected
+    - .build:windows
 
-# windows64_snapshot:
-#   before_script:
-#     - echo "BITS=64" > .myenv
-#   <<: *build_windows
-#   <<: *snapshot
-#   artifacts:
-#     <<: *snapshot_artifacts
-#     name: IEMPluginSuite_w64
+.windows64:
+  variables:
+    BITS: 64
+  extends:
+    - .windows
+  artifacts:
+    name: IEMPluginSuite_w64
 
-# # release builds (for tags; artifacts are kept forever)
-# linux_release:
-#   <<: *release
-#   <<: *build_linux
-#   artifacts:
-#     <<: *release_artifacts
-#     name: IEMPluginSuite_${CI_COMMIT_TAG}_linux
-
-# osx_release:
-#   <<: *build_osx
-#   <<: *release
-#   artifacts:
-#     <<: *release_artifacts
-#     name: IEMPluginSuite_${CI_COMMIT_TAG}_macOS
-
-# windows32_release:
-#   before_script:
-#     - echo "BITS=32" > .myenv
-#   <<: *build_windows
-#   <<: *release
-#   artifacts:
-#     <<: *release_artifacts
-#     name: IEMPluginSuite_${CI_COMMIT_TAG}_w32
-
-# windows64_release:
-#   before_script:
-#     - echo "BITS=64" > .myenv
-#   <<: *build_windows
-#   <<: *release
-#   artifacts:
-#     <<: *release_artifacts
-#     name: IEMPluginSuite_${CI_COMMIT_TAG}_w64
+.windows32:
+  extends:
+    - .windows
+  variables:
+    BITS: 32
+  artifacts:
+    name: IEMPluginSuite_w32

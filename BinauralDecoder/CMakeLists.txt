@@ -7,7 +7,8 @@ juce_add_plugin (BinauralDecoder
     COMPANY_NAME "IEM"
     PRODUCT_NAME "BinauralDecoder"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.6.3")
+    VERSION "0.6.4"
+    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/BinauralDecoder")
 
 
 juce_generate_juce_header(BinauralDecoder)

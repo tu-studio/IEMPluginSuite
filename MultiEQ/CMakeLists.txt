@@ -7,7 +7,8 @@ juce_add_plugin (MultiEQ
     COMPANY_NAME "IEM"
     PRODUCT_NAME "MultiEQ"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.2.3")
+    VERSION "0.2.4"
+    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/MultiEQ")
 
 
 juce_generate_juce_header(MultiEQ)

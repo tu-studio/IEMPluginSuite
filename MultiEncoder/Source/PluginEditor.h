@@ -22,18 +22,17 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
-#include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/lookAndFeel/IEM_LaF.h"
-#include "../../resources/customComponents/TitleBar.h"
-#include "../../resources/customComponents/SimpleLabel.h"
 #include "../../resources/customComponents/MuteSoloButton.h"
+#include "../../resources/customComponents/ReverseSlider.h"
+#include "../../resources/customComponents/SimpleLabel.h"
 #include "../../resources/customComponents/SpherePanner.h"
-#include "MasterControlWithText.h"
+#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "EncoderList.h"
 #include "EnergySpherePanner.h"
-
+#include "MasterControlWithText.h"
+#include "PluginProcessor.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -42,12 +41,13 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class MultiEncoderAudioProcessorEditor  : public juce::AudioProcessorEditor,
-private juce::Timer,
-private SpherePanner::Listener
+class MultiEncoderAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                         private juce::Timer,
+                                         private SpherePanner::Listener
 {
 public:
-    MultiEncoderAudioProcessorEditor (MultiEncoderAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    MultiEncoderAudioProcessorEditor (MultiEncoderAudioProcessor&,
+                                      juce::AudioProcessorValueTreeState&);
     ~MultiEncoderAudioProcessorEditor();
 
     //==============================================================================
@@ -55,13 +55,16 @@ public:
     void resized() override;
 
     void importLayout();
+
 private:
     LaF globalLaF;
     TitleBar<AudioChannelsIOWidget<maxNumberOfInputs>, AmbisonicIOWidget<>> title;
     OSCFooter footer;
 
     void timerCallback() override;
-    void mouseWheelOnSpherePannerMoved (SpherePanner* sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
+    void mouseWheelOnSpherePannerMoved (SpherePanner* sphere,
+                                        const juce::MouseEvent& event,
+                                        const juce::MouseWheelDetails& wheel) override;
 
     MultiEncoderAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
@@ -80,10 +83,8 @@ private:
     std::unique_ptr<SliderAttachment> slPeakLevelAttachment;
     SimpleLabel lbPeakLevel;
 
-
     juce::ToggleButton tbAnalyzeRMS;
     std::unique_ptr<ButtonAttachment> tbAnalyzeRMSAttachment;
-
 
     juce::ComboBox inputChooser;
 
