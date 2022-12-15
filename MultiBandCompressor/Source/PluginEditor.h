@@ -83,8 +83,6 @@ private:
     OSCFooter footer;
     // =============== end essentials ============
 
-    static constexpr const int& numFreqBands = MultiBandCompressorAudioProcessor::numFreqBands;
-
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;
 
@@ -92,17 +90,17 @@ private:
     juce::TooltipWindow tooltips;
 
     // Filter Crossovers
-    ReverseSlider slCrossover[numFreqBands-1];
-    std::unique_ptr<SliderAttachment> slCrossoverAttachment[numFreqBands-1];
+    ReverseSlider slCrossover[numFilterBands-1];
+    std::unique_ptr<SliderAttachment> slCrossoverAttachment[numFilterBands-1];
 
     // Solo and Bypass juce::Buttons
-    RoundButton tbSolo[numFreqBands];
-    RoundButton tbBypass[numFreqBands];
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> soloAttachment[numFreqBands], bypassAttachment[numFreqBands];
+    RoundButton tbSolo[numFilterBands];
+    RoundButton tbBypass[numFilterBands];
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> soloAttachment[numFilterBands], bypassAttachment[numFilterBands];
 
     // Compressor Parameters
-    ReverseSlider slKnee[numFreqBands], slThreshold[numFreqBands], slRatio[numFreqBands], slAttackTime[numFreqBands], slReleaseTime[numFreqBands], slMakeUpGain[numFreqBands];
-    std::unique_ptr<SliderAttachment> slKneeAttachment[numFreqBands], slThresholdAttachment[numFreqBands], slRatioAttachment[numFreqBands], slAttackTimeAttachment[numFreqBands], slReleaseTimeAttachment[numFreqBands], slMakeUpGainAttachment[numFreqBands];
+    ReverseSlider slKnee[numFilterBands], slThreshold[numFilterBands], slRatio[numFilterBands], slAttackTime[numFilterBands], slReleaseTime[numFilterBands], slMakeUpGain[numFilterBands];
+    std::unique_ptr<SliderAttachment> slKneeAttachment[numFilterBands], slThresholdAttachment[numFilterBands], slRatioAttachment[numFilterBands], slAttackTimeAttachment[numFilterBands], slReleaseTimeAttachment[numFilterBands], slMakeUpGainAttachment[numFilterBands];
 
     // Master parameters
     juce::GroupComponent gcMasterControls;
@@ -112,14 +110,14 @@ private:
     juce::OwnedArray<CompressorVisualizer> compressorVisualizers;
 
     // Meters
-    LevelMeter GRmeter[numFreqBands], omniInputMeter, omniOutputMeter;
+    LevelMeter GRmeter[numFilterBands], omniInputMeter, omniOutputMeter;
 
     // juce::Toggle juce::Buttons
     juce::ToggleButton tbOverallMagnitude;
     bool displayOverallMagnitude {false};
 
     // juce::Labels
-    SimpleLabel lbKnee[numFreqBands+1], lbThreshold[numFreqBands+1], lbMakeUpGain[numFreqBands+1], lbRatio[numFreqBands+1], lbAttack[numFreqBands+1], lbRelease[numFreqBands+1], lbInput, lbOutput;
+    SimpleLabel lbKnee[numFilterBands+1], lbThreshold[numFilterBands+1], lbMakeUpGain[numFilterBands+1], lbRatio[numFilterBands+1], lbAttack[numFilterBands+1], lbRelease[numFilterBands+1], lbInput, lbOutput;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiBandCompressorAudioProcessorEditor)
 };

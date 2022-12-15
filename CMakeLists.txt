@@ -41,6 +41,7 @@ set (PLUGINS_TO_BUILD
 option (IEM_USE_SYSTEM_JUCE "Use JUCE found via CMake rather than the bundled one." OFF)
 option (IEM_BUILD_VST2 "Build VST2 version of the plug-ins." OFF)
 option (IEM_BUILD_VST3 "Build VST3 version of the plug-ins." ON)
+option (IEM_BUILD_LV2 "Build LV2 version of the plug-ins." OFF)
 option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." OFF)
 option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." ON)
 
@@ -48,7 +49,7 @@ option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." ON)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Actual project configuration
-project (IEMPluginSuite VERSION 1.12.1 LANGUAGES C CXX)
+project (IEMPluginSuite VERSION 1.14.0 LANGUAGES C CXX)
 
 set_property (GLOBAL PROPERTY USE_FOLDERS YES)
 set_directory_properties (PROPERTIES JUCE_COPY_PLUGIN_AFTER_BUILD ON)
@@ -100,6 +101,11 @@ endif()
 if (IEM_BUILD_VST3)
     message ("-- IEM: Building VST3 versions")
     list (APPEND IEM_FORMATS VST3)
+endif()
+
+if (IEM_BUILD_LV2)
+    message ("-- IEM: Building LV2 versions")
+    list (APPEND IEM_FORMATS LV2)
 endif()
 
 if (IEM_BUILD_STANDALONE)
