@@ -73,7 +73,7 @@ variables:
 .build:osx:
   stage: build
   tags:
-    - osx10.14
+    - macos11.4
   script:
 # install dependencies
     - HOMEBREW_NO_AUTO_UPDATE=1 brew install jack || true
