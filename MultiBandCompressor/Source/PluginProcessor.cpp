@@ -114,6 +114,11 @@ MultiBandCompressorAudioProcessor::MultiBandCompressorAudioProcessor()
     soloArray.clear();
 
     copyCoeffsToProcessor();
+    
+    for (int ch = 0; ch < maxNumFilters; ++ch)
+    {
+        interleavedBlockData.push_back (juce::HeapBlock<char> ());
+    }
 }
 
 MultiBandCompressorAudioProcessor::~MultiBandCompressorAudioProcessor()
@@ -431,19 +436,11 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
     const int maxNChIn = juce::jmin (buffer.getNumChannels(), input.getNumberOfChannels());
     if (maxNChIn < 1)
         return;
-    
-    
-
-    /*for (int i = maxNChIn; i < getTotalNumOutputChannels(); ++i)
-    {
-        buffer.clear (i, 0, buffer.getNumSamples());
-    }*/
 
     const int L = buffer.getNumSamples();
     const int nSIMDFilters =  1 + (maxNChIn - 1) / IIRfloat_elements;
     gainChannelPointer = gains.getChannelPointer (0);
 
-    //tempBuffer.clear();
     gains.clear();
     zero.clear();
 
@@ -505,16 +502,16 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
         const IIRfloat* chPtrinterleavedData[1] = {interleavedData[i]->getChannelPointer (0)};
         juce::dsp::AudioBlock<IIRfloat> abInterleaved (const_cast<IIRfloat**> (chPtrinterleavedData), 1, L);
 
-        const IIRfloat* chPtrLow[1] = {freqBands[0][i]->getChannelPointer (0)};
+        const IIRfloat* chPtrLow[1] = {freqBands[FrequencyBands::Low][i]->getChannelPointer (0)};
         juce::dsp::AudioBlock<IIRfloat> abLow (const_cast<IIRfloat**> (chPtrLow), 1, L);
 
-        const IIRfloat* chPtrMidLow[1] = {freqBands[1][i]->getChannelPointer (0)};
+        const IIRfloat* chPtrMidLow[1] = {freqBands[FrequencyBands::MidLow][i]->getChannelPointer (0)};
         juce::dsp::AudioBlock<IIRfloat> abMidLow (const_cast<IIRfloat**> (chPtrMidLow), 1, L);
 
-        const IIRfloat* chPtrMidHigh[1] = {freqBands[2][i]->getChannelPointer (0)};
+        const IIRfloat* chPtrMidHigh[1] = {freqBands[FrequencyBands::MidHigh][i]->getChannelPointer (0)};
         juce::dsp::AudioBlock<IIRfloat> abMidHigh (const_cast<IIRfloat**> (chPtrMidHigh), 1, L);
 
-        const IIRfloat* chPtrHigh[1] = {freqBands[3][i]->getChannelPointer (0)};
+        const IIRfloat* chPtrHigh[1] = {freqBands[FrequencyBands::High][i]->getChannelPointer (0)};
         juce::dsp::AudioBlock<IIRfloat> abHigh (const_cast<IIRfloat**> (chPtrHigh), 1, L);
 
 
@@ -541,7 +538,7 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
     }
 
     buffer.clear();
-
+    
     for (int i = 0; i < numFilterBands; ++i)
     {
         if (! soloArray.isZero())
@@ -553,6 +550,8 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
                 continue;
             }
         }
+        
+        tempBuffer.clear();
 
         // Deinterleave
         if (partial == 0)
@@ -611,8 +610,6 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
             maxGR[i] = 0.0f;
             maxPeak[i] = juce::Decibels::gainToDecibels (-INFINITY);
         }
-        
-        tempBuffer.clear();
     }
 
     outputPeak = juce::Decibels::gainToDecibels (buffer.getMagnitude (0, 0, L));

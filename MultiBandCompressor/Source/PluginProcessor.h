@@ -143,31 +143,20 @@ private:
                                              iirAP[numFilterBands-1];
 
     // data for interleaving audio
-    juce::HeapBlock<char> interleavedBlockData[16], zeroData; //todo: dynamically?
+    juce::HeapBlock<char> zeroData;
+    std::vector<juce::HeapBlock<char>> interleavedBlockData;
     juce::OwnedArray<juce::dsp::AudioBlock<IIRfloat>> interleavedData;
     juce::dsp::AudioBlock<float> zero;
     juce::AudioBuffer<float> tempBuffer;
     
     // filters for processing
-    juce::OwnedArray<juce::dsp::AudioBlock<IIRfloat>> freqBands[16];
+    juce::OwnedArray<juce::dsp::AudioBlock<IIRfloat>> freqBands[numFilterBands];
     std::vector<juce::HeapBlock<char>> freqBandsBlocks[numFilterBands];
     
     // Additional compressor parameters
     float* gainChannelPointer;
     juce::dsp::AudioBlock<float> gains;
     juce::HeapBlock<char> gainData;
-    
-    
-    /*
-    juce::OwnedArray<juce::dsp::AudioBlock<IIRfloat>> interleavedData, freqBands[numFilterBands];
-    juce::dsp::AudioBlock<float> zero, temp, gains;
-    juce::AudioBuffer<float> tempBuffer;
-    float* gainChannelPointer;
-
-    std::vector<juce::HeapBlock<char>> freqBandsBlocks[numFilterBands];
-    juce::HeapBlock<char> zeroData, tempData, gainData, interleavedBlockData[16];
-    juce::HeapBlock<const float*> channelPointers { 64 };
-    //juce::HeapBlock<char> interleavedBlockData[16];*/
 
     juce::Atomic<bool> userChangedFilterSettings = true;
 
