@@ -48,6 +48,12 @@
 #include <dlfcn.h>
 #include <jack/jack.h>
 
+#ifdef JUCE_JACK
+# define IEM_JACK_DEVICENAME "JACK(iem)"
+#else
+# define IEM_JACK_DEVICENAME "JACK"
+#endif
+
 namespace iem
 {
 
@@ -264,7 +270,7 @@ public:
     JackAudioIODevice (const juce::String& inName,
                        const juce::String& outName,
                        std::function<void()> notifyIn) :
-        AudioIODevice (outName.isEmpty() ? inName : outName, "JACK"),
+        AudioIODevice (outName.isEmpty() ? inName : outName, IEM_JACK_DEVICENAME),
         inputName (inName),
         outputName (outName),
         notifyChannelsChanged (std::move (notifyIn))
@@ -646,7 +652,7 @@ class JackAudioIODeviceType;
 class JackAudioIODeviceType : public juce::AudioIODeviceType
 {
 public:
-    JackAudioIODeviceType() : AudioIODeviceType ("JACK") {}
+    JackAudioIODeviceType() : AudioIODeviceType (IEM_JACK_DEVICENAME) {}
 
     void scanForDevices()
     {
@@ -667,6 +673,7 @@ public:
         if (auto* const client =
                 iem::jack_client_open ("JuceJackDummy", JackNoStartServer, &status))
         {
+		std::cerr << "scan for devices" << std::endl;
             // scan for output devices
             for (JackPortIterator i (client, false); i.next();)
                 if (i.getClientName() != (currentDeviceName)

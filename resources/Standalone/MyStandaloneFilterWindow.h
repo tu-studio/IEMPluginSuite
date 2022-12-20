@@ -713,7 +713,7 @@ private:
         player.audioDeviceAboutToStart (device);
         player.setMidiOutput (deviceManager.getDefaultMidiOutput());
 
-        if (device->getTypeName() == "JACK")
+        if (device->getTypeName() == IEM_JACK_DEVICENAME)
             jackClientName = device->getName();
         else
             jackClientName = "";
