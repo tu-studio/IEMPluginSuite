@@ -7,8 +7,8 @@ juce_add_plugin (DistanceCompensator
     COMPANY_NAME "IEM"
     PRODUCT_NAME "DistanceCompensator"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.3.4")
-
+    VERSION "0.3.4"
+    LV2URI "http://plugins.iem.at/DistanceCompensator")
 
 juce_generate_juce_header (DistanceCompensator)
 

@@ -24,10 +24,10 @@
 #include "PluginProcessor.h"
 
 #include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/lookAndFeel/IEM_LaF.h"
-#include "../../resources/customComponents/TitleBar.h"
-#include "../../resources/customComponents/SpherePanner.h"
 #include "../../resources/customComponents/SimpleLabel.h"
+#include "../../resources/customComponents/SpherePanner.h"
+#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -42,16 +42,19 @@ class GranularEncoderAudioProcessorEditor : public juce::AudioProcessorEditor,
                                             private juce::KeyListener
 {
 public:
-    GranularEncoderAudioProcessorEditor(GranularEncoderAudioProcessor &, juce::AudioProcessorValueTreeState &);
+    GranularEncoderAudioProcessorEditor (GranularEncoderAudioProcessor&,
+                                         juce::AudioProcessorValueTreeState&);
     ~GranularEncoderAudioProcessorEditor();
 
     //==============================================================================
-    void paint(juce::Graphics &) override;
+    void paint (juce::Graphics&) override;
     void resized() override;
 
-    void mouseWheelOnSpherePannerMoved(SpherePanner *sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
+    void mouseWheelOnSpherePannerMoved (SpherePanner* sphere,
+                                        const juce::MouseEvent& event,
+                                        const juce::MouseWheelDetails& wheel) override;
 
-    bool keyPressed(const juce::KeyPress &key, juce::Component *originatingComponent) override;
+    bool keyPressed (const juce::KeyPress& key, juce::Component* originatingComponent) override;
 
 private:
     LaF globalLaF;
@@ -63,14 +66,16 @@ private:
 
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    GranularEncoderAudioProcessor &processor;
-    juce::AudioProcessorValueTreeState &valueTreeState;
+    GranularEncoderAudioProcessor& processor;
+    juce::AudioProcessorValueTreeState& valueTreeState;
 
     juce::GroupComponent quatGroup, ypGroup, grainGroup, settingsGroup;
-    ReverseSlider azimuthSlider, elevationSlider, shapeSlider, sizeSlider, qwSlider, qxSlider, qySlider, qzSlider;
+    ReverseSlider azimuthSlider, elevationSlider, shapeSlider, sizeSlider, qwSlider, qxSlider,
+        qySlider, qzSlider;
     ReverseSlider deltaTimeSlider, deltaTimeModSlider, grainLengthSlider, grainLengthModSlider;
     ReverseSlider positionSlider, positionModSlider, pitchSlider, pitchModSlider;
-    ReverseSlider windowAttackSlider, windowAttackModSlider, windowDecaySlider, windowDecayModSlider;
+    ReverseSlider windowAttackSlider, windowAttackModSlider, windowDecaySlider,
+        windowDecayModSlider;
     ReverseSlider mixSlider, sourceSlider;
     juce::ComboBox inputChooser;
 
@@ -125,7 +130,15 @@ private:
 
     juce::ToggleButton tbFreeze;
     SimpleLabel lbFreeze;
-    std::unique_ptr<ButtonAttachment> tbFreezeAttachment;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEncoderAudioProcessorEditor)
+    // juce::ToggleButton tb2D;
+    // SimpleLabel lb2D;
+
+    juce::ComboBox cb2D3D;
+    std::unique_ptr<ComboBoxAttachment> cb2D3DAtachement;
+
+    std::unique_ptr<ButtonAttachment> tbFreezeAttachment;
+    std::unique_ptr<ButtonAttachment> tb2DAttachment;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GranularEncoderAudioProcessorEditor)
 };

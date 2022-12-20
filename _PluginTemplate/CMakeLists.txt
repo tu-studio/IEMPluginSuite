@@ -6,7 +6,8 @@ juce_add_plugin (PluginTemplate
     COMPANY_NAME "IEM"
     PRODUCT_NAME "PluginTemplate"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.0.1")
+    VERSION "0.0.1"
+    LV2URI "http://plugins.iem.at/_PluginTemplate")
 
 
 juce_generate_juce_header(PluginTemplate)

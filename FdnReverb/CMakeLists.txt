@@ -7,7 +7,8 @@ juce_add_plugin (FdnReverb
     COMPANY_NAME "IEM"
     PRODUCT_NAME "FdnReverb"
     FORMATS ${IEM_FORMATS}
-    VERSION "1.2.3")
+    VERSION "1.2.4"
+    LV2URI "http://plugins.iem.at/FdnReverb")
 
 
 juce_generate_juce_header (FdnReverb)

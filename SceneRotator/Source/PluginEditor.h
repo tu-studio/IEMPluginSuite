@@ -26,34 +26,36 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
 
-
-typedef ReverseSlider::SliderAttachment SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
+typedef ReverseSlider::SliderAttachment
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class SceneRotatorAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, private juce::ComboBox::Listener
+class SceneRotatorAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                         private juce::Timer,
+                                         private juce::ComboBox::Listener
 {
 public:
-    SceneRotatorAudioProcessorEditor (SceneRotatorAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    SceneRotatorAudioProcessorEditor (SceneRotatorAudioProcessor&,
+                                      juce::AudioProcessorValueTreeState&);
     ~SceneRotatorAudioProcessorEditor();
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
-
     void timerCallback() override;
-    void comboBoxChanged (juce::ComboBox *comboBoxThatHasChanged) override;
+    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
 
     void refreshMidiDeviceList();
     void updateSelectedMidiScheme();
@@ -68,7 +70,6 @@ private:
     SceneRotatorAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
 
-
     // title and footer component
     TitleBar<AmbisonicIOWidget<>, NoIOWidget> title;
     OSCFooter footer;
@@ -78,7 +79,6 @@ private:
     // and the associated parameters
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAttachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAttachement;
-
 
     ReverseSlider slYaw, slPitch, slRoll, slQW, slQX, slQY, slQZ;
 
@@ -98,8 +98,8 @@ private:
     juce::GroupComponent quatGroup, yprGroup;
 
     juce::ToggleButton tbInvertYaw, tbInvertPitch, tbInvertRoll, tbInvertQuaternion;
-    std::unique_ptr<ButtonAttachment> tbInvertYawAttachment, tbInvertPitchAttachment, tbRollFlipAttachment, tbInvertQuaternionAttachment;
-
+    std::unique_ptr<ButtonAttachment> tbInvertYawAttachment, tbInvertPitchAttachment,
+        tbRollFlipAttachment, tbInvertQuaternionAttachment;
 
     // MIDI Section
     juce::GroupComponent midiGroup;
@@ -108,7 +108,6 @@ private:
 
     juce::Atomic<bool> refreshingMidiDevices = false;
     juce::Atomic<bool> updatingMidiScheme = false;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SceneRotatorAudioProcessorEditor)
 };

@@ -11,7 +11,7 @@ variables:
   #PROJECTS: AllRADecoder BinauralDecoder CoordinateConverter DirectionalCompressor DirectivityShaper DistanceCompensator DualDelay EnergyVisualizer FdnReverb MatrixMultiplier MultiBandCompressor MultiEncoder MultiEQ OmniCompressor ProbeDecoder RoomEncoder SceneRotator SimpleDecoder StereoEncoder ToolBox
   GIT_SUBMODULE_STRATEGY: recursive
   CONFIG: Release
-  JUCEVERSION: 6.0.7
+  JUCEVERSION: 7.0.3
 
 ###################################################
 # cleanup after the job (e.g. rename files for the artifacts...)
@@ -35,6 +35,7 @@ variables:
     - master
     - develop
     - ci-test
+    - 148-JUCE7.0.3
 
 .build:linux:
   stage: build
@@ -54,6 +55,7 @@ variables:
 # get VST2SDK
     - .git-ci/getvst.sh
 # run the actual build
+    - rm -rf build
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release -DIEM_BUILD_VST2=ON -DVST2SDKPATH=src/VST_SDK/VST2_SDK/ -DIEM_BUILD_STANDALONE=ON
@@ -71,13 +73,14 @@ variables:
 .build:osx:
   stage: build
   tags:
-    - osx10.14
+    - macos11.4
   script:
 # install dependencies
     - HOMEBREW_NO_AUTO_UPDATE=1 brew install jack || true
 # get VST2SDK
     - .git-ci/getvst.sh
 # run the actual build
+    - rm -rf build
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release  -DIEM_BUILD_VST2=ON -DVST2SDKPATH=src/VST_SDK/VST2_SDK/ -DIEM_BUILD_STANDALONE=ON

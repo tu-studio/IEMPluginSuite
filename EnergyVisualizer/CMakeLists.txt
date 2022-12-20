@@ -7,7 +7,8 @@ juce_add_plugin (EnergyVisualizer
     COMPANY_NAME "IEM"
     PRODUCT_NAME "EnergyVisualizer"
     FORMATS ${IEM_FORMATS}
-    VERSION "1.0.3")
+    VERSION "1.0.4"
+    LV2URI "http://plugins.iem.at/EnergyVisualizer")
 
 
 juce_generate_juce_header (EnergyVisualizer)

@@ -29,13 +29,13 @@ Grain::Grain()
     _blockCounter = 0;
 }
 
-void Grain::setBlockSize(int numSampOutBuffer)
+void Grain::setBlockSize (int numSampOutBuffer)
 {
-    _outputBuffer.setSize(1, numSampOutBuffer);
+    _outputBuffer.setSize (1, numSampOutBuffer);
     _outputBuffer.clear();
 }
 
-void Grain::startGrain(const GrainJobParameters &grainParameters) // Type envelopeType)
+void Grain::startGrain (const GrainJobParameters& grainParameters) // Type envelopeType)
 {
     _params = grainParameters;
 
@@ -46,31 +46,32 @@ void Grain::startGrain(const GrainJobParameters &grainParameters) // Type envelo
     _outputBuffer.clear();
 }
 
-void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<float> &circularBuffer)
+void Grain::processBlock (juce::AudioBuffer<float>& buffer,
+                          juce::AudioBuffer<float>& circularBuffer)
 {
-    if (!_isActive)
+    if (! _isActive)
         return;
 
     int numSampCircBuffer = circularBuffer.getNumSamples();
     int numSampOutBuffer = buffer.getNumSamples();
-    jassert(_outputBuffer.getNumSamples() == numSampOutBuffer);
+    jassert (_outputBuffer.getNumSamples() == numSampOutBuffer);
 
     _outputBuffer.clear();
     int nChOut = buffer.getNumChannels();
 
-    const float *circularLeftChannel = circularBuffer.getReadPointer(0);
-    const float *circularRightChannel = circularBuffer.getReadPointer(1);
+    const float* circularLeftChannel = circularBuffer.getReadPointer (0);
+    const float* circularRightChannel = circularBuffer.getReadPointer (1);
 
-    const float *circularBuffToSeed;
+    const float* circularBuffToSeed;
     if (_params.seedFromLeftCircBuffer)
         circularBuffToSeed = circularLeftChannel;
     else
         circularBuffToSeed = circularRightChannel;
 
-    const float *window_ptr = _params.windowBuffer.getReadPointer(0);
+    const float* window_ptr = _params.windowBuffer.getReadPointer (0);
     const int windowNumSamples = _params.windowBuffer.getNumSamples();
 
-    float *outputBufferWritePtr = _outputBuffer.getWritePointer(0);
+    float* outputBufferWritePtr = _outputBuffer.getWritePointer (0);
 
     int outStart;
     if (_blockCounter == 0)
@@ -88,8 +89,9 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
         if (_currentIndex < _params.grainLengthSamples) // grain still needs samples
         {
             // Linear interpolation of buffer samples
-            float readIndex = _params.startPositionCircBuffer + (_currentIndex * _params.pitchReadFactor);
-            int readIndexInt = static_cast<int>(readIndex);
+            float readIndex =
+                _params.startPositionCircBuffer + (_currentIndex * _params.pitchReadFactor);
+            int readIndexInt = static_cast<int> (readIndex);
             int readIndexIntNext = readIndexInt + 1;
             float sampleFracWeight = readIndex - readIndexInt;
             if (readIndexInt >= numSampCircBuffer)
@@ -101,16 +103,18 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
             float sampleValue = sampleIntPart + sampleFracWeight * sampleFracPart;
 
             // Linear interpolation for grain window function
-            float windowIndex = static_cast<float>(_currentIndex) / static_cast<float>(_params.grainLengthSamples) * (windowNumSamples - 1);
-            int windowIndexInt = static_cast<int>(windowIndex);
-            jassert(windowIndexInt >= 0 && windowIndexInt < (windowNumSamples - 1));
+            float windowIndex = static_cast<float> (_currentIndex)
+                                / static_cast<float> (_params.grainLengthSamples)
+                                * (windowNumSamples - 1);
+            int windowIndexInt = static_cast<int> (windowIndex);
+            jassert (windowIndexInt >= 0 && windowIndexInt < (windowNumSamples - 1));
 
-            int windowIndexIntNext = windowIndexInt + 1; // windowIndexInt < 1023 ? (windowIndexInt + 1) : windowIndexInt;
+            int windowIndexIntNext = windowIndexInt + 1;
             float windowFracWeight = windowIndex - windowIndexInt;
             float windowIntPart = window_ptr[windowIndexInt];
             float windFracPart = window_ptr[windowIndexIntNext] - windowIntPart;
             float windowValue = windowIntPart + windowFracWeight * windFracPart;
-            jassert(windowValue >= 0.0f && windowValue <= 1.0f);
+            jassert (windowValue >= 0.0f && windowValue <= 1.0f);
             outputBufferWritePtr[i] = sampleValue * windowValue;
 
             _currentIndex++;
@@ -122,10 +126,14 @@ void Grain::processBlock(juce::AudioBuffer<float> &buffer, juce::AudioBuffer<flo
         }
     }
 
-    const float *outputBufferReadPtr = _outputBuffer.getReadPointer(0);
+    const float* outputBufferReadPtr = _outputBuffer.getReadPointer (0);
     for (int ch = 0; ch < nChOut; ++ch)
     {
-        buffer.addFrom(ch, 0, outputBufferReadPtr, buffer.getNumSamples(), _params.channelWeights[ch] * _params.gainFactor);
+        buffer.addFrom (ch,
+                        0,
+                        outputBufferReadPtr,
+                        buffer.getNumSamples(),
+                        _params.channelWeights[ch] * _params.gainFactor);
     }
 
     _blockCounter++;

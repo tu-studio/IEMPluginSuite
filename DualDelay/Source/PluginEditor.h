@@ -25,10 +25,10 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 
-#include "../../resources/customComponents/TitleBar.h"
 #include "../../resources/customComponents/DoubleSlider.h"
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
+#include "../../resources/customComponents/TitleBar.h"
 #include "../../resources/lookAndFeel/IEM_LaF.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
@@ -37,8 +37,7 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 //==============================================================================
 /**
 */
-class DualDelayAudioProcessorEditor  : public juce::AudioProcessorEditor,
-private juce::Timer
+class DualDelayAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
     DualDelayAudioProcessorEditor (DualDelayAudioProcessor&, juce::AudioProcessorValueTreeState&);
@@ -71,18 +70,22 @@ private:
     ReverseSlider SlLeftRot;
     ReverseSlider SlLeftDelay, SlLeftLfoRate, SlLeftLfoDepth, SlLeftFb, SlLeftCrossFb, SlLeftGain;
 
-    std::unique_ptr<SliderAttachment> dblSlLeftFilterHpAttachment,dblSlLeftFilterLpAttachment;
+    std::unique_ptr<SliderAttachment> dblSlLeftFilterHpAttachment, dblSlLeftFilterLpAttachment;
     std::unique_ptr<SliderAttachment> SlLeftRotAttachment;
-    std::unique_ptr<SliderAttachment> SlLeftDelayAttachment, SlLeftLfoRateAttachment, SlLeftLfoDepthAttachment, SlLeftFbAttachment, SlLeftCrossFbAttachment, SlLeftGainAttachment;
+    std::unique_ptr<SliderAttachment> SlLeftDelayAttachment, SlLeftLfoRateAttachment,
+        SlLeftLfoDepthAttachment, SlLeftFbAttachment, SlLeftCrossFbAttachment, SlLeftGainAttachment;
 
     // elements for right side
     DoubleSlider dblSlRightFilter;
     ReverseSlider SlRightRot;
-    ReverseSlider SlRightDelay, SlRightLfoRate, SlRightLfoDepth, SlRightFb, SlRightCrossFb, SlRightGain;
+    ReverseSlider SlRightDelay, SlRightLfoRate, SlRightLfoDepth, SlRightFb, SlRightCrossFb,
+        SlRightGain;
 
-    std::unique_ptr<SliderAttachment> dblSlRightFilterHpAttachment,dblSlRightFilterLpAttachment;
+    std::unique_ptr<SliderAttachment> dblSlRightFilterHpAttachment, dblSlRightFilterLpAttachment;
     std::unique_ptr<SliderAttachment> SlRightRotAttachment;
-    std::unique_ptr<SliderAttachment> SlRightDelayAttachment, SlRightLfoRateAttachment, SlRightLfoDepthAttachment, SlRightFbAttachment, SlRightCrossFbAttachment, SlRightGainAttachment;
+    std::unique_ptr<SliderAttachment> SlRightDelayAttachment, SlRightLfoRateAttachment,
+        SlRightLfoDepthAttachment, SlRightFbAttachment, SlRightCrossFbAttachment,
+        SlRightGainAttachment;
 
     // labels and groups
     SimpleLabel lbRotL, lbDelL, lbFbL, lbXFbL;

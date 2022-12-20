@@ -426,7 +426,8 @@ void RoomEncoderAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, j
     
     // update iir filter coefficients
     if (userChangedFilterSettings) updateFilterCoefficients(sampleRate);
-
+    
+    using Format = juce::AudioData::Format<juce::AudioData::Float32, juce::AudioData::NativeEndian>;
 
     //interleave input data
     int partial = maxNChIn%IIRfloat_elements;
@@ -434,9 +435,9 @@ void RoomEncoderAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, j
     {
         for (int i = 0; i<nSIMDFilters; ++i)
         {
-            juce::AudioDataConverters::interleaveSamples(buffer.getArrayOfReadPointers() + i*IIRfloat_elements,
-                                                   reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)), L,
-                                                   static_cast<int> (IIRfloat_elements));
+            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers() + i * IIRfloat_elements, IIRfloat_elements},
+                                                juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
+                                                L);
         }
     }
     else
@@ -444,9 +445,9 @@ void RoomEncoderAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, j
         int i;
         for (i = 0; i<nSIMDFilters-1; ++i)
         {
-            juce::AudioDataConverters::interleaveSamples(buffer.getArrayOfReadPointers() + i*IIRfloat_elements,
-                                                   reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)), L,
-                                                   static_cast<int> (IIRfloat_elements));
+            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers() + i * IIRfloat_elements, IIRfloat_elements},
+                                                juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
+                                                L);
         }
 
         const float* addr[IIRfloat_elements];
@@ -459,9 +460,9 @@ void RoomEncoderAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, j
         {
             addr[ch] = zero.getChannelPointer(ch);
         }
-        juce::AudioDataConverters::interleaveSamples(addr,
-                                               reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)), L,
-                                               static_cast<int> (IIRfloat_elements));
+        juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {addr, IIRfloat_elements},
+                                            juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
+                                            L);
     }
 
     int currNumRefl = juce::roundToInt (numRefl->load());
