@@ -13,26 +13,26 @@ include(CheckIncludeFiles)
 # The following list will hold all the plug-ins which will be built.
 # Simply comment them out if you want to build only a subset of the plug-ins.
 set (PLUGINS_TO_BUILD
-        # AllRADecoder
-        # BinauralDecoder
-        # CoordinateConverter
-        # DirectionalCompressor
-        # DirectivityShaper
-        # DistanceCompensator
-        # DualDelay
-        # EnergyVisualizer
-        # FdnReverb
-        # GranularEncoder
-        # MatrixMultiplier
-        # MultiBandCompressor
-        # MultiEncoder
-        # MultiEQ
-        # OmniCompressor
-        # ProbeDecoder
-        # RoomEncoder
-        # SceneRotator
-        # SimpleDecoder
-        # StereoEncoder
+        AllRADecoder
+        BinauralDecoder
+        CoordinateConverter
+        DirectionalCompressor
+        DirectivityShaper
+        DistanceCompensator
+        DualDelay
+        EnergyVisualizer
+        FdnReverb
+        GranularEncoder
+        MatrixMultiplier
+        MultiBandCompressor
+        MultiEncoder
+        MultiEQ
+        OmniCompressor
+        ProbeDecoder
+        RoomEncoder
+        SceneRotator
+        SimpleDecoder
+        StereoEncoder
         ToolBox
     )
 
@@ -44,7 +44,9 @@ option (IEM_BUILD_VST3 "Build VST3 version of the plug-ins." ON)
 option (IEM_BUILD_LV2 "Build LV2 version of the plug-ins." OFF)
 option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." OFF)
 option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." ON)
-option (IEM_POST_BUILD_INSTALL "Define if plug-ins are installed for USER, SYSTEM or there's NO installation" USER)
+
+set (IEM_POST_BUILD_INSTALL "USER" CACHE STRING "Define if plug-ins are installed for USER, SYSTEM or if you want NO installation")
+set (prefix "/usr/local" CACHE STRING "Path prefix for custom installation")
 
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -72,29 +74,37 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_directory_properties (PROPERTIES JUCE_COPY_PLUGIN_AFTER_BUILD ON)
-    # TODO: Fix Windows configuration
-    if (IEM_POST_BUILD_INSTALL STREQUAL "USER")
+
+    if ((IEM_POST_BUILD_INSTALL STREQUAL "USER") AND (prefix STREQUAL "/usr/local"))
         if (IEM_BUILD_VST3 OR IEM_BUILD_VST2)
-            message ("WARNING VST and VST3 plug-ins are installed for all users by default as there is no officially supported consistent directory for local installation.")
+            message (WARNING "VST and VST3 plug-ins are installed for all users by default as there is no officially supported consistent directory for local installation. Using SYSTEM for those. You can provide a costum prefix to change this behaviour.")
+            set (IEM_POST_BUILD_INSTALL "SYSTEM")
         endif()
 
         set_directory_properties(PROPERTIES JUCE_LV2_COPY_DIR "$ENV{APPDATA}/LV2")
-    else()
-        set_directory_properties(PROPERTIES JUCE_LV2_COPY_DIR "$ENV{CommonProgramFiles}/LV2")
     endif()
 
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set_directory_properties (PROPERTIES JUCE_VST_COPY_DIR "$ENV{ProgramW6432}/Steinberg/VSTplugins/IEM")
-        set_directory_properties (PROPERTIES JUCE_VST3_COPY_DIR "$ENV{CommonProgramFiles}/VST3/IEM")
-    else()
-        set_directory_properties (PROPERTIES JUCE_VST_COPY_DIR "$ENV{ProgramFiles(x86)}/Steinberg/Vstplugins/IEM")
-        set_directory_properties (PROPERTIES JUCE_VST3_COPY_DIR "$ENV{CommonProgramFiles(x86)}/VST3/IEM")
+    if (IEM_POST_BUILD_INSTALL STREQUAL "USER")
+        set_directory_properties (PROPERTIES JUCE_VST_COPY_DIR "${prefix}/VST")
+        set_directory_properties (PROPERTIES JUCE_VST3_COPY_DIR "${prefix}/VST3")
+        set_directory_properties(PROPERTIES JUCE_LV2_COPY_DIR "${prefix}/LV2")
+
+    else()  # Defaulting to SYSTEM as this is the only valid path on Windows for VST and VST3
+        set_directory_properties(PROPERTIES JUCE_LV2_COPY_DIR "$ENV{CommonProgramFiles}/LV2")
+
+        if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+            set_directory_properties (PROPERTIES JUCE_VST_COPY_DIR "$ENV{ProgramW6432}/Steinberg/VSTplugins/IEM")
+            set_directory_properties (PROPERTIES JUCE_VST3_COPY_DIR "$ENV{CommonProgramFiles}/VST3/IEM")
+        else()
+            set_directory_properties (PROPERTIES JUCE_VST_COPY_DIR "$ENV{ProgramFiles(x86)}/Steinberg/Vstplugins/IEM")
+            set_directory_properties (PROPERTIES JUCE_VST3_COPY_DIR "$ENV{CommonProgramFiles(x86)}/VST3/IEM")
+        endif()
+
     endif()
+
 
 elseif ((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     set_directory_properties (PROPERTIES JUCE_COPY_PLUGIN_AFTER_BUILD ON)
-
-    SET (prefix "/usr/local" CACHE STRING "Path prefix for custom installation")
 
     if (IEM_POST_BUILD_INSTALL STREQUAL "SYSTEM")
         set_directory_properties (PROPERTIES JUCE_VST_COPY_DIR "${prefix}/lib/vst/IEM")
