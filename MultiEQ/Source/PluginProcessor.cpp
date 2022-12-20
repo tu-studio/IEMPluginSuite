@@ -433,7 +433,7 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
     {
         for (int i = 0; i<nSIMDFilters; ++i)
         {
-            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers(), IIRfloat_elements},
+            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers() + i * IIRfloat_elements, IIRfloat_elements},
                                                 juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
                                                 L);
         }
@@ -443,7 +443,7 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
         int i;
         for (i = 0; i<nSIMDFilters-1; ++i)
         {
-            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers(), IIRfloat_elements},
+            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers() + i * IIRfloat_elements, IIRfloat_elements},
                                                 juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
                                                 L);
         }
@@ -509,7 +509,7 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
         for (int i = 0; i<nSIMDFilters; ++i)
         {
             juce::AudioData::deinterleaveSamples (juce::AudioData::InterleavedSource<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
-                                                  juce::AudioData::NonInterleavedDest<Format> {buffer.getArrayOfWritePointers(), IIRfloat_elements},
+                                                  juce::AudioData::NonInterleavedDest<Format> {buffer.getArrayOfWritePointers() + i * IIRfloat_elements, IIRfloat_elements},
                                                   L);
         }
     }
@@ -519,7 +519,7 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
         for (i = 0; i<nSIMDFilters-1; ++i)
         {
             juce::AudioData::deinterleaveSamples (juce::AudioData::InterleavedSource<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
-                                                  juce::AudioData::NonInterleavedDest<Format> {buffer.getArrayOfWritePointers(), IIRfloat_elements},
+                                                  juce::AudioData::NonInterleavedDest<Format> {buffer.getArrayOfWritePointers() + i * IIRfloat_elements, IIRfloat_elements},
                                                   L);
         }
 

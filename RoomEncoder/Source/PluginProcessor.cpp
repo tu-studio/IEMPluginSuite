@@ -435,7 +435,7 @@ void RoomEncoderAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, j
     {
         for (int i = 0; i<nSIMDFilters; ++i)
         {
-            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers(), IIRfloat_elements},
+            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers() + i * IIRfloat_elements, IIRfloat_elements},
                                                 juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
                                                 L);
         }
@@ -445,7 +445,7 @@ void RoomEncoderAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, j
         int i;
         for (i = 0; i<nSIMDFilters-1; ++i)
         {
-            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers(), IIRfloat_elements},
+            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers() + i * IIRfloat_elements, IIRfloat_elements},
                                                 juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
                                                 L);
         }
