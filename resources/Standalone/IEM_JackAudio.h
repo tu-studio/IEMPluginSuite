@@ -673,7 +673,6 @@ public:
         if (auto* const client =
                 iem::jack_client_open ("JuceJackDummy", JackNoStartServer, &status))
         {
-		std::cerr << "scan for devices" << std::endl;
             // scan for output devices
             for (JackPortIterator i (client, false); i.next();)
                 if (i.getClientName() != (currentDeviceName)
