@@ -661,9 +661,9 @@ public:
         outputNames.clear();
 
         if (juce_libjackHandle == nullptr)
-            juce_libjackHandle = dlopen ("JACK_LIB_NAME0", RTLD_LAZY);
+            juce_libjackHandle = dlopen (JACK_LIB_NAME0, RTLD_LAZY);
         if (juce_libjackHandle == nullptr)
-            juce_libjackHandle = dlopen ("JACK_LIB_NAME", RTLD_LAZY);
+            juce_libjackHandle = dlopen (JACK_LIB_NAME, RTLD_LAZY);
         if (juce_libjackHandle == nullptr)
             return;
 
