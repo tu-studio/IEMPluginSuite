@@ -68,11 +68,9 @@ static void* juce_loadJackFunction (const char* const name)
 }
 
 #if JUCE_MAC
-    #define JACK_LIB_NAME0 "libjack.0.dylib"
-    #define JACK_LIB_NAME "libjack.dylib"
+    #define JACK_LIB_NAMES "libjack.0.dylib", "libjack.dylib"
 #elif JUCE_LINUX
-    #define JACK_LIB_NAME0 "libjack.so.0"
-    #define JACK_LIB_NAME "libjack.so"
+    #define JACK_LIB_NAMES "libjack.so.0", "libjack.so"
 #endif
 
 #define JUCE_DECL_JACK_FUNCTION(return_type, fn_name, argument_types, arguments) \
@@ -649,6 +647,10 @@ private:
 //==============================================================================
 class JackAudioIODeviceType;
 
+#ifndef JACK_LIB_NAMES
+    #define JACK_LIB_NAMES
+#endif
+
 class JackAudioIODeviceType : public juce::AudioIODeviceType
 {
 public:
@@ -656,14 +658,16 @@ public:
 
     void scanForDevices()
     {
+        const char* libnames[] = { JACK_LIB_NAMES };
         hasScanned = true;
         inputNames.clear();
         outputNames.clear();
 
-        if (juce_libjackHandle == nullptr)
-            juce_libjackHandle = dlopen (JACK_LIB_NAME0, RTLD_LAZY);
-        if (juce_libjackHandle == nullptr)
-            juce_libjackHandle = dlopen (JACK_LIB_NAME, RTLD_LAZY);
+        for (unsigned int i = 0; ! juce_libjackHandle && i < sizeof (libnames) / sizeof (*libnames);
+             i++)
+        {
+            juce_libjackHandle = dlopen (libnames[i], RTLD_LAZY);
+        }
         if (juce_libjackHandle == nullptr)
             return;
 
