@@ -91,6 +91,7 @@ private:
     std::atomic<float>* peakLevel;
     std::atomic<float>* dynamicRange;
     std::atomic<float>* holdRMS;
+    std::atomic<float>* timeConstantInMS;
 
     float timeConstant;
 

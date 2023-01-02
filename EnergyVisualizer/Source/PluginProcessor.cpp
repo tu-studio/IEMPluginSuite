@@ -44,8 +44,10 @@ createParameterLayout()), decoderMatrix (nSamplePoints, 64)
     peakLevel = parameters.getRawParameterValue ("peakLevel");
     dynamicRange = parameters.getRawParameterValue ("dynamicRange");
     holdRMS = parameters.getRawParameterValue ("holdRMS");
+    timeConstantInMS = parameters.getRawParameterValue ("timeConstantInMS");
 
     parameters.addParameterListener ("orderSetting", this);
+    parameters.addParameterListener ("timeConstantInMS", this);
 
     for (int point = 0; point < nSamplePoints; ++point)
     {
@@ -97,7 +99,7 @@ void EnergyVisualizerAudioProcessor::prepareToPlay (double sampleRate, int sampl
 {
     checkInputAndOutput (this, *orderSetting, 0, true);
 
-    timeConstant = exp (-1.0 / (sampleRate * 0.1 / samplesPerBlock)); // 100ms RMS averaging
+    timeConstant = exp (-1.0 / (sampleRate * (*timeConstantInMS / 1000) / samplesPerBlock));
 
     sampledSignal.resize (samplesPerBlock);
     std::fill (rms.begin(), rms.end(), 0.0f);
@@ -199,6 +201,9 @@ void EnergyVisualizerAudioProcessor::parameterChanged (const juce::String &param
 {
     if (parameterID == "orderSetting")
         userChangedIOSettings = true;
+    if (parameterID == "timeConstantInMS")
+        timeConstant = exp (-1.0 / (getSampleRate() * (*timeConstantInMS / 1000) / getBlockSize()));
+        
 }
 
 
@@ -243,6 +248,10 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> EnergyVisualizerAudioPr
                                                                        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
                                                                        [](float value) {if (value >= 0.5f) return "ON";
                                                                            else return "OFF";}, nullptr));
+    
+    params.push_back (OSCParameterInterface::createParameterTheOldWay ("timeConstantInMS", "RMS time constant", "ms",
+                                                       juce::NormalisableRange<float> (20.0f, 2000.0f, 1.0f), 100.0f,
+                                                       [](float value) {return juce::String (value, 0);}, nullptr));
 
     return params;
 }
