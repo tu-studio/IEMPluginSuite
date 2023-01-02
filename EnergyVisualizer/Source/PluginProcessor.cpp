@@ -43,6 +43,7 @@ createParameterLayout()), decoderMatrix (nSamplePoints, 64)
     useSN3D = parameters.getRawParameterValue ("useSN3D");
     peakLevel = parameters.getRawParameterValue ("peakLevel");
     dynamicRange = parameters.getRawParameterValue ("dynamicRange");
+    holdRMS = parameters.getRawParameterValue ("holdRMS");
 
     parameters.addParameterListener ("orderSetting", this);
 
@@ -196,7 +197,8 @@ void EnergyVisualizerAudioProcessor::setStateInformation (const void *data, int 
 //==============================================================================
 void EnergyVisualizerAudioProcessor::parameterChanged (const juce::String &parameterID, float newValue)
 {
-    if (parameterID == "orderSetting") userChangedIOSettings = true;
+    if (parameterID == "orderSetting")
+        userChangedIOSettings = true;
 }
 
 
@@ -230,12 +232,17 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> EnergyVisualizerAudioPr
                                      }, nullptr));
 
     params.push_back (OSCParameterInterface::createParameterTheOldWay ("peakLevel", "Peak level", "dB",
-                                    juce::NormalisableRange<float> (-50.0f, 10.0f, 0.1f), 0.0,
+                                    juce::NormalisableRange<float> (-50.0f, 10.0f, 0.1f), 0.0f,
                                     [](float value) {return juce::String(value, 1);}, nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("dynamicRange", "Dynamic juce::Range", "dB",
-                                                       juce::NormalisableRange<float> (10.0f, 60.0f, 1.f), 35.0,
+    params.push_back (OSCParameterInterface::createParameterTheOldWay ("dynamicRange", "Dynamic Range", "dB",
+                                                       juce::NormalisableRange<float> (10.0f, 60.0f, 1.f), 35.0f,
                                                        [](float value) {return juce::String (value, 0);}, nullptr));
+    
+    params.push_back (OSCParameterInterface::createParameterTheOldWay ("holdRMS", "Hold maximal RMS value", "",
+                                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                                                       [](float value) {if (value >= 0.5f) return "ON";
+                                                                           else return "OFF";}, nullptr));
 
     return params;
 }

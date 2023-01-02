@@ -155,6 +155,7 @@ void EnergyVisualizerAudioProcessorEditor::timerCallback()
     visualizer.setColormap (colormap.getColormap());
     visualizer.setPeakLevel (processor.getPeakLevelSetting());
     visualizer.setDynamicRange (processor.getDynamicRange());
+    visualizer.setHoldRMS (processor.getHoldRMSSetting());
 
     processor.lastEditorTime = juce::Time::getCurrentTime();
 }
