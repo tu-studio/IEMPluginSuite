@@ -3,6 +3,19 @@ For a list of all changes and bugfixes see the git log.
 
 Please note, that breaking changes are marked with `!!BREAKING CHANGE!!`. They might lead to an unexpected behaviour and might not be compatible with your previous projects without making some adaptions. See the [Breaking changes article](https://plugins.iem.at/docs/breakingchanges/) for more information.
 
+## v1.14.0
+- general changes
+    - moved to JUCE 7.0.3
+    - LV2 plug-ins for Linux and Windows
+    - remove deprecated *.jucer files
+    - clang-format
+    - smaller bug fixes
+- new plug-ins
+    - **Granular**Encoder
+        - Granular synthesizer and encoder
+-  plug-in specific changes
+    -  **Distance**Compensator
+        -  Change plug-in code from DiCo to DisC, so it is different to the **Directional**Compressor
 
 ## v1.13.0
 - general changes
