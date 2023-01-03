@@ -31,7 +31,7 @@ EnergyVisualizerAudioProcessorEditor::EnergyVisualizerAudioProcessorEditor (Ener
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
-    setResizeLimits(705, 400, 1500, 1200);
+    setResizeLimits(710, 410, 1500, 1200);
     setLookAndFeel (&globalLaF);
 
 
@@ -42,8 +42,6 @@ EnergyVisualizerAudioProcessorEditor::EnergyVisualizerAudioProcessorEditor (Ener
 
     cbNormalizationAtachement.reset (new ComboBoxAttachment (valueTreeState,"useSN3D", *title.getInputWidgetPtr()->getNormCbPointer()));
     cbOrderAtachement.reset (new ComboBoxAttachment (valueTreeState,"orderSetting", *title.getInputWidgetPtr()->getOrderCbPointer()));
-
-
 
 
     addAndMakeVisible(&slPeakLevel);
@@ -63,6 +61,20 @@ EnergyVisualizerAudioProcessorEditor::EnergyVisualizerAudioProcessorEditor (Ener
     slDynamicRange.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
     slDynamicRange.setReverse(false);
     slDynamicRange.addListener (this);
+    
+    addAndMakeVisible (&slRMStimeConstant);
+    slRMStimeConstantAttachment.reset (new SliderAttachment (valueTreeState, "RMStimeConstant", slRMStimeConstant));
+    slRMStimeConstant.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    slRMStimeConstant.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 100, 12);
+    slRMStimeConstant.setTextValueSuffix (" ms");
+    slRMStimeConstant.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
+    slRMStimeConstant.setReverse (false);
+    slRMStimeConstant.addListener (this);
+    
+    addAndMakeVisible (tbHoldMax);
+    tbHoldMaxAttachment.reset (new ButtonAttachment(valueTreeState, "holdMax", tbHoldMax));
+    tbHoldMax.setButtonText ("Hold max");
+    tbHoldMax.setColour (juce::ToggleButton::tickColourId, globalLaF.ClWidgetColours[2]);
 
 
     addAndMakeVisible(&lbPeakLevel);
@@ -70,6 +82,9 @@ EnergyVisualizerAudioProcessorEditor::EnergyVisualizerAudioProcessorEditor (Ener
 
     addAndMakeVisible (&lbDynamicRange);
     lbDynamicRange.setText("Range");
+    
+    addAndMakeVisible (&lbRMStimeConstant);
+    lbRMStimeConstant.setText("Time Constant");
 
     addAndMakeVisible(&visualizer);
     visualizer.setRmsDataPtr (p.rms.data());
@@ -105,19 +120,19 @@ void EnergyVisualizerAudioProcessorEditor::resized()
 
     area.removeFromLeft(leftRightMargin);
     area.removeFromRight(leftRightMargin);
-    juce::Rectangle<int> headerArea = area.removeFromTop    (headerHeight);
+    juce::Rectangle<int> headerArea = area.removeFromTop (headerHeight);
     title.setBounds (headerArea);
     area.removeFromTop(10);
     area.removeFromBottom(5);
 
 
-    juce::Rectangle<int> UIarea = area.removeFromRight(105);
+    juce::Rectangle<int> UIarea = area.removeFromRight(106);
     const juce::Point<int> UIareaCentre = UIarea.getCentre();
-    UIarea.setHeight(240);
+    UIarea.setHeight(320);
     UIarea.setCentre(UIareaCentre);
 
-
-    juce::Rectangle<int> sliderCol = UIarea.removeFromRight(50);
+    juce::Rectangle<int> dynamicsArea = UIarea.removeFromTop (210);
+    juce::Rectangle<int> sliderCol = dynamicsArea.removeFromRight (50);
 
     lbDynamicRange.setBounds (sliderCol.removeFromBottom (12));
     slDynamicRange.setBounds (sliderCol.removeFromBottom (50));
@@ -128,11 +143,25 @@ void EnergyVisualizerAudioProcessorEditor::resized()
     slPeakLevel.setBounds (sliderCol);
 
 
-    UIarea.removeFromRight(5);
-    sliderCol = UIarea.removeFromRight(50);
-    colormap.setBounds(sliderCol);
-
-
+    dynamicsArea.removeFromRight (6);
+    sliderCol = dynamicsArea.removeFromRight (50);
+    colormap.setBounds (sliderCol);
+    colormap.setMaxLevel (processor.getPeakLevelSetting());
+    colormap.setRange (processor.getDynamicRange());
+    
+    UIarea.removeFromTop (20);
+    juce::Rectangle<int> sliderArea = UIarea.removeFromTop (45);
+    sliderArea.removeFromRight (28);
+    sliderArea.removeFromLeft (28);
+    slRMStimeConstant.setBounds (sliderArea);
+    lbRMStimeConstant.setBounds (UIarea.removeFromTop (12));
+    
+    UIarea.removeFromTop (10);
+    UIarea.removeFromLeft (15);
+    
+    tbHoldMax.setBounds (UIarea.removeFromTop (20));
+    
+    
     area.removeFromRight(5);
     visualizer.setBounds(area);
 
@@ -155,6 +184,7 @@ void EnergyVisualizerAudioProcessorEditor::timerCallback()
     visualizer.setColormap (colormap.getColormap());
     visualizer.setPeakLevel (processor.getPeakLevelSetting());
     visualizer.setDynamicRange (processor.getDynamicRange());
+    visualizer.setHoldMax (processor.getHoldRMSSetting());
 
     processor.lastEditorTime = juce::Time::getCurrentTime();
 }

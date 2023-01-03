@@ -43,6 +43,8 @@ public:
         openGLContext.attachTo(*this);
 
         addAndMakeVisible(&hammerAitovGrid);
+        
+        visualizedRMS.resize (nSamplePoints);
 
         startTimer(20);
     }
@@ -76,6 +78,11 @@ public:
     void setDynamicRange (const float newDynamicRange)
     {
         dynamicRange = newDynamicRange;
+    }
+    
+    void setHoldMax (const bool newHoldMax)
+    {
+        holdMax = newHoldMax;
     }
 
     void renderOpenGL() override
@@ -130,8 +137,13 @@ public:
         static GLfloat g_colorMap_data[nSamplePoints];
         for (int i = 0; i < nSamplePoints; i++)
         {
-            const float val = (juce::Decibels::gainToDecibels (pRMS[i]) - peakLevel) / dynamicRange + 1.0f;
-            g_colorMap_data[i] = juce::jlimit (0.0f, 1.0f, val);;
+            if (holdMax)
+                visualizedRMS[i] = std::max(pRMS[i], visualizedRMS[i]);
+            else
+                visualizedRMS[i] = pRMS[i];
+            
+            const float val = (juce::Decibels::gainToDecibels (visualizedRMS[i]) - peakLevel) / dynamicRange + 1.0f;
+            g_colorMap_data[i] = juce::jlimit (0.0f, 1.0f, val);
         }
 
         GLuint colorBuffer;
@@ -291,6 +303,8 @@ private:
     std::unique_ptr<juce::OpenGLShaderProgram> shader;
     std::unique_ptr<juce::OpenGLShaderProgram::Uniform> colormapChooser;
     bool usePerceptualColormap = true;
+    
+    std::vector<float> visualizedRMS;
 
     static juce::OpenGLShaderProgram::Uniform* createUniform (juce::OpenGLContext& openGLContext, juce::OpenGLShaderProgram& shaderProgram, const char* uniformName)
     {
@@ -305,6 +319,7 @@ private:
     juce::OpenGLTexture texture;
 
     bool firstRun = true;
+    bool holdMax = false;
 
     float* pRMS;
 

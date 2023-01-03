@@ -15,7 +15,9 @@ Please note, that breaking changes are marked with `!!BREAKING CHANGE!!`. They m
         - Granular synthesizer and encoder
 -  plug-in specific changes
     -  **Distance**Compensator
-        -  Change plug-in code from DiCo to DisC, so it is different to the **Directional**Compressor
+        - Change plug-in code from DiCo to DisC, so it is different to the **Directional**Compressor
+    -  **Energy**Visualizer
+        - Added variable RMS time constant and max hold 
 
 ## v1.13.0
 - general changes
