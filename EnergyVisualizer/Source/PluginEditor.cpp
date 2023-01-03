@@ -120,7 +120,7 @@ void EnergyVisualizerAudioProcessorEditor::resized()
 
     area.removeFromLeft(leftRightMargin);
     area.removeFromRight(leftRightMargin);
-    juce::Rectangle<int> headerArea = area.removeFromTop    (headerHeight);
+    juce::Rectangle<int> headerArea = area.removeFromTop (headerHeight);
     title.setBounds (headerArea);
     area.removeFromTop(10);
     area.removeFromBottom(5);
@@ -146,6 +146,8 @@ void EnergyVisualizerAudioProcessorEditor::resized()
     dynamicsArea.removeFromRight (6);
     sliderCol = dynamicsArea.removeFromRight (50);
     colormap.setBounds (sliderCol);
+    colormap.setMaxLevel (processor.getPeakLevelSetting());
+    colormap.setRange (processor.getDynamicRange());
     
     UIarea.removeFromTop (20);
     juce::Rectangle<int> sliderArea = UIarea.removeFromTop (45);
