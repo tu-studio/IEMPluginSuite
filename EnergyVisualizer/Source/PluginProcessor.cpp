@@ -250,7 +250,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> EnergyVisualizerAudioPr
                                                                            else return "OFF";}, nullptr));
     
     params.push_back (OSCParameterInterface::createParameterTheOldWay ("timeConstantInMS", "RMS time constant", "ms",
-                                                       juce::NormalisableRange<float> (20.0f, 2000.0f, 1.0f), 100.0f,
+                                                       juce::NormalisableRange<float> (10.0f, 1000.0f, 1.0f, 0.4f), 100.0f,
                                                        [](float value) {return juce::String (value, 0);}, nullptr));
 
     return params;

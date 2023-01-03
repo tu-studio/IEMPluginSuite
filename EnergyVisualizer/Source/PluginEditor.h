@@ -69,14 +69,15 @@ private:
     TitleBar<AmbisonicIOWidget<>, NoIOWidget> title;
     OSCFooter footer;
 
-    ReverseSlider slPeakLevel;
-    ReverseSlider slDynamicRange;
-    SimpleLabel lbPeakLevel;
-    SimpleLabel lbDynamicRange;
-    std::unique_ptr<SliderAttachment> slPeakLevelAttachment, slDynamicRangeAttachment;
+    ReverseSlider slPeakLevel, slDynamicRange, slTimeConstant;
+    juce::ToggleButton tbHoldMax;
+    
+    SimpleLabel lbPeakLevel, lbDynamicRange, lbTimeConstant;
+    std::unique_ptr<SliderAttachment> slPeakLevelAttachment, slDynamicRangeAttachment, slTimeConstantAttachment;
 
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;
+    std::unique_ptr<ButtonAttachment> tbHoldMaxAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnergyVisualizerAudioProcessorEditor)
 };
