@@ -69,11 +69,11 @@ private:
     TitleBar<AmbisonicIOWidget<>, NoIOWidget> title;
     OSCFooter footer;
 
-    ReverseSlider slPeakLevel, slDynamicRange, slTimeConstant;
+    ReverseSlider slPeakLevel, slDynamicRange, slRMStimeConstant;
     juce::ToggleButton tbHoldMax;
     
-    SimpleLabel lbPeakLevel, lbDynamicRange, lbTimeConstant;
-    std::unique_ptr<SliderAttachment> slPeakLevelAttachment, slDynamicRangeAttachment, slTimeConstantAttachment;
+    SimpleLabel lbPeakLevel, lbDynamicRange, lbRMStimeConstant;
+    std::unique_ptr<SliderAttachment> slPeakLevelAttachment, slDynamicRangeAttachment, slRMStimeConstantAttachment;
 
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;

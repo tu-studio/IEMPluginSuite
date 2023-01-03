@@ -80,9 +80,9 @@ public:
         dynamicRange = newDynamicRange;
     }
     
-    void setHoldRMS (const bool newHoldRMS)
+    void setHoldMax (const bool newHoldMax)
     {
-        holdRMS = newHoldRMS;
+        holdMax = newHoldMax;
     }
 
     void renderOpenGL() override
@@ -137,7 +137,7 @@ public:
         static GLfloat g_colorMap_data[nSamplePoints];
         for (int i = 0; i < nSamplePoints; i++)
         {
-            if (holdRMS)
+            if (holdMax)
                 visualizedRMS[i] = std::max(pRMS[i], visualizedRMS[i]);
             else
                 visualizedRMS[i] = pRMS[i];
@@ -319,7 +319,7 @@ private:
     juce::OpenGLTexture texture;
 
     bool firstRun = true;
-    bool holdRMS = false;
+    bool holdMax = false;
 
     float* pRMS;
 

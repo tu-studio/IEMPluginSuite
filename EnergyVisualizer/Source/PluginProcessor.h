@@ -76,7 +76,7 @@ public:
     const float getPeakLevelSetting() { return *peakLevel; }
     const float getDynamicRange() { return *dynamicRange; }
     const float getHoldRMSSetting(){
-        if (*holdRMS >= 0.5f) return true;
+        if (*holdMax >= 0.5f) return true;
         else return false;
     }
 
@@ -90,8 +90,8 @@ private:
     std::atomic<float>* useSN3D;
     std::atomic<float>* peakLevel;
     std::atomic<float>* dynamicRange;
-    std::atomic<float>* holdRMS;
-    std::atomic<float>* timeConstantInMS;
+    std::atomic<float>* holdMax;
+    std::atomic<float>* RMStimeConstant;
 
     float timeConstant;
 

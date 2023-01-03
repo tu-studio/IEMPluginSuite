@@ -62,18 +62,18 @@ EnergyVisualizerAudioProcessorEditor::EnergyVisualizerAudioProcessorEditor (Ener
     slDynamicRange.setReverse(false);
     slDynamicRange.addListener (this);
     
-    addAndMakeVisible (&slTimeConstant);
-    slTimeConstantAttachment.reset (new SliderAttachment (valueTreeState, "timeConstantInMS", slTimeConstant));
-    slTimeConstant.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
-    slTimeConstant.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 100, 12);
-    slTimeConstant.setTextValueSuffix (" dB");
-    slTimeConstant.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
-    slTimeConstant.setReverse (false);
-    slTimeConstant.addListener (this);
+    addAndMakeVisible (&slRMStimeConstant);
+    slRMStimeConstantAttachment.reset (new SliderAttachment (valueTreeState, "RMStimeConstant", slRMStimeConstant));
+    slRMStimeConstant.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    slRMStimeConstant.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 100, 12);
+    slRMStimeConstant.setTextValueSuffix (" ms");
+    slRMStimeConstant.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
+    slRMStimeConstant.setReverse (false);
+    slRMStimeConstant.addListener (this);
     
     addAndMakeVisible (tbHoldMax);
-    tbHoldMaxAttachment.reset (new ButtonAttachment(valueTreeState, "holdRMS", tbHoldMax));
-    tbHoldMax.setButtonText ("hold max");
+    tbHoldMaxAttachment.reset (new ButtonAttachment(valueTreeState, "holdMax", tbHoldMax));
+    tbHoldMax.setButtonText ("Hold max");
     tbHoldMax.setColour (juce::ToggleButton::tickColourId, globalLaF.ClWidgetColours[2]);
 
 
@@ -83,8 +83,8 @@ EnergyVisualizerAudioProcessorEditor::EnergyVisualizerAudioProcessorEditor (Ener
     addAndMakeVisible (&lbDynamicRange);
     lbDynamicRange.setText("Range");
     
-    addAndMakeVisible (&lbTimeConstant);
-    lbTimeConstant.setText("Time Constant");
+    addAndMakeVisible (&lbRMStimeConstant);
+    lbRMStimeConstant.setText("Time Constant");
 
     addAndMakeVisible(&visualizer);
     visualizer.setRmsDataPtr (p.rms.data());
@@ -151,8 +151,8 @@ void EnergyVisualizerAudioProcessorEditor::resized()
     juce::Rectangle<int> sliderArea = UIarea.removeFromTop (45);
     sliderArea.removeFromRight (28);
     sliderArea.removeFromLeft (28);
-    slTimeConstant.setBounds (sliderArea);
-    lbTimeConstant.setBounds (UIarea.removeFromTop (12));
+    slRMStimeConstant.setBounds (sliderArea);
+    lbRMStimeConstant.setBounds (UIarea.removeFromTop (12));
     
     UIarea.removeFromTop (10);
     UIarea.removeFromLeft (15);
@@ -182,7 +182,7 @@ void EnergyVisualizerAudioProcessorEditor::timerCallback()
     visualizer.setColormap (colormap.getColormap());
     visualizer.setPeakLevel (processor.getPeakLevelSetting());
     visualizer.setDynamicRange (processor.getDynamicRange());
-    visualizer.setHoldRMS (processor.getHoldRMSSetting());
+    visualizer.setHoldMax (processor.getHoldRMSSetting());
 
     processor.lastEditorTime = juce::Time::getCurrentTime();
 }
