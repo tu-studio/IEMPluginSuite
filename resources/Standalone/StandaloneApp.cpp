@@ -77,7 +77,7 @@ public:
 #if JUCE_LINUX || JUCE_BSD
         options.folderName = "~/.config/IEMAudioPlugins";
 #else
-        options.folderName = "";
+        options.folderName = "IEMAudioPlugins";
 #endif
 
         appProperties.setStorageParameters (options);
