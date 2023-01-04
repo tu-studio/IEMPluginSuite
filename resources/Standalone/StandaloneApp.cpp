@@ -73,11 +73,11 @@ public:
 
         options.applicationName = getApplicationName();
         options.filenameSuffix = ".settings";
-        options.osxLibrarySubFolder = "Application Support";
+        options.osxLibrarySubFolder = "Application Support/IEMAudioPlugins";
 #if JUCE_LINUX || JUCE_BSD
-        options.folderName = "~/.config";
+        options.folderName = "~/.config/IEMAudioPlugins";
 #else
-        options.folderName = "";
+        options.folderName = "IEMAudioPlugins";
 #endif
 
         appProperties.setStorageParameters (options);

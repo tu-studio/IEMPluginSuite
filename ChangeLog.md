@@ -7,6 +7,7 @@ Please note, that breaking changes are marked with `!!BREAKING CHANGE!!`. They m
 - general changes
     - moved to JUCE 7.0.3
     - LV2 plug-ins for Linux and Windows
+    - Store settings of standalones in a dedicated `IEMAudioPlugins` subdirectory
     - remove deprecated *.jucer files
     - clang-format
     - smaller bug fixes
