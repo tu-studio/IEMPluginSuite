@@ -875,6 +875,16 @@ public:
         if (auto* processor = getAudioProcessor())
             if (auto* editor = processor->getActiveEditor())
                 setResizable (editor->isResizable(), false);
+
+        // Setting icon for standalone application here in order to display it on Linux.
+        // This has to be done after `setUsingNativeTitleBar()` and `setResizable()`.
+        auto img = juce::ImageFileFormat::loadFrom(juce::File("IEMPluginSuiteSmall.png"));
+
+        DocumentWindow::setIcon (img);
+
+        if (auto peer = getPeer())
+            peer->setIcon (img);
+
 #endif
     }
 
