@@ -45,6 +45,7 @@ target_include_directories (StereoEncoder PRIVATE Source)
 
 target_link_libraries (StereoEncoder PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

@@ -54,6 +54,7 @@
 #include "../customComponents/SimpleLabel.h"
 #include "../lookAndFeel/IEM_LaF.h"
 #include "IEM_AudioDeviceSelectorComponent.h"
+#include <IEMLogo.h>
 
 #if JUCE_MAC || JUCE_LINUX
     #if DONT_BUILD_WITH_JACK_SUPPORT
@@ -876,14 +877,16 @@ public:
             if (auto* editor = processor->getActiveEditor())
                 setResizable (editor->isResizable(), false);
 
-        // Setting icon for standalone application here in order to display it on Linux.
+        // Setting icon for standalone application in order to display it on Linux.
         // This has to be done after `setUsingNativeTitleBar()` and `setResizable()`.
-        auto img = juce::ImageFileFormat::loadFrom(BinaryData::IEMPluginSuiteSmall_png, BinaryData::IEMPluginSuiteSmall_pngSize);
+        auto img = juce::ImageFileFormat::loadFrom(IEMLogo::IEMPluginSuiteSmall_png, IEMLogo::IEMPluginSuiteSmall_pngSize);
 
         DocumentWindow::setIcon (img);
 
         if (auto peer = getPeer())
             peer->setIcon (img);
+        else
+            jassertfalse;
 
 #endif
     }
