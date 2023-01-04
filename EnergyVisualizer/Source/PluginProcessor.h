@@ -73,10 +73,11 @@ public:
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
     //==============================================================================
 
-    const float getPeakLevelSetting() { return *peakLevel; }
-    const float getDynamicRange() { return *dynamicRange; }
-    const float getHoldRMSSetting(){
-        if (*holdMax >= 0.5f) return true;
+    float getPeakLevelSetting() const { return peakLevel->load (std::memory_order_relaxed); }
+    float getDynamicRange() const { return dynamicRange->load (std::memory_order_relaxed); }
+    bool getHoldRMSSetting() const
+    {
+        if (holdMax->load (std::memory_order_relaxed) >= 0.5f) return true;
         else return false;
     }
 
