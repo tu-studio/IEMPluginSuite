@@ -73,7 +73,7 @@ public:
 
         options.applicationName = getApplicationName();
         options.filenameSuffix = ".settings";
-        options.osxLibrarySubFolder = "Application Support";
+        options.osxLibrarySubFolder = "Application Support/IEMAudioPlugins";
 #if JUCE_LINUX || JUCE_BSD
         options.folderName = "~/.config/IEMAudioPlugins";
 #else
