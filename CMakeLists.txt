@@ -164,7 +164,8 @@ juce_add_binary_data (LAF_fonts SOURCES
     resources/lookAndFeel/Roboto-Bold.ttf
     resources/lookAndFeel/Roboto-Light.ttf
     resources/lookAndFeel/Roboto-Medium.ttf
-    resources/lookAndFeel/Roboto-Regular.ttf)
+    resources/lookAndFeel/Roboto-Regular.ttf
+    resources/Standalone/IEMPluginSuiteSmall.png)
 
 foreach (subproject IN LISTS PLUGINS_TO_BUILD)
     add_subdirectory (${subproject})

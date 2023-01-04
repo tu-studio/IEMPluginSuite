@@ -878,7 +878,7 @@ public:
 
         // Setting icon for standalone application here in order to display it on Linux.
         // This has to be done after `setUsingNativeTitleBar()` and `setResizable()`.
-        auto img = juce::ImageFileFormat::loadFrom(juce::File("IEMPluginSuiteSmall.png"));
+        auto img = juce::ImageFileFormat::loadFrom(BinaryData::IEMPluginSuiteSmall_png, BinaryData::IEMPluginSuiteSmall_pngSize);
 
         DocumentWindow::setIcon (img);
 
