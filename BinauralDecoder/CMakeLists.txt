@@ -86,6 +86,7 @@ juce_add_binary_data (BinauralDecoderIRs
 
 target_link_libraries (BinauralDecoder PRIVATE
     LAF_fonts
+    IEM_logo
     BinauralDecoderEQs
     BinauralDecoderIRs
     juce::juce_audio_utils

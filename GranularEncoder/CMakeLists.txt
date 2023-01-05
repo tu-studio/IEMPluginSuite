@@ -47,6 +47,7 @@ target_include_directories (GranularEncoder PRIVATE Source)
 
 target_link_libraries (GranularEncoder PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

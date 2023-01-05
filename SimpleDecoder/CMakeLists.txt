@@ -62,6 +62,7 @@ target_include_directories(SimpleDecoder PRIVATE Source)
 
 target_link_libraries(SimpleDecoder PRIVATE
     LAF_fonts
+    IEM_logo
     SimpleDecoderPresets
     juce::juce_audio_utils
     juce::juce_audio_plugin_client

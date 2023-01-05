@@ -46,6 +46,7 @@ target_include_directories(RoomEncoder PRIVATE Source)
 
 target_link_libraries(RoomEncoder PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc
