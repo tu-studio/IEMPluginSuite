@@ -411,8 +411,8 @@ std::pair<int, float> GranularEncoderAudioProcessor::getGrainLengthAndPitchFacto
     float grainLengthModSeconds = *grainLengthMod / 100.0f * *grainLength * 2
                                   * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
     float newGrainLengthSeconds = *grainLength + grainLengthModSeconds;
-    newGrainLengthSeconds = std::min (newGrainLengthSeconds, 0.5f);
-    newGrainLengthSeconds = std::max (newGrainLengthSeconds, 0.001f);
+    newGrainLengthSeconds = std::min (newGrainLengthSeconds, MAX_GRAIN_LENGTH);
+    newGrainLengthSeconds = std::max (newGrainLengthSeconds, MIN_GRAIN_LENGTH);
 
     // jassert(newGrainLengthSeconds >= 0.001f && newGrainLengthSeconds =< 0.5f);
     float grainLengthSamplesFloat = newGrainLengthSeconds * lastSampleRate;
@@ -431,7 +431,9 @@ std::pair<int, float> GranularEncoderAudioProcessor::getGrainLengthAndPitchFacto
     float pitchReadFactor = std::pow (2.0f, (pitchToUse) / 12.0f);
 
     // Updated length of grain in samples
-    int grainLengthSamples = static_cast<int> (grainLengthSamplesFloat * (1 / pitchReadFactor));
+    int grainLengthSamples = static_cast<int> (
+        std::min (newGrainLengthSeconds * (1 / pitchReadFactor), MAX_GRAIN_LENGTH * 2.0f)
+        * lastSampleRate);
 
     return std::make_pair (grainLengthSamples, pitchReadFactor);
 }
@@ -442,9 +444,9 @@ int GranularEncoderAudioProcessor::getDeltaTimeSamples()
     float deltaTimeModSeconds = *deltaTimeMod / 100.0f * *deltaTime * 2.0f
                                 * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
     float newDeltaTime = *deltaTime + deltaTimeModSeconds;
-    newDeltaTime = std::min (newDeltaTime, 0.5f);
-    newDeltaTime = std::max (newDeltaTime, 0.001f);
-    jassert (newDeltaTime >= 0.001f && newDeltaTime <= 0.5f);
+    newDeltaTime = std::min (newDeltaTime, MAX_DELTA_T);
+    newDeltaTime = std::max (newDeltaTime, MIN_DELTA_T);
+    jassert (MIN_DELTA_T >= 0.001f && newDeltaTime <= MAX_DELTA_T);
     int deltaTimeSamples = juce::roundToInt (lastSampleRate * newDeltaTime);
     return deltaTimeSamples;
 }
@@ -586,15 +588,16 @@ void GranularEncoderAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
     // GRANULAR PROCESSING
     float windowGain = getMeanWindowGain();
     float gainFactor;
+    float overlap = std::min (*grainLength / *deltaTime, static_cast<float> (maxNumGrains));
     if (*positionMod > 0.0f)
     {
         // Formula for uncorrelated grain signals
-        gainFactor = juce::jmin (std::sqrt (*deltaTime / *grainLength / windowGain), 1.0f) * 1.41f;
+        gainFactor = juce::jmin (std::sqrt (1.0f / overlap / windowGain), 1.0f) * 1.41f;
     }
     else
     {
         // More gain reduction if grains are highly correlated
-        gainFactor = juce::jmin (*deltaTime / *grainLength / windowGain, 1.0f) * 1.41f;
+        gainFactor = juce::jmin (1.0f / overlap / windowGain, 1.0f) * 1.41f;
     }
 
     // Get GUI state of Freeze button
@@ -1034,7 +1037,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         "deltaTime",
         "Delta Time",
         juce::CharPointer_UTF8 (R"(s)"),
-        juce::NormalisableRange<float> (0.001f, 0.5f, 1e-6f, GUI_SKEW),
+        juce::NormalisableRange<float> (MIN_DELTA_T, MAX_DELTA_T, 1e-6f, GUI_SKEW),
         0.005f,
         [] (float value) { return juce::String (value, 3); },
         nullptr));
@@ -1051,7 +1054,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         "grainLength",
         "Grain Length",
         juce::CharPointer_UTF8 (R"(s)"),
-        juce::NormalisableRange<float> (0.001f, 0.500f, 0.0001f, GUI_SKEW),
+        juce::NormalisableRange<float> (MIN_GRAIN_LENGTH, MAX_GRAIN_LENGTH, 0.0001f, GUI_SKEW),
         0.250f,
         [] (float value) { return juce::String (value, 3); },
         nullptr));
