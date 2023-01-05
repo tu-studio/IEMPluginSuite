@@ -879,12 +879,25 @@ public:
 
         // Setting icon for standalone application in order to display it on Linux.
         // This has to be done after `setUsingNativeTitleBar()` and `setResizable()`.
+        
+        // Loading image from binary data
         auto img = juce::ImageFileFormat::loadFrom(IEMLogo::IEMPluginSuiteSmall_png, IEMLogo::IEMPluginSuiteSmall_pngSize);
+    
+        // Workaround to avoid distorted icon on Linux
+        // Create empty quadratic, transparent image
+        juce::Image imgQuadratic (juce::Image::ARGB, img.getWidth(), img.getWidth(), true);
+        int yStartDraw = juce::roundToInt ((img.getWidth() - img.getHeight())/2);
+        
+        // Draw loaded image onto the quadratic image
+        juce::Graphics g (imgQuadratic);
+        g.drawImageAt (img, 0, yStartDraw);
 
-        DocumentWindow::setIcon (img);
+        // Finally set icons
+        DocumentWindow::setIcon (imgQuadratic);
 
+        // Only set if a peer exists
         if (auto peer = getPeer())
-            peer->setIcon (img);
+            peer->setIcon (imgQuadratic);
         else
             jassertfalse;
 
