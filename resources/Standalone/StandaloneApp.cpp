@@ -75,7 +75,9 @@ public:
         options.filenameSuffix = ".settings";
         options.osxLibrarySubFolder = "Application Support/IEMAudioPlugins";
 #if JUCE_LINUX || JUCE_BSD
-        options.folderName = "~/.config/IEMAudioPlugins";
+        options.folderName =
+            File::getSpecialLocation (File::userApplicationDataDirectory).getFullPathName()
+            + File::getSeparatorString() + "IEMAudioPlugins";
 #else
         options.folderName = "IEMAudioPlugins";
 #endif
