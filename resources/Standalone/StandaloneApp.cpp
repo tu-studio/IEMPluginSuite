@@ -85,10 +85,21 @@ public:
         appProperties.setStorageParameters (options);
     }
 
-    const juce::String getApplicationName() override { return CharPointer_UTF8 (JucePlugin_Name); }
-    const juce::String getApplicationVersion() override { return JucePlugin_VersionString; }
-    bool moreThanOneInstanceAllowed() override { return true; }
-    void anotherInstanceStarted (const juce::String&) override {}
+    const juce::String getApplicationName() override
+    {
+        return CharPointer_UTF8 (JucePlugin_Name);
+    }
+    const juce::String getApplicationVersion() override
+    {
+        return JucePlugin_VersionString;
+    }
+    bool moreThanOneInstanceAllowed() override
+    {
+        return true;
+    }
+    void anotherInstanceStarted (const juce::String&) override
+    {
+    }
 
     virtual MyStandaloneFilterWindow* createWindow()
     {
