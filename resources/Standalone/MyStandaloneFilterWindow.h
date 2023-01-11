@@ -188,7 +188,7 @@ public:
     //==============================================================================
     virtual void createPlugin()
     {
-        processor.reset (createPluginFilterOfType (juce::AudioProcessor::wrapperType_Standalone));
+        processor = createPluginFilterOfType (juce::AudioProcessor::wrapperType_Standalone);
         processor->disableNonMainBuses();
         processor->setRateAndBufferSizeDetails (44100, 512);
 
