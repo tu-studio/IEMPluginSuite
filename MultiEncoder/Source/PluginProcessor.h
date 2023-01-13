@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "../../resources/Quaternion.h"
-#include "../../resources/efficientSHvanilla.h"
-#include "../../resources/ambisonicTools.h"
 #include "../../resources/AudioProcessorBase.h"
 #include "../../resources/Conversions.h"
+#include "../../resources/Quaternion.h"
+#include "../../resources/ambisonicTools.h"
+#include "../../resources/efficientSHvanilla.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define CONFIGURATIONHELPER_ENABLE_LOUDSPEAKERLAYOUT_METHODS 1
 #include "../../resources/ConfigurationHelper.h"
@@ -40,7 +40,8 @@ constexpr int startNnumberOfInputs = 5;
 //==============================================================================
 /**
 */
-class MultiEncoderAudioProcessor  : public AudioProcessorBase<IOTypes::AudioChannels<maxNumberOfInputs>, IOTypes::Ambisonics<>>
+class MultiEncoderAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<maxNumberOfInputs>, IOTypes::Ambisonics<>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -70,8 +71,7 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
-
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();

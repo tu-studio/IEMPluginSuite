@@ -26,37 +26,38 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
 
-
-typedef ReverseSlider::SliderAttachment SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
+typedef ReverseSlider::SliderAttachment
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class MatrixMultiplierAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, private juce::Button::Listener
+class MatrixMultiplierAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                             private juce::Timer,
+                                             private juce::Button::Listener
 {
 public:
-    MatrixMultiplierAudioProcessorEditor (MatrixMultiplierAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    MatrixMultiplierAudioProcessorEditor (MatrixMultiplierAudioProcessor&,
+                                          juce::AudioProcessorValueTreeState&);
     ~MatrixMultiplierAudioProcessorEditor();
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
-
     void timerCallback() override;
     void buttonClicked (juce::Button* button) override;
     void buttonStateChanged (juce::Button* button) override;
     void loadConfigurationFile();
-
 
 private:
     // ====================== beging essentials ==================
@@ -67,7 +68,6 @@ private:
     MatrixMultiplierAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
 
-
     /* title and footer component
      title component can hold different widgets for in- and output:
         - NoIOWidget (if there's no need for an input or output widget)
@@ -75,7 +75,7 @@ private:
         - AmbisonicIOWidget
         - DirectivitiyIOWidget
      */
-    TitleBar<AudioChannelsIOWidget<0,false>, AudioChannelsIOWidget<0,false>> title;
+    TitleBar<AudioChannelsIOWidget<0, false>, AudioChannelsIOWidget<0, false>> title;
     OSCFooter footer;
     // =============== end essentials ============
 

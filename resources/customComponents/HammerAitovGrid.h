@@ -21,13 +21,13 @@
  */
 
 #pragma once
-#include "Conversions.h"
 #include "../HammerAitov.h"
+#include "Conversions.h"
 
 //==============================================================================
 /*
 */
-class HammerAitovGrid    : public juce::Component
+class HammerAitovGrid : public juce::Component
 {
 public:
     HammerAitovGrid()
@@ -41,43 +41,44 @@ public:
 
         juce::Path* workingPath;
 
-
         // vertical lines
         for (int ele = -90; ele <= 90; ele += 30)
         {
-            if (ele % 45 == 0) workingPath = &boldGrid;
-            else workingPath = &regularGrid;
+            if (ele % 45 == 0)
+                workingPath = &boldGrid;
+            else
+                workingPath = &regularGrid;
 
-            workingPath->startNewSubPath(anglesToPoint(-180, ele));
+            workingPath->startNewSubPath (anglesToPoint (-180, ele));
             for (int azi = -165; azi <= 180; azi += 15)
             {
-                workingPath->lineTo(anglesToPoint(azi,ele));
+                workingPath->lineTo (anglesToPoint (azi, ele));
             }
         }
-
 
         // horizontal lines
         for (int azi = -180; azi <= 180; azi += 30)
         {
-            if (azi % 90 == 0) workingPath = &boldGrid;
-            else workingPath = &regularGrid;
+            if (azi % 90 == 0)
+                workingPath = &boldGrid;
+            else
+                workingPath = &regularGrid;
 
-            workingPath->startNewSubPath(anglesToPoint(azi, -90));
+            workingPath->startNewSubPath (anglesToPoint (azi, -90));
             for (int ele = -85; ele <= 90; ele += 5)
             {
-                workingPath->lineTo(anglesToPoint(azi,ele));
+                workingPath->lineTo (anglesToPoint (azi, ele));
             }
         }
 
-
-        outline.startNewSubPath(anglesToPoint(180, -90));
+        outline.startNewSubPath (anglesToPoint (180, -90));
         for (int ele = -85; ele <= 90; ele += 5)
         {
-            outline.lineTo(anglesToPoint(180, ele));
+            outline.lineTo (anglesToPoint (180, ele));
         }
         for (int ele = 85; ele >= -85; ele -= 5)
         {
-            outline.lineTo(anglesToPoint(-180, ele));
+            outline.lineTo (anglesToPoint (-180, ele));
         }
         outline.closeSubPath();
     }
@@ -87,75 +88,74 @@ public:
     void paint (juce::Graphics& g) override
     {
         juce::Path path;
-        g.setColour (juce::Colour(0xFF2D2D2D));
+        g.setColour (juce::Colour (0xFF2D2D2D));
         juce::Path rectangle;
-        rectangle.addRectangle(getLocalBounds());
-        rectangle.setUsingNonZeroWinding(false);
+        rectangle.addRectangle (getLocalBounds());
+        rectangle.setUsingNonZeroWinding (false);
 
         path = outline;
-        path.applyTransform(toArea);
+        path.applyTransform (toArea);
 
-        rectangle.addPath(path);
-        g.fillPath(rectangle);
-
+        rectangle.addPath (path);
+        g.fillPath (rectangle);
 
         g.setColour (juce::Colours::white);
 
         path = boldGrid;
         path.applyTransform (toArea);
-        g.strokePath(path, juce::PathStrokeType(1.0f));
-
+        g.strokePath (path, juce::PathStrokeType (1.0f));
 
         path = regularGrid;
         path.applyTransform (toArea);
-        g.strokePath(path, juce::PathStrokeType(0.2f));
-
-
-
+        g.strokePath (path, juce::PathStrokeType (0.2f));
 
         // text
-        g.setFont(getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 1)));
-        g.setFont(12.0f);
+        g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 1)));
+        g.setFont (12.0f);
         juce::Point<float> textPos;
 
-        textPos = anglesToPoint(0, 0);
-        textPos.applyTransform(toArea);
-        g.drawText("FRONT", textPos.x, textPos.y-12, 30, 12, juce::Justification::centred);
+        textPos = anglesToPoint (0, 0);
+        textPos.applyTransform (toArea);
+        g.drawText ("FRONT", textPos.x, textPos.y - 12, 30, 12, juce::Justification::centred);
 
-        textPos = anglesToPoint(90, 0);
-        textPos.applyTransform(toArea);
-        g.drawText("LEFT", textPos.x, textPos.y-12, 30, 12, juce::Justification::centred);
+        textPos = anglesToPoint (90, 0);
+        textPos.applyTransform (toArea);
+        g.drawText ("LEFT", textPos.x, textPos.y - 12, 30, 12, juce::Justification::centred);
 
-        textPos = anglesToPoint(-90, 0);
-        textPos.applyTransform(toArea);
-        g.drawText("RIGHT", textPos.x, textPos.y-12, 30, 12, juce::Justification::centred);
+        textPos = anglesToPoint (-90, 0);
+        textPos.applyTransform (toArea);
+        g.drawText ("RIGHT", textPos.x, textPos.y - 12, 30, 12, juce::Justification::centred);
 
-        textPos = anglesToPoint(180, 0);
-        textPos.applyTransform(toArea);
-        g.drawText("BACK", textPos.x, textPos.y-12, 30, 12, juce::Justification::centred);
+        textPos = anglesToPoint (180, 0);
+        textPos.applyTransform (toArea);
+        g.drawText ("BACK", textPos.x, textPos.y - 12, 30, 12, juce::Justification::centred);
 
-        textPos = anglesToPoint(-180, 0);
-        textPos.applyTransform(toArea);
-        g.drawText("BACK", textPos.x-30, textPos.y-12, 30, 12, juce::Justification::centred);
+        textPos = anglesToPoint (-180, 0);
+        textPos.applyTransform (toArea);
+        g.drawText ("BACK", textPos.x - 30, textPos.y - 12, 30, 12, juce::Justification::centred);
 
-        textPos = anglesToPoint(0, -90);
-        textPos.applyTransform(toArea);
-        g.drawText("TOP", textPos.x-15, textPos.y-12, 30, 12, juce::Justification::centred);
+        textPos = anglesToPoint (0, -90);
+        textPos.applyTransform (toArea);
+        g.drawText ("TOP", textPos.x - 15, textPos.y - 12, 30, 12, juce::Justification::centred);
 
-        textPos = anglesToPoint(0,  90);
-        textPos.applyTransform(toArea);
-        g.drawText("BOTTOM", textPos.x-25, textPos.y, 50, 12, juce::Justification::centred);
+        textPos = anglesToPoint (0, 90);
+        textPos.applyTransform (toArea);
+        g.drawText ("BOTTOM", textPos.x - 25, textPos.y, 50, 12, juce::Justification::centred);
 
-
-        g.setFont(getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 2)));
-        g.setFont(12.0f);
+        g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 2)));
+        g.setFont (12.0f);
 
         // azimuth labels
         for (int azi = -150; azi <= 150; azi += 30)
         {
-            textPos = anglesToPoint(azi, 0);
-            textPos.applyTransform(toArea);
-            g.drawText (juce::String (azi) + juce::String (juce::CharPointer_UTF8 ("\xc2\xb0")), textPos.x, textPos.y, 25, 12, juce::Justification::centred);
+            textPos = anglesToPoint (azi, 0);
+            textPos.applyTransform (toArea);
+            g.drawText (juce::String (azi) + juce::String (juce::CharPointer_UTF8 ("\xc2\xb0")),
+                        textPos.x,
+                        textPos.y,
+                        25,
+                        12,
+                        juce::Justification::centred);
         }
 
         // elevation labels
@@ -163,27 +163,36 @@ public:
         {
             if (ele != 0)
             {
-                textPos = anglesToPoint(0, -ele);
-                textPos.applyTransform(toArea);
-                g.drawText(juce::String (ele) + juce::String (juce::CharPointer_UTF8 ("\xc2\xb0")), textPos.x, textPos.y - 12, 20, 12, juce::Justification::centred);
+                textPos = anglesToPoint (0, -ele);
+                textPos.applyTransform (toArea);
+                g.drawText (juce::String (ele) + juce::String (juce::CharPointer_UTF8 ("\xc2\xb0")),
+                            textPos.x,
+                            textPos.y - 12,
+                            20,
+                            12,
+                            juce::Justification::centred);
             }
         }
-
     }
 
     void resized() override
     {
         juce::Rectangle<int> area = getLocalBounds();
 
-        toArea = juce::AffineTransform::fromTargetPoints(area.getCentreX(), area.getCentreY(),
-                                                   area.getRight() - 10.0f, area.getCentreY(),
-                                                   area.getCentreX(), area.getBottom() - 20.0f);
-
+        toArea = juce::AffineTransform::fromTargetPoints (area.getCentreX(),
+                                                          area.getCentreY(),
+                                                          area.getRight() - 10.0f,
+                                                          area.getCentreY(),
+                                                          area.getCentreX(),
+                                                          area.getBottom() - 20.0f);
     }
 
-    juce::Point<float> anglesToPoint (int azimuthInDegree, int elevationInDegree) //hammer-aitov-projection
+    juce::Point<float> anglesToPoint (int azimuthInDegree,
+                                      int elevationInDegree) //hammer-aitov-projection
     {
-        return HammerAitov::sphericalToXY(Conversions<float>::degreesToRadians(azimuthInDegree), Conversions<float>::degreesToRadians(elevationInDegree));
+        return HammerAitov::sphericalToXY (
+            Conversions<float>::degreesToRadians (azimuthInDegree),
+            Conversions<float>::degreesToRadians (elevationInDegree));
     }
 
 private:

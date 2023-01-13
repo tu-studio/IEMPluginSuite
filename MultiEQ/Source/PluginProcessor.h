@@ -22,26 +22,26 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
 #include "../../resources/FilterVisualizerHelper.h"
-
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define numFilterBands 6
 using namespace juce::dsp;
 
 #if JUCE_USE_SIMD
-    using IIRfloat = juce::dsp::SIMDRegister<float>;
-    static constexpr int IIRfloat_elements = juce::dsp::SIMDRegister<float>::size();
+using IIRfloat = juce::dsp::SIMDRegister<float>;
+static constexpr int IIRfloat_elements = juce::dsp::SIMDRegister<float>::size();
 #else /* !JUCE_USE_SIMD */
-    using IIRfloat = float;
-    static constexpr int IIRfloat_elements = 1;
+using IIRfloat = float;
+static constexpr int IIRfloat_elements = 1;
 #endif /* JUCE_USE_SIMD */
 
 #define ProcessorClass MultiEQAudioProcessor
 
 //==============================================================================
-class MultiEQAudioProcessor  : public AudioProcessorBase<IOTypes::AudioChannels<64>, IOTypes::AudioChannels<64>>
+class MultiEQAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<64>, IOTypes::AudioChannels<64>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -60,7 +60,6 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
-
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -73,9 +72,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
-
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
@@ -84,22 +82,38 @@ public:
     void updateFilterCoefficients (double sampleRate);
     void copyFilterCoefficientsToProcessor();
 
-    IIR::Coefficients<double>::Ptr getCoefficientsForGui (const int filterIndex) { return guiCoefficients[filterIndex]; };
+    IIR::Coefficients<double>::Ptr getCoefficientsForGui (const int filterIndex)
+    {
+        return guiCoefficients[filterIndex];
+    };
     void updateGuiCoefficients();
 
     // FV repaint flag
     juce::Atomic<bool> repaintFV = true;
 
 private:
-
     enum class RegularFilterType
     {
-        FirstOrderHighPass, SecondOrderHighPass, LowShelf, PeakFilter, HighShelf, FirstOrderLowPass, SecondOrderLowPass, NothingToDo
+        FirstOrderHighPass,
+        SecondOrderHighPass,
+        LowShelf,
+        PeakFilter,
+        HighShelf,
+        FirstOrderLowPass,
+        SecondOrderLowPass,
+        NothingToDo
     };
 
     enum class SpecialFilterType
     {
-        FirstOrderHighPass, SecondOrderHighPass, LinkwitzRileyHighPass, LowShelf, FirstOrderLowPass, SecondOrderLowPass, LinkwitzRileyLowPass, HighShelf
+        FirstOrderHighPass,
+        SecondOrderHighPass,
+        LinkwitzRileyHighPass,
+        LowShelf,
+        FirstOrderLowPass,
+        SecondOrderLowPass,
+        LinkwitzRileyLowPass,
+        HighShelf
     };
 
     void createLinkwitzRileyFilter (const bool isUpperBand);
@@ -107,9 +121,19 @@ private:
 
     inline void clear (juce::dsp::AudioBlock<IIRfloat>& ab);
 
-    inline juce::dsp::IIR::Coefficients<float>::Ptr createFilterCoefficients (const RegularFilterType type, const double sampleRate, const float frequency, const float Q, const float gain);
+    inline juce::dsp::IIR::Coefficients<float>::Ptr
+        createFilterCoefficients (const RegularFilterType type,
+                                  const double sampleRate,
+                                  const float frequency,
+                                  const float Q,
+                                  const float gain);
 
-    inline juce::dsp::IIR::Coefficients<double>::Ptr createFilterCoefficientsForGui (const RegularFilterType type, const double sampleRate, const float frequency, const float Q, const float gain);
+    inline juce::dsp::IIR::Coefficients<double>::Ptr
+        createFilterCoefficientsForGui (const RegularFilterType type,
+                                        const double sampleRate,
+                                        const float frequency,
+                                        const float Q,
+                                        const float gain);
 
     // filter dummy for GUI
     IIR::Coefficients<double>::Ptr guiCoefficients[numFilterBands];
@@ -124,7 +148,6 @@ private:
     juce::HeapBlock<char> interleavedBlockData[16], zeroData; //todo: dynamically?
     juce::OwnedArray<juce::dsp::AudioBlock<IIRfloat>> interleavedData;
     juce::dsp::AudioBlock<float> zero;
-
 
     // list of used audio parameters
     std::atomic<float>* inputChannelsSetting;

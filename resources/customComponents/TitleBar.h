@@ -22,11 +22,11 @@
 
 #pragma once
 
-#include "TitleBarPaths.h"
 #include "../ambisonicTools.h"
+#include "TitleBarPaths.h"
 
 #ifdef JUCE_OSC_H_INCLUDED
-#include "../OSC/OSCStatus.h"
+    #include "../OSC/OSCStatus.h"
 #endif
 
 class AlertSymbol : public juce::Component, public juce::TooltipClient
@@ -45,7 +45,10 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-        warningSign.applyTransform (warningSign.getTransformToScaleToFit (getLocalBounds().toFloat(), true, juce::Justification::centred));
+        warningSign.applyTransform (
+            warningSign.getTransformToScaleToFit (getLocalBounds().toFloat(),
+                                                  true,
+                                                  juce::Justification::centred));
         g.setColour (juce::Colours::yellow);
         g.fillPath (warningSign);
     }
@@ -72,17 +75,14 @@ public:
         alert.setVisible (isBusTooSmall);
     }
 
-    bool isBusTooSmall ()
-    {
-        return busTooSmall;
-    }
+    bool isBusTooSmall() { return busTooSmall; }
 
 private:
     AlertSymbol alert;
     bool busTooSmall = false;
 };
 
-class  NoIOWidget :  public IOWidget
+class NoIOWidget : public IOWidget
 {
 public:
     NoIOWidget() {}
@@ -90,7 +90,7 @@ public:
     const int getComponentSize() override { return 0; }
 };
 
-class  BinauralIOWidget : public IOWidget
+class BinauralIOWidget : public IOWidget
 {
 public:
     BinauralIOWidget() : IOWidget()
@@ -103,16 +103,16 @@ public:
     void setMaxSize (int maxSize) override { juce::ignoreUnused (maxSize); }
     void paint (juce::Graphics& g) override
     {
-        BinauralPath.applyTransform (BinauralPath.getTransformToScaleToFit (0, 0, 30, 30, true, juce::Justification::centred));
+        BinauralPath.applyTransform (
+            BinauralPath
+                .getTransformToScaleToFit (0, 0, 30, 30, true, juce::Justification::centred));
         g.setColour ((juce::Colours::white).withMultipliedAlpha (0.5));
         g.fillPath (BinauralPath);
-
     }
 
 private:
     juce::Path BinauralPath;
 };
-
 
 template <int maxChannels, bool selectable = true>
 class AudioChannelsIOWidget : public IOWidget, private juce::ComboBox::Listener
@@ -121,7 +121,7 @@ public:
     AudioChannelsIOWidget() : IOWidget()
     {
         WaveformPath.loadPathFromData (WaveformPathData, sizeof (WaveformPathData));
-        setBufferedToImage(true);
+        setBufferedToImage (true);
 
         if (selectable)
         {
@@ -143,7 +143,8 @@ public:
     {
         if (availableChannels < channelSizeIfNotSelectable)
         {
-            displayTextIfNotSelectable = juce::String (channelSizeIfNotSelectable) + " (bus too small)";
+            displayTextIfNotSelectable =
+                juce::String (channelSizeIfNotSelectable) + " (bus too small)";
             setBusTooSmall (true);
         }
         else
@@ -162,7 +163,7 @@ public:
             setBusTooSmall (false);
     }
 
-    void comboBoxChanged (juce::ComboBox *comboBoxThatHasChanged) override
+    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override
     {
         juce::ignoreUnused (comboBoxThatHasChanged);
         checkIfBusIsTooSmall();
@@ -175,18 +176,23 @@ public:
             availableChannels = maxPossibleNumberOfChannels;
             if (selectable)
             {
-                if (maxPossibleNumberOfChannels > 0) cbChannels->changeItemText (1, "Auto (" + juce::String (maxPossibleNumberOfChannels) + ")");
-                else cbChannels->changeItemText (1, "(Auto)");
+                if (maxPossibleNumberOfChannels > 0)
+                    cbChannels->changeItemText (
+                        1,
+                        "Auto (" + juce::String (maxPossibleNumberOfChannels) + ")");
+                else
+                    cbChannels->changeItemText (1, "(Auto)");
                 int currId = cbChannels->getSelectedId();
-                if (currId == 0) currId = 1; //bad work around
+                if (currId == 0)
+                    currId = 1; //bad work around
                 int i;
                 for (i = 1; i <= maxPossibleNumberOfChannels; ++i)
                 {
-                    cbChannels->changeItemText (i + 1, juce::String(i));
+                    cbChannels->changeItemText (i + 1, juce::String (i));
                 }
-                for (i = maxPossibleNumberOfChannels+1; i<=maxChannels; ++i)
+                for (i = maxPossibleNumberOfChannels + 1; i <= maxChannels; ++i)
                 {
-                    cbChannels->changeItemText (i + 1, juce::String(i) + " (bus too small)");
+                    cbChannels->changeItemText (i + 1, juce::String (i) + " (bus too small)");
                 }
                 checkIfBusIsTooSmall();
 
@@ -210,35 +216,44 @@ public:
 
     juce::ComboBox* getChannelsCbPointer()
     {
-        if (selectable) return cbChannels.get();
+        if (selectable)
+            return cbChannels.get();
         return nullptr;
     }
 
     void paint (juce::Graphics& g) override
     {
-        WaveformPath.applyTransform(WaveformPath.getTransformToScaleToFit (0, 0, 30, 30, true, juce::Justification::centred));
+        WaveformPath.applyTransform (
+            WaveformPath
+                .getTransformToScaleToFit (0, 0, 30, 30, true, juce::Justification::centred));
         g.setColour ((juce::Colours::white).withMultipliedAlpha (0.5));
         g.fillPath (WaveformPath);
 
-        if (!selectable)
+        if (! selectable)
         {
             g.setColour ((juce::Colours::white).withMultipliedAlpha (0.5));
             g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 1)));
             g.setFont (15.0f);
-            g.drawFittedText (displayTextIfNotSelectable, 35, 0, 40, 30, juce::Justification::centredLeft, 2);
+            g.drawFittedText (displayTextIfNotSelectable,
+                              35,
+                              0,
+                              40,
+                              30,
+                              juce::Justification::centredLeft,
+                              2);
         }
     }
 
 private:
     std::unique_ptr<juce::ComboBox> cbChannels;
     juce::Path WaveformPath;
-    int availableChannels {64};
+    int availableChannels { 64 };
     int channelSizeIfNotSelectable = maxChannels;
     juce::String displayTextIfNotSelectable = juce::String (maxChannels);
 };
 
 template <int order = 7, bool selectable = true>
-class  AmbisonicIOWidget :  public IOWidget
+class AmbisonicIOWidget : public IOWidget
 {
 public:
     AmbisonicIOWidget() : IOWidget()
@@ -299,7 +314,7 @@ public:
         cbOrder.addSectionHeading ("Ambisonic Order");
         cbOrder.addItem ("Auto", 1);
         for (int o = 0; o <= maxOrder; ++o)
-            cbOrder.addItem (getOrderString(o), o + 2);
+            cbOrder.addItem (getOrderString (o), o + 2);
 
         cbOrder.setSelectedItemIndex (previousIndex);
     }
@@ -331,12 +346,13 @@ public:
                     cbOrder.changeItemText (1, "(Auto)");
 
                 int currId = cbOrder.getSelectedId();
-                if (currId == 0) currId = 1; //bad work around
+                if (currId == 0)
+                    currId = 1; //bad work around
 
                 for (int i = 1; i <= maxPossibleOrder; ++i)
                     cbOrder.changeItemText (i + 2, getOrderString (i));
 
-                for (int i = maxPossibleOrder + 1; i<=maxOrder; ++i)
+                for (int i = maxPossibleOrder + 1; i <= maxOrder; ++i)
                     cbOrder.changeItemText (i + 2, getOrderString (i) + " (bus too small)");
 
                 DBG (cbOrder.getItemText (cbOrder.indexOfItemId ((currId))));
@@ -365,16 +381,24 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-        AmbiLogoPath.applyTransform (AmbiLogoPath.getTransformToScaleToFit (0, 0, 30, 30, true, juce::Justification::centred));
+        AmbiLogoPath.applyTransform (
+            AmbiLogoPath
+                .getTransformToScaleToFit (0, 0, 30, 30, true, juce::Justification::centred));
         g.setColour ((juce::Colours::white).withMultipliedAlpha (0.5));
         g.fillPath (AmbiLogoPath);
 
-        if (!selectable)
+        if (! selectable)
         {
             g.setColour ((juce::Colours::white).withMultipliedAlpha (0.5));
             g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 1)));
             g.setFont (15.0f);
-            g.drawFittedText (displayTextIfNotSelectable, 35, 15, 55, 15, juce::Justification::centred, 1);
+            g.drawFittedText (displayTextIfNotSelectable,
+                              35,
+                              15,
+                              55,
+                              15,
+                              juce::Justification::centred,
+                              1);
         }
     };
 
@@ -387,7 +411,7 @@ private:
     juce::String displayTextIfNotSelectable;
 };
 
-class  DirectivityIOWidget :  public IOWidget
+class DirectivityIOWidget : public IOWidget
 {
 public:
     DirectivityIOWidget() : IOWidget()
@@ -429,10 +453,13 @@ public:
 
     void setMaxSize (int maxPossibleOrder) override
     {
-        if (maxPossibleOrder > -1) cbOrder.changeItemText( 1, "Auto (" + orderStrings[maxPossibleOrder] + ")");
-        else cbOrder.changeItemText (1, "(Auto)");
+        if (maxPossibleOrder > -1)
+            cbOrder.changeItemText (1, "Auto (" + orderStrings[maxPossibleOrder] + ")");
+        else
+            cbOrder.changeItemText (1, "(Auto)");
         int currId = cbOrder.getSelectedId();
-        if (currId == 0) currId = 1; //bad work around
+        if (currId == 0)
+            currId = 1; //bad work around
         int i;
         for (i = 1; i <= maxPossibleOrder; ++i)
         {
@@ -443,11 +470,10 @@ public:
             cbOrder.changeItemText (i + 2, orderStrings[i] + " (bus too small)");
         }
         cbOrder.setText (cbOrder.getItemText (cbOrder.indexOfItemId (currId)));
-        if (currId - 2> maxPossibleOrder)
+        if (currId - 2 > maxPossibleOrder)
             setBusTooSmall (true);
         else
             setBusTooSmall (false);
-
     }
 
     juce::ComboBox* getNormCbPointer() { return &cbNormalization; }
@@ -455,7 +481,9 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-        DirectivityPath.applyTransform (DirectivityPath.getTransformToScaleToFit (0, 0, 30, 30, true, juce::Justification::centred));
+        DirectivityPath.applyTransform (
+            DirectivityPath
+                .getTransformToScaleToFit (0, 0, 30, 30, true, juce::Justification::centred));
         g.setColour ((juce::Colours::white).withMultipliedAlpha (0.5));
         g.fillPath (DirectivityPath);
     }
@@ -468,18 +496,17 @@ private:
 
 // ======================================================== TITLEBAR =========================
 template <class Tin, class Tout>
-class TitleBar :  public juce::Component
+class TitleBar : public juce::Component
 {
 public:
     TitleBar() : juce::Component()
     {
-        addAndMakeVisible(&inputWidget);
-        addAndMakeVisible(&outputWidget);
+        addAndMakeVisible (&inputWidget);
+        addAndMakeVisible (&outputWidget);
     }
 
     Tin* getInputWidgetPtr() { return &inputWidget; }
     Tout* getOutputWidgetPtr() { return &outputWidget; }
-
 
     void setTitle (juce::String newBoldText, juce::String newRegularText)
     {
@@ -493,7 +520,7 @@ public:
         regularFont = newRegularFont;
     }
 
-    void resized () override
+    void resized() override
     {
         const int leftWidth = inputWidget.getComponentSize();
         const int rightWidth = outputWidget.getComponentSize();
@@ -524,21 +551,31 @@ public:
         const float boldWidth = boldFont.getStringWidth (boldText);
         const float regularWidth = regularFont.getStringWidth (regularText);
 
-        juce::Rectangle<float> textArea (0, 0, boldWidth + regularWidth, juce::jmax (boldHeight, regularHeight));
-        textArea.setCentre (centreX,centreY);
+        juce::Rectangle<float> textArea (0,
+                                         0,
+                                         boldWidth + regularWidth,
+                                         juce::jmax (boldHeight, regularHeight));
+        textArea.setCentre (centreX, centreY);
 
-        if (textArea.getX() < leftWidth) textArea.setX(leftWidth);
-        if (textArea.getRight() > bounds.getRight() - rightWidth) textArea.setRight (bounds.getRight() - rightWidth);
-
+        if (textArea.getX() < leftWidth)
+            textArea.setX (leftWidth);
+        if (textArea.getRight() > bounds.getRight() - rightWidth)
+            textArea.setRight (bounds.getRight() - rightWidth);
 
         g.setColour (juce::Colours::white);
         g.setFont (boldFont);
-        g.drawFittedText (boldText, textArea.removeFromLeft (boldWidth).toNearestInt(), juce::Justification::bottom, 1);
+        g.drawFittedText (boldText,
+                          textArea.removeFromLeft (boldWidth).toNearestInt(),
+                          juce::Justification::bottom,
+                          1);
         g.setFont (regularFont);
         g.drawFittedText (regularText, textArea.toNearestInt(), juce::Justification::bottom, 1);
 
         g.setColour ((juce::Colours::white).withMultipliedAlpha (0.5));
-        g.drawLine (bounds.getX(),bounds.getY() + bounds.getHeight() - 4, bounds.getX() + bounds.getWidth(), bounds.getY()+bounds.getHeight() - 4);
+        g.drawLine (bounds.getX(),
+                    bounds.getY() + bounds.getHeight() - 4,
+                    bounds.getX() + bounds.getWidth(),
+                    bounds.getY() + bounds.getHeight() - 4);
     }
 
 private:
@@ -549,7 +586,6 @@ private:
     juce::String boldText = "Bold";
     juce::String regularText = "Regular";
 };
-
 
 class IEMLogo : public juce::Component
 {
@@ -565,33 +601,36 @@ public:
         juce::Rectangle<int> bounds = getLocalBounds();
         bounds.removeFromBottom (3);
         bounds.removeFromLeft (1);
-        IEMPath.applyTransform(IEMPath.getTransformToScaleToFit (bounds.reduced (2, 2).toFloat(), true, juce::Justification::bottomLeft));
+        IEMPath.applyTransform (IEMPath.getTransformToScaleToFit (bounds.reduced (2, 2).toFloat(),
+                                                                  true,
+                                                                  juce::Justification::bottomLeft));
 
         if (isMouseOver())
         {
-            g.setColour (juce::Colour::fromRGB(52, 88, 165));
+            g.setColour (juce::Colour::fromRGB (52, 88, 165));
             g.fillAll();
         }
 
-        g.setColour (isMouseOver() ? juce::Colour::fromRGB (249, 226, 45) : juce::Colours::white.withMultipliedAlpha (0.5));
+        g.setColour (isMouseOver() ? juce::Colour::fromRGB (249, 226, 45)
+                                   : juce::Colours::white.withMultipliedAlpha (0.5));
         g.fillPath (IEMPath);
     }
 
-    void mouseEnter (const juce::MouseEvent &event) override
+    void mouseEnter (const juce::MouseEvent& event) override
     {
         juce::ignoreUnused (event);
         setMouseCursor (juce::MouseCursor (juce::MouseCursor::PointingHandCursor));
         repaint();
     }
 
-    void mouseExit (const juce::MouseEvent &event) override
+    void mouseExit (const juce::MouseEvent& event) override
     {
         juce::ignoreUnused (event);
         setMouseCursor (juce::MouseCursor (juce::MouseCursor::NormalCursor));
         repaint();
     }
 
-    void mouseUp (const juce::MouseEvent &event) override
+    void mouseUp (const juce::MouseEvent& event) override
     {
         juce::ignoreUnused (event);
         if (url.isWellFormed())
@@ -603,13 +642,10 @@ private:
     juce::URL url;
 };
 
-class  Footer :  public juce::Component
+class Footer : public juce::Component
 {
 public:
-    Footer() : juce::Component()
-    {
-        addAndMakeVisible(&iemLogo);
-    }
+    Footer() : juce::Component() { addAndMakeVisible (&iemLogo); }
 
     void paint (juce::Graphics& g) override
     {
@@ -622,22 +658,24 @@ public:
 #if JUCE_DEBUG
         versionString = "DEBUG - v";
 #endif
-        versionString.append(JucePlugin_VersionString, 6);
+        versionString.append (JucePlugin_VersionString, 6);
 
-        g.drawText (versionString, 0, 0, bounds.getWidth() - 8, bounds.getHeight() - 2, juce::Justification::bottomRight);
+        g.drawText (versionString,
+                    0,
+                    0,
+                    bounds.getWidth() - 8,
+                    bounds.getHeight() - 2,
+                    juce::Justification::bottomRight);
     }
 
-    void resized () override
-    {
-        iemLogo.setBounds (0, 0, 40, getHeight());
-    }
+    void resized() override { iemLogo.setBounds (0, 0, 40, getHeight()); }
 
 private:
     IEMLogo iemLogo;
 };
 
 #ifdef JUCE_OSC_H_INCLUDED
-class  OSCFooter :  public juce::Component
+class OSCFooter : public juce::Component
 {
 public:
     OSCFooter (OSCParameterInterface& oscInterface) : oscStatus (oscInterface)
@@ -646,7 +684,7 @@ public:
         addAndMakeVisible (oscStatus);
     }
 
-    void resized () override
+    void resized() override
     {
         auto bounds = getLocalBounds();
         footer.setBounds (bounds);

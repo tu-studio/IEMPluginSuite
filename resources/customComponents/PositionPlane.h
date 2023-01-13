@@ -20,20 +20,12 @@
  ==============================================================================
  */
 
-
 #pragma once
 
-
-
-class  PositionPlane :  public juce::Component
+class PositionPlane : public juce::Component
 {
-
 public:
-    PositionPlane() :
-    drawPlane(xy),
-    autoScale(true),
-    dimensions(1.0f, 1.0f, 1.0f)
-    {};
+    PositionPlane() : drawPlane (xy), autoScale (true), dimensions (1.0f, 1.0f, 1.0f) {};
 
     ~PositionPlane() { deleteAllChildren(); };
 
@@ -49,23 +41,27 @@ public:
     public:
         Element() {}
         Element (juce::String newID) { ID = newID; }
-        virtual ~Element () {}
+        virtual ~Element() {}
 
         virtual void startMovement() {};
-        virtual void moveElement (const juce::MouseEvent &event, const juce::Point<float> centre, const float scale, Planes plane, PositionPlane* positionPlane, int xFactor = 1, int yFactor = 1, int zFactor = 1) = 0;
-        virtual void stopMovement() { };
-
-
+        virtual void moveElement (const juce::MouseEvent& event,
+                                  const juce::Point<float> centre,
+                                  const float scale,
+                                  Planes plane,
+                                  PositionPlane* positionPlane,
+                                  int xFactor = 1,
+                                  int yFactor = 1,
+                                  int zFactor = 1) = 0;
+        virtual void stopMovement() {};
 
         void setActive (bool shouldBeActive) { active = shouldBeActive; }
         bool isActive() { return active; }
 
-        void setColour( juce::Colour newColour) { faceColour = newColour; }
+        void setColour (juce::Colour newColour) { faceColour = newColour; }
         juce::Colour getColour() { return faceColour; }
 
         void setLabel (juce::String newLabel) { label = newLabel; }
         void setID (juce::String newID) { ID = newID; }
-
 
         virtual juce::Vector3D<float> getPosition() = 0;
 
@@ -80,12 +76,12 @@ public:
         };
         void removePlane (PositionPlane* positionPlane)
         {
-            planesImIn.removeFirstMatchingValue(positionPlane);
+            planesImIn.removeFirstMatchingValue (positionPlane);
         };
 
-        void repaintAllPlanesImIn ()
+        void repaintAllPlanesImIn()
         {
-            for (int i = planesImIn.size (); --i >= 0;)
+            for (int i = planesImIn.size(); --i >= 0;)
             {
                 PositionPlane* handle = planesImIn.getUnchecked (i);
                 handle->repaint();
@@ -111,13 +107,14 @@ public:
                           juce::NormalisableRange<float> yParameterRange,
                           juce::AudioProcessorParameter& zParameter,
                           juce::NormalisableRange<float> zParameterRange) :
-        x (xParameter),
-        xRange (xParameterRange),
-        y (yParameter),
-        yRange (yParameterRange),
-        z (zParameter),
-        zRange (zParameterRange)
-        {}
+            x (xParameter),
+            xRange (xParameterRange),
+            y (yParameter),
+            yRange (yParameterRange),
+            z (zParameter),
+            zRange (zParameterRange)
+        {
+        }
 
         void startMovement() override
         {
@@ -126,7 +123,14 @@ public:
             z.beginChangeGesture();
         };
 
-        void moveElement (const juce::MouseEvent &event, const juce::Point<float> centre, const float scale, Planes plane, PositionPlane* positionPlane, int xFactor = 1, int yFactor = 1, int zFactor = 1) override
+        void moveElement (const juce::MouseEvent& event,
+                          const juce::Point<float> centre,
+                          const float scale,
+                          Planes plane,
+                          PositionPlane* positionPlane,
+                          int xFactor = 1,
+                          int yFactor = 1,
+                          int zFactor = 1) override
         {
             auto mousePos = event.getPosition().toFloat();
             mousePos.x -= centre.x;
@@ -136,36 +140,40 @@ public:
             juce::Vector3D<float> roomDims = positionPlane->getDimensions();
             juce::Vector3D<float> pos;
 
-            switch(plane)
+            switch (plane)
             {
                 case xy:
                     pos.x = -mousePos.y * xFactor;
                     pos.y = -mousePos.x * yFactor;
-                    pos.x = juce::Range<float> (- 0.5 * roomDims.x, 0.5 * roomDims.x).clipValue(pos.x);
-                    pos.y = juce::Range<float> (- 0.5 * roomDims.y, 0.5 * roomDims.y).clipValue(pos.y);
-                    x.setValueNotifyingHost(xRange.convertTo0to1(pos.x));
-                    y.setValueNotifyingHost(yRange.convertTo0to1(pos.y));
+                    pos.x =
+                        juce::Range<float> (-0.5 * roomDims.x, 0.5 * roomDims.x).clipValue (pos.x);
+                    pos.y =
+                        juce::Range<float> (-0.5 * roomDims.y, 0.5 * roomDims.y).clipValue (pos.y);
+                    x.setValueNotifyingHost (xRange.convertTo0to1 (pos.x));
+                    y.setValueNotifyingHost (yRange.convertTo0to1 (pos.y));
 
                     break;
                 case zy:
                     pos.z = -mousePos.y * zFactor;
                     pos.y = -mousePos.x * yFactor;
-                    pos.z = juce::Range<float> (- 0.5* roomDims.z, 0.5* roomDims.z).clipValue(pos.z);
-                    pos.y = juce::Range<float> (- 0.5 * roomDims.y, 0.5 * roomDims.y).clipValue(pos.y);
-                    z.setValueNotifyingHost(zRange.convertTo0to1(pos.z));
-                    y.setValueNotifyingHost(yRange.convertTo0to1(pos.y));
+                    pos.z =
+                        juce::Range<float> (-0.5 * roomDims.z, 0.5 * roomDims.z).clipValue (pos.z);
+                    pos.y =
+                        juce::Range<float> (-0.5 * roomDims.y, 0.5 * roomDims.y).clipValue (pos.y);
+                    z.setValueNotifyingHost (zRange.convertTo0to1 (pos.z));
+                    y.setValueNotifyingHost (yRange.convertTo0to1 (pos.y));
                     break;
                 case zx:
                     pos.z = -mousePos.y * zFactor;
                     pos.x = mousePos.x * xFactor;
-                    pos.z = juce::Range<float> (- 0.5* roomDims.z, 0.5* roomDims.z).clipValue(pos.z);
-                    pos.x = juce::Range<float> (- 0.5 * roomDims.x, 0.5 * roomDims.x).clipValue(pos.x);
-                    z.setValueNotifyingHost(zRange.convertTo0to1(pos.z));
-                    x.setValueNotifyingHost(xRange.convertTo0to1(pos.x));
+                    pos.z =
+                        juce::Range<float> (-0.5 * roomDims.z, 0.5 * roomDims.z).clipValue (pos.z);
+                    pos.x =
+                        juce::Range<float> (-0.5 * roomDims.x, 0.5 * roomDims.x).clipValue (pos.x);
+                    z.setValueNotifyingHost (zRange.convertTo0to1 (pos.z));
+                    x.setValueNotifyingHost (xRange.convertTo0to1 (pos.x));
                     break;
             }
-
-
         }
 
         void stopMovement() override
@@ -175,15 +183,14 @@ public:
             z.endChangeGesture();
         };
 
-
         /**
          Get cartesian coordinates
          */
         juce::Vector3D<float> getPosition() override
         {
-            return juce::Vector3D<float> (xRange.convertFrom0to1(x.getValue()),
-                                    yRange.convertFrom0to1(y.getValue()),
-                                    zRange.convertFrom0to1(z.getValue()));
+            return juce::Vector3D<float> (xRange.convertFrom0to1 (x.getValue()),
+                                          yRange.convertFrom0to1 (y.getValue()),
+                                          zRange.convertFrom0to1 (z.getValue()));
         };
 
     private:
@@ -195,21 +202,19 @@ public:
         juce::NormalisableRange<float> zRange;
     };
 
-
     class PositionPlaneListener
     {
     public:
-        virtual ~PositionPlaneListener () {}
+        virtual ~PositionPlaneListener() {}
 
         virtual void PositionPlaneElementChanged (PositionPlane* plane, Element* element) = 0;
     };
 
-
     void paint (juce::Graphics& g) override
     {
-        juce::Rectangle<float> bounds (0,0,getBounds().getWidth(),getBounds().getHeight());
+        juce::Rectangle<float> bounds (0, 0, getBounds().getWidth(), getBounds().getHeight());
         float innerSpacing = 3.0f;
-        bounds.reduce(innerSpacing,innerSpacing);
+        bounds.reduce (innerSpacing, innerSpacing);
 
         const float width = bounds.getWidth();
         const float height = bounds.getHeight();
@@ -224,7 +229,7 @@ public:
         const int yFactor = yFlip ? -1 : 1;
         const int zFactor = zFlip ? -1 : 1;
 
-        switch(drawPlane)
+        switch (drawPlane)
         {
             default:
             case xy:
@@ -241,59 +246,86 @@ public:
                 break;
         }
 
-        if (autoScale) {
-            float dimRatio = drawH /drawW;
+        if (autoScale)
+        {
+            float dimRatio = drawH / drawW;
 
-            if (dimRatio >= height/width)
-                scale = height/drawH;
+            if (dimRatio >= height / width)
+                scale = height / drawH;
             else
-                scale = width/drawW;
+                scale = width / drawW;
 
-            if (dimRatio >= height/width)
-                scale = height/drawH;
+            if (dimRatio >= height / width)
+                scale = height / drawH;
             else
-                scale = width/drawW;
+                scale = width / drawW;
         }
         drawW *= scale;
         drawH *= scale;
 
-        juce::Rectangle<float> room (innerSpacing + 0.5f * (width - drawW), innerSpacing + 0.5f * (height - drawH), drawW, drawH);
-
+        juce::Rectangle<float> room (innerSpacing + 0.5f * (width - drawW),
+                                     innerSpacing + 0.5f * (height - drawH),
+                                     drawW,
+                                     drawH);
 
         g.setColour (juce::Colours::white.withMultipliedSaturation (0.9f));
-        g.setFont(10.0f);
+        g.setFont (10.0f);
         switch (drawPlane)
         {
             default:
             case xy:
-                g.drawArrow (juce::Line<float> (centreX, centreY, centreX, centreY - 20.0f * xFactor), 1.0f, 4.0f, 4.0f);
-                g.drawArrow (juce::Line<float> (centreX, centreY, centreX - 20.0f * yFactor, centreY), 1.0f, 4.0f, 4.0f);
+                g.drawArrow (
+                    juce::Line<float> (centreX, centreY, centreX, centreY - 20.0f * xFactor),
+                    1.0f,
+                    4.0f,
+                    4.0f);
+                g.drawArrow (
+                    juce::Line<float> (centreX, centreY, centreX - 20.0f * yFactor, centreY),
+                    1.0f,
+                    4.0f,
+                    4.0f);
                 g.drawSingleLineText ("x", centreX + 2.0f, centreY + 2.0f - 9.0f * xFactor);
-                g.drawSingleLineText ("y", centreX - 2.0f  - 10.0f * yFactor, centreY + 7.0f);
+                g.drawSingleLineText ("y", centreX - 2.0f - 10.0f * yFactor, centreY + 7.0f);
                 break;
             case zy:
-                g.drawArrow (juce::Line<float> (centreX, centreY, centreX, centreY - 20.0f * zFactor), 1.0f, 4.0f, 4.0f);
-                g.drawArrow (juce::Line<float> (centreX, centreY, centreX - 20.0f * yFactor, centreY), 1.0f, 4.0f, 4.0f);
+                g.drawArrow (
+                    juce::Line<float> (centreX, centreY, centreX, centreY - 20.0f * zFactor),
+                    1.0f,
+                    4.0f,
+                    4.0f);
+                g.drawArrow (
+                    juce::Line<float> (centreX, centreY, centreX - 20.0f * yFactor, centreY),
+                    1.0f,
+                    4.0f,
+                    4.0f);
                 g.drawSingleLineText ("z", centreX + 2.0f, centreY + 2.0f - 9.0f * zFactor);
-                g.drawSingleLineText ("y", centreX - 2.0f  - 10.0f * yFactor, centreY + 7.0f);;
+                g.drawSingleLineText ("y", centreX - 2.0f - 10.0f * yFactor, centreY + 7.0f);
+                ;
                 break;
             case zx:
-                g.drawArrow (juce::Line<float> (centreX, centreY, centreX, centreY - 20.0f * zFactor), 1.0f, 4.0f, 4.0f);
-                g.drawArrow (juce::Line<float> (centreX, centreY, centreX + 20.0f * xFactor, centreY), 1.0f, 4.0f, 4.0f);
-                g.drawSingleLineText("z", centreX + 2.0f, centreY + 2.0f - 9.0f * zFactor);
-                g.drawSingleLineText("x", centreX + 2.0f, centreY + 2.0f - 9.0f * xFactor);
+                g.drawArrow (
+                    juce::Line<float> (centreX, centreY, centreX, centreY - 20.0f * zFactor),
+                    1.0f,
+                    4.0f,
+                    4.0f);
+                g.drawArrow (
+                    juce::Line<float> (centreX, centreY, centreX + 20.0f * xFactor, centreY),
+                    1.0f,
+                    4.0f,
+                    4.0f);
+                g.drawSingleLineText ("z", centreX + 2.0f, centreY + 2.0f - 9.0f * zFactor);
+                g.drawSingleLineText ("x", centreX + 2.0f, centreY + 2.0f - 9.0f * xFactor);
                 break;
         }
-
 
         g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.3f));
         g.fillRect (room);
 
         g.setColour (juce::Colours::white);
-        g.drawRect (room,1.0f);
+        g.drawRect (room, 1.0f);
 
-
-        for (int i = elements.size (); --i >= 0;) {
+        for (int i = elements.size(); --i >= 0;)
+        {
             Element* handle = (Element*) elements.getUnchecked (i);
 
             juce::Vector3D<float> position = handle->getPosition();
@@ -317,12 +349,13 @@ public:
                     posW = -position.x * xFactor;
                     break;
             }
-            juce::Rectangle<float> temp (centreX-posW * scale-10/2,centreY-posH * scale-10/2,11,11);
+            juce::Rectangle<float> temp (centreX - posW * scale - 10 / 2,
+                                         centreY - posH * scale - 10 / 2,
+                                         11,
+                                         11);
             path.addEllipse (temp);
             g.fillPath (path);
         }
-
-
     };
 
     float setDimensions (juce::Vector3D<float> newDimensions)
@@ -335,7 +368,7 @@ public:
 
         float drawH, drawW;
         float tempScale;
-        switch(drawPlane)
+        switch (drawPlane)
         {
             default:
             case xy:
@@ -352,32 +385,30 @@ public:
                 break;
         }
 
+        float dimRatio = drawH / drawW;
 
-        float dimRatio = drawH /drawW;
-
-        if (dimRatio >= height/width)
-            tempScale = height/drawH;
+        if (dimRatio >= height / width)
+            tempScale = height / drawH;
         else
-            tempScale = width/drawW;
+            tempScale = width / drawW;
 
         return tempScale;
     }
 
-    void useAutoScale(bool shouldUseAutoScale) {autoScale = shouldUseAutoScale;}
-    bool usingAutoScale() {return autoScale;}
+    void useAutoScale (bool shouldUseAutoScale) { autoScale = shouldUseAutoScale; }
+    bool usingAutoScale() { return autoScale; }
 
-    void setScale(float newScale) {
-        if (!autoScale)
+    void setScale (float newScale)
+    {
+        if (! autoScale)
             scale = newScale;
     }
 
-    juce::Vector3D<float> getDimensions ()
-    {
-        return dimensions;
-    }
+    juce::Vector3D<float> getDimensions() { return dimensions; }
 
-    void mouseDown (const juce::MouseEvent &event) override {
-        Element *handle;
+    void mouseDown (const juce::MouseEvent& event) override
+    {
+        Element* handle;
 
         auto bounds = getLocalBounds().toType<float>();
         const float centreX = bounds.getCentreX();
@@ -394,12 +425,14 @@ public:
 
             auto pos = event.getPosition();
 
-            float mouseX = (centreY-pos.getY());
-            float mouseY = (centreX-pos.getX());
+            float mouseX = (centreY - pos.getY());
+            float mouseY = (centreX - pos.getX());
 
-            if (drawPlane == zx) mouseY *= -1;
+            if (drawPlane == zx)
+                mouseY *= -1;
 
-            for (int i = elements.size(); --i >= 0;) {
+            for (int i = elements.size(); --i >= 0;)
+            {
                 handle = elements.getUnchecked (i);
 
                 float posH, posW;
@@ -421,22 +454,24 @@ public:
                         break;
                 }
 
-                float tx = (mouseX - posH*scale);
-                float ty = (mouseY - posW*scale);
+                float tx = (mouseX - posH * scale);
+                float ty = (mouseY - posW * scale);
 
-                float dSquared = tx*tx + ty*ty;
-                if (dSquared <= 80.0f && dSquared < activeDSquared) {
+                float dSquared = tx * tx + ty * ty;
+                if (dSquared <= 80.0f && dSquared < activeDSquared)
+                {
                     activeElem = i;
                     activeDSquared = dSquared;
                 }
             }
         }
-        if (activeElem != -1) {
-            elements.getUnchecked(activeElem)->startMovement();
+        if (activeElem != -1)
+        {
+            elements.getUnchecked (activeElem)->startMovement();
         }
     }
 
-    void mouseDrag (const juce::MouseEvent &event) override
+    void mouseDrag (const juce::MouseEvent& event) override
     {
         auto bounds = getLocalBounds().toType<float>();
         const auto centre = bounds.getCentre();
@@ -444,62 +479,66 @@ public:
         const int yFactor = yFlip ? -1 : 1;
         const int zFactor = zFlip ? -1 : 1;
 
-        if (activeElem != -1) {
+        if (activeElem != -1)
+        {
             Element* handle = elements.getUnchecked (activeElem);
-            handle->moveElement(event, centre, scale, drawPlane, this, xFactor, yFactor, zFactor);
+            handle->moveElement (event, centre, scale, drawPlane, this, xFactor, yFactor, zFactor);
             handle->repaintAllPlanesImIn();
-            sendChanges(handle);
+            sendChanges (handle);
         }
         repaint();
     }
 
-    void mouseUp (const juce::MouseEvent &event) override
+    void mouseUp (const juce::MouseEvent& event) override
     {
-        if (activeElem != -1) {
-            elements.getUnchecked(activeElem)->stopMovement();
+        if (activeElem != -1)
+        {
+            elements.getUnchecked (activeElem)->stopMovement();
         }
     }
 
-    void setPlane(Planes PlaneToDraw)
-    {
-        drawPlane = PlaneToDraw;
-    }
+    void setPlane (Planes PlaneToDraw) { drawPlane = PlaneToDraw; }
 
-    void addListener (PositionPlaneListener* const listener) {
+    void addListener (PositionPlaneListener* const listener)
+    {
         jassert (listener != 0);
-        if (listener !=0)
+        if (listener != 0)
             listeners.add (listener);
     };
-    void removeListener (PositionPlaneListener* const listener) {
-        listeners.removeFirstMatchingValue(listener);
+    void removeListener (PositionPlaneListener* const listener)
+    {
+        listeners.removeFirstMatchingValue (listener);
     };
 
-    void sendChanges(Element* element)
+    void sendChanges (Element* element)
     {
-        for (int i = listeners.size (); --i >= 0;)
-            ((PositionPlaneListener*) listeners.getUnchecked (i))->PositionPlaneElementChanged (this, element);
+        for (int i = listeners.size(); --i >= 0;)
+            ((PositionPlaneListener*) listeners.getUnchecked (i))
+                ->PositionPlaneElementChanged (this, element);
     }
 
-    void addElement (Element* const element) {
+    void addElement (Element* const element)
+    {
         jassert (element != 0);
-        if (element !=0)
+        if (element != 0)
         {
             elements.add (element);
-            element->addPlane(this);
+            element->addPlane (this);
         }
     };
-    void removeElement (Element* const element) {
-        element->removePlane(this);
-        elements.removeFirstMatchingValue(element);
+    void removeElement (Element* const element)
+    {
+        element->removePlane (this);
+        elements.removeFirstMatchingValue (element);
     };
 
-    int indexofSmallestElement(float *array, int size)
+    int indexofSmallestElement (float* array, int size)
     {
         int index = 0;
 
-        for(int i = 1; i < size; i++)
+        for (int i = 1; i < size; i++)
         {
-            if(array[i] < array[index])
+            if (array[i] < array[index])
                 index = i;
         }
 

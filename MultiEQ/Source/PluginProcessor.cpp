@@ -23,24 +23,24 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-
-static constexpr int filterTypePresets[] = {1, 1, 1, 1, 1, 3};
-static constexpr float filterFrequencyPresets[] = {20.0f, 120.0f, 500.0f, 2200.0f, 8000.0f, 16000.0f};
+static constexpr int filterTypePresets[] = { 1, 1, 1, 1, 1, 3 };
+static constexpr float filterFrequencyPresets[] = { 20.0f,   120.0f,  500.0f,
+                                                    2200.0f, 8000.0f, 16000.0f };
 
 //==============================================================================
-MultiEQAudioProcessor::MultiEQAudioProcessor()
-     : AudioProcessorBase (
+MultiEQAudioProcessor::MultiEQAudioProcessor() :
+    AudioProcessorBase (
 #ifndef JucePlugin_PreferredChannelConfigurations
-                           BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::discreteChannels (64), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
-                     #endif
-                       ,
+        BusesProperties()
+    #if ! JucePlugin_IsMidiEffect
+        #if ! JucePlugin_IsSynth
+            .withInput ("Input", juce::AudioChannelSet::discreteChannels (64), true)
+        #endif
+            .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
+    #endif
+            ,
 #endif
-createParameterLayout())
+        createParameterLayout())
 {
     // get pointers to the parameters
     inputChannelsSetting = parameters.getRawParameterValue ("inputChannelsSetting");
@@ -50,16 +50,16 @@ createParameterLayout())
 
     for (int i = 0; i < numFilterBands; ++i)
     {
-        filterEnabled[i] = parameters.getRawParameterValue ("filterEnabled" + juce::String(i));
-        filterType[i] = parameters.getRawParameterValue ("filterType" + juce::String(i));
-        filterFrequency[i] = parameters.getRawParameterValue ("filterFrequency" + juce::String(i));
-        filterQ[i] = parameters.getRawParameterValue ("filterQ" + juce::String(i));
-        filterGain[i] = parameters.getRawParameterValue ("filterGain" + juce::String(i));
+        filterEnabled[i] = parameters.getRawParameterValue ("filterEnabled" + juce::String (i));
+        filterType[i] = parameters.getRawParameterValue ("filterType" + juce::String (i));
+        filterFrequency[i] = parameters.getRawParameterValue ("filterFrequency" + juce::String (i));
+        filterQ[i] = parameters.getRawParameterValue ("filterQ" + juce::String (i));
+        filterGain[i] = parameters.getRawParameterValue ("filterGain" + juce::String (i));
 
-        parameters.addParameterListener("filterType" + juce::String(i), this);
-        parameters.addParameterListener("filterFrequency" + juce::String(i), this);
-        parameters.addParameterListener("filterQ" + juce::String(i), this);
-        parameters.addParameterListener("filterGain" + juce::String(i), this);
+        parameters.addParameterListener ("filterType" + juce::String (i), this);
+        parameters.addParameterListener ("filterFrequency" + juce::String (i), this);
+        parameters.addParameterListener ("filterQ" + juce::String (i), this);
+        parameters.addParameterListener ("filterGain" + juce::String (i), this);
     }
 
     additionalTempCoefficients[0] = IIR::Coefficients<float>::makeAllPass (48000.0, 20.0f);
@@ -89,25 +89,26 @@ createParameterLayout())
 
     additionalFilterArrays[0].clear();
     for (int ch = 0; ch < ceil (64 / IIRfloat_elements); ++ch)
-        additionalFilterArrays[0].add (new IIR::Filter<IIRfloat> (additionalProcessorCoefficients[0]));
+        additionalFilterArrays[0].add (
+            new IIR::Filter<IIRfloat> (additionalProcessorCoefficients[0]));
 
     additionalFilterArrays[1].clear();
     for (int ch = 0; ch < ceil (64 / IIRfloat_elements); ++ch)
-        additionalFilterArrays[1].add (new IIR::Filter<IIRfloat> (additionalProcessorCoefficients[1]));
+        additionalFilterArrays[1].add (
+            new IIR::Filter<IIRfloat> (additionalProcessorCoefficients[1]));
 }
-
 
 MultiEQAudioProcessor::~MultiEQAudioProcessor()
 {
 }
-
 
 void MultiEQAudioProcessor::updateGuiCoefficients()
 {
     const double sampleRate = getSampleRate() == 0 ? 48000.0 : getSampleRate();
 
     // Low band
-    const auto lowBandFrequency = juce::jmin (static_cast<float> (0.5 * sampleRate), filterFrequency[0]->load());
+    const auto lowBandFrequency =
+        juce::jmin (static_cast<float> (0.5 * sampleRate), filterFrequency[0]->load());
     const SpecialFilterType lowType = SpecialFilterType (static_cast<int> (*filterType[0]));
 
     switch (lowType)
@@ -115,47 +116,64 @@ void MultiEQAudioProcessor::updateGuiCoefficients()
         case SpecialFilterType::LinkwitzRileyHighPass:
         {
             auto coeffs = IIR::Coefficients<double>::makeHighPass (sampleRate, lowBandFrequency);
-            coeffs->coefficients = FilterVisualizerHelper<double>::cascadeSecondOrderCoefficients
-            (coeffs->coefficients, coeffs->coefficients);
+            coeffs->coefficients = FilterVisualizerHelper<double>::cascadeSecondOrderCoefficients (
+                coeffs->coefficients,
+                coeffs->coefficients);
             guiCoefficients[0] = coeffs;
             break;
         }
         case SpecialFilterType::FirstOrderHighPass:
-            guiCoefficients[0] = IIR::Coefficients<double>::makeFirstOrderHighPass (sampleRate, lowBandFrequency);
+            guiCoefficients[0] =
+                IIR::Coefficients<double>::makeFirstOrderHighPass (sampleRate, lowBandFrequency);
             break;
         case SpecialFilterType::SecondOrderHighPass:
-            guiCoefficients[0] = IIR::Coefficients<double>::makeHighPass (sampleRate, lowBandFrequency, *filterQ[0]);
+            guiCoefficients[0] =
+                IIR::Coefficients<double>::makeHighPass (sampleRate, lowBandFrequency, *filterQ[0]);
             break;
         case SpecialFilterType::LowShelf:
-            guiCoefficients[0] = IIR::Coefficients<double>::makeLowShelf (sampleRate, lowBandFrequency, *filterQ[0], juce::Decibels::decibelsToGain (filterGain[0]->load()));
+            guiCoefficients[0] = IIR::Coefficients<double>::makeLowShelf (
+                sampleRate,
+                lowBandFrequency,
+                *filterQ[0],
+                juce::Decibels::decibelsToGain (filterGain[0]->load()));
             break;
         default:
             break;
     }
 
-
     // High band
-    const auto highBandFrequency = juce::jmin (static_cast<float> (0.5 * sampleRate), filterFrequency[numFilterBands - 1]->load());
-    const SpecialFilterType highType = SpecialFilterType (4 + static_cast<int> (*filterType[numFilterBands - 1]));
+    const auto highBandFrequency = juce::jmin (static_cast<float> (0.5 * sampleRate),
+                                               filterFrequency[numFilterBands - 1]->load());
+    const SpecialFilterType highType =
+        SpecialFilterType (4 + static_cast<int> (*filterType[numFilterBands - 1]));
 
     switch (highType)
     {
         case SpecialFilterType::LinkwitzRileyLowPass:
         {
             auto coeffs = IIR::Coefficients<double>::makeLowPass (sampleRate, highBandFrequency);
-            coeffs->coefficients = FilterVisualizerHelper<double>::cascadeSecondOrderCoefficients
-            (coeffs->coefficients, coeffs->coefficients);
+            coeffs->coefficients = FilterVisualizerHelper<double>::cascadeSecondOrderCoefficients (
+                coeffs->coefficients,
+                coeffs->coefficients);
             guiCoefficients[numFilterBands - 1] = coeffs;
             break;
         }
         case SpecialFilterType::FirstOrderLowPass:
-            guiCoefficients[numFilterBands - 1] = IIR::Coefficients<double>::makeFirstOrderLowPass (sampleRate, highBandFrequency);
+            guiCoefficients[numFilterBands - 1] =
+                IIR::Coefficients<double>::makeFirstOrderLowPass (sampleRate, highBandFrequency);
             break;
         case SpecialFilterType::SecondOrderLowPass:
-            guiCoefficients[numFilterBands - 1] = IIR::Coefficients<double>::makeLowPass (sampleRate, highBandFrequency, *filterQ[numFilterBands - 1]);
+            guiCoefficients[numFilterBands - 1] =
+                IIR::Coefficients<double>::makeLowPass (sampleRate,
+                                                        highBandFrequency,
+                                                        *filterQ[numFilterBands - 1]);
             break;
         case SpecialFilterType::HighShelf:
-            guiCoefficients[numFilterBands - 1] = IIR::Coefficients<double>::makeHighShelf (sampleRate, highBandFrequency, *filterQ[numFilterBands - 1], juce::Decibels::decibelsToGain (filterGain[numFilterBands - 1]->load()));
+            guiCoefficients[numFilterBands - 1] = IIR::Coefficients<double>::makeHighShelf (
+                sampleRate,
+                highBandFrequency,
+                *filterQ[numFilterBands - 1],
+                juce::Decibels::decibelsToGain (filterGain[numFilterBands - 1]->load()));
             break;
         default:
             break;
@@ -165,27 +183,44 @@ void MultiEQAudioProcessor::updateGuiCoefficients()
 
     for (int f = 1; f < numFilterBands - 1; ++f)
     {
-        const auto frequency = juce::jmin (static_cast<float> (0.5 * sampleRate), filterFrequency[f]->load());
-        const RegularFilterType type = RegularFilterType (2 + static_cast<int>(*filterType[f]));
+        const auto frequency =
+            juce::jmin (static_cast<float> (0.5 * sampleRate), filterFrequency[f]->load());
+        const RegularFilterType type = RegularFilterType (2 + static_cast<int> (*filterType[f]));
         switch (type)
         {
             case RegularFilterType::LowShelf:
-                guiCoefficients[f] = IIR::Coefficients<double>::makeLowShelf (sampleRate, frequency, *filterQ[f], juce::Decibels::decibelsToGain (filterGain[f]->load()));
+                guiCoefficients[f] = IIR::Coefficients<double>::makeLowShelf (
+                    sampleRate,
+                    frequency,
+                    *filterQ[f],
+                    juce::Decibels::decibelsToGain (filterGain[f]->load()));
                 break;
             case RegularFilterType::PeakFilter:
-                guiCoefficients[f] = IIR::Coefficients<double>::makePeakFilter (sampleRate, frequency, *filterQ[f], juce::Decibels::decibelsToGain (filterGain[f]->load()));
+                guiCoefficients[f] = IIR::Coefficients<double>::makePeakFilter (
+                    sampleRate,
+                    frequency,
+                    *filterQ[f],
+                    juce::Decibels::decibelsToGain (filterGain[f]->load()));
                 break;
             case RegularFilterType::HighShelf:
-                guiCoefficients[f] = IIR::Coefficients<double>::makeHighShelf (sampleRate, frequency, *filterQ[f], juce::Decibels::decibelsToGain (filterGain[f]->load()));
+                guiCoefficients[f] = IIR::Coefficients<double>::makeHighShelf (
+                    sampleRate,
+                    frequency,
+                    *filterQ[f],
+                    juce::Decibels::decibelsToGain (filterGain[f]->load()));
                 break;
             default:
                 break;
         }
-
     }
 }
 
-inline juce::dsp::IIR::Coefficients<float>::Ptr MultiEQAudioProcessor::createFilterCoefficients (const RegularFilterType type, const double sampleRate, const float frequency, const float Q, const float gain)
+inline juce::dsp::IIR::Coefficients<float>::Ptr
+    MultiEQAudioProcessor::createFilterCoefficients (const RegularFilterType type,
+                                                     const double sampleRate,
+                                                     const float frequency,
+                                                     const float Q,
+                                                     const float gain)
 {
     const auto f = juce::jmin (static_cast<float> (0.5 * sampleRate), frequency);
     switch (type)
@@ -217,7 +252,12 @@ inline juce::dsp::IIR::Coefficients<float>::Ptr MultiEQAudioProcessor::createFil
     }
 }
 
-inline juce::dsp::IIR::Coefficients<double>::Ptr MultiEQAudioProcessor::createFilterCoefficientsForGui (const RegularFilterType type, const double sampleRate, const float frequency, const float Q, const float gain)
+inline juce::dsp::IIR::Coefficients<double>::Ptr
+    MultiEQAudioProcessor::createFilterCoefficientsForGui (const RegularFilterType type,
+                                                           const double sampleRate,
+                                                           const float frequency,
+                                                           const float Q,
+                                                           const float gain)
 {
     const auto f = juce::jmin (static_cast<float> (0.5 * sampleRate), frequency);
     switch (type)
@@ -253,19 +293,26 @@ void MultiEQAudioProcessor::createLinkwitzRileyFilter (const bool isUpperBand)
 {
     if (isUpperBand)
     {
-        const auto frequency = juce::jmin (static_cast<float> (0.5 * getSampleRate()), filterFrequency[numFilterBands - 1]->load());
-        tempCoefficients[numFilterBands - 1] = IIR::Coefficients<float>::makeLowPass (getSampleRate(), frequency, *filterQ[numFilterBands - 1]);
+        const auto frequency = juce::jmin (static_cast<float> (0.5 * getSampleRate()),
+                                           filterFrequency[numFilterBands - 1]->load());
+        tempCoefficients[numFilterBands - 1] =
+            IIR::Coefficients<float>::makeLowPass (getSampleRate(),
+                                                   frequency,
+                                                   *filterQ[numFilterBands - 1]);
         additionalTempCoefficients[1] = processorCoefficients[numFilterBands - 1];
     }
     else
     {
-        const auto frequency = juce::jmin (static_cast<float> (0.5 * getSampleRate()), filterFrequency[0]->load());
-        tempCoefficients[0] = IIR::Coefficients<float>::makeHighPass (getSampleRate(), frequency, *filterQ[0]);
+        const auto frequency =
+            juce::jmin (static_cast<float> (0.5 * getSampleRate()), filterFrequency[0]->load());
+        tempCoefficients[0] =
+            IIR::Coefficients<float>::makeHighPass (getSampleRate(), frequency, *filterQ[0]);
         additionalTempCoefficients[0] = processorCoefficients[0];
     }
 }
 
-void MultiEQAudioProcessor::createFilterCoefficients (const int filterIndex, const double sampleRate)
+void MultiEQAudioProcessor::createFilterCoefficients (const int filterIndex,
+                                                      const double sampleRate)
 {
     const int type = juce::roundToInt (filterType[filterIndex]->load());
     if (filterIndex == 0 && type == 2)
@@ -319,9 +366,13 @@ void MultiEQAudioProcessor::createFilterCoefficients (const int filterIndex, con
                 }
                 break;
         }
-        tempCoefficients[filterIndex] = createFilterCoefficients (filterType, sampleRate, *filterFrequency[filterIndex], *filterQ[filterIndex], juce::Decibels::decibelsToGain (filterGain[filterIndex]->load()));
+        tempCoefficients[filterIndex] = createFilterCoefficients (
+            filterType,
+            sampleRate,
+            *filterFrequency[filterIndex],
+            *filterQ[filterIndex],
+            juce::Decibels::decibelsToGain (filterGain[filterIndex]->load()));
     }
-
 }
 
 void MultiEQAudioProcessor::copyFilterCoefficientsToProcessor()
@@ -335,21 +386,21 @@ void MultiEQAudioProcessor::copyFilterCoefficientsToProcessor()
     userHasChangedFilterSettings = false;
 }
 
-
 inline void MultiEQAudioProcessor::clear (juce::dsp::AudioBlock<IIRfloat>& ab)
 {
     const int N = static_cast<int> (ab.getNumSamples()) * IIRfloat_elements;
     const int nCh = static_cast<int> (ab.getNumChannels());
 
     for (int ch = 0; ch < nCh; ++ch)
-        juce::FloatVectorOperations::clear (reinterpret_cast<float*> (ab.getChannelPointer (ch)), N);
+        juce::FloatVectorOperations::clear (reinterpret_cast<float*> (ab.getChannelPointer (ch)),
+                                            N);
 }
 
 //==============================================================================
 int MultiEQAudioProcessor::getNumPrograms()
 {
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+        // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int MultiEQAudioProcessor::getCurrentProgram()
@@ -381,7 +432,6 @@ void MultiEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
     }
     copyFilterCoefficientsToProcessor();
 
-
     interleavedData.clear();
 
     for (int i = 0; i < ceil (64 / IIRfloat_elements); ++i)
@@ -392,7 +442,8 @@ void MultiEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
             filterArrays[f][i]->reset (IIRfloat (0.0f));
         }
 
-        interleavedData.add (new juce::dsp::AudioBlock<IIRfloat> (interleavedBlockData[i], 1, samplesPerBlock));
+        interleavedData.add (
+            new juce::dsp::AudioBlock<IIRfloat> (interleavedBlockData[i], 1, samplesPerBlock));
         //interleavedData.getLast()->clear(); // this one's broken in JUCE 5.4.5
         clear (*interleavedData.getLast());
     }
@@ -407,8 +458,8 @@ void MultiEQAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-
-void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiMessages)
+void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer,
+                                          juce::MidiBuffer& midiMessages)
 {
     checkInputAndOutput (this, *inputChannelsSetting, *inputChannelsSetting, false);
     juce::ScopedNoDenormals noDenormals;
@@ -418,12 +469,12 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
     const int maxNChIn = juce::jmin (buffer.getNumChannels(), input.getSize());
     if (maxNChIn < 1)
         return;
-    
+
     const int nSIMDFilters = 1 + (maxNChIn - 1) / IIRfloat_elements;
 
-
     // update iir filter coefficients
-    if (userHasChangedFilterSettings.get()) copyFilterCoefficientsToProcessor();
+    if (userHasChangedFilterSettings.get())
+        copyFilterCoefficientsToProcessor();
 
     using Format = juce::AudioData::Format<juce::AudioData::Float32, juce::AudioData::NativeEndian>;
 
@@ -431,21 +482,31 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
     int partial = maxNChIn % IIRfloat_elements;
     if (partial == 0)
     {
-        for (int i = 0; i<nSIMDFilters; ++i)
+        for (int i = 0; i < nSIMDFilters; ++i)
         {
-            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers() + i * IIRfloat_elements, IIRfloat_elements},
-                                                juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
-                                                L);
+            juce::AudioData::interleaveSamples (
+                juce::AudioData::NonInterleavedSource<Format> { buffer.getArrayOfReadPointers()
+                                                                    + i * IIRfloat_elements,
+                                                                IIRfloat_elements },
+                juce::AudioData::InterleavedDest<Format> {
+                    reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)),
+                    IIRfloat_elements },
+                L);
         }
     }
     else
     {
         int i;
-        for (i = 0; i<nSIMDFilters-1; ++i)
+        for (i = 0; i < nSIMDFilters - 1; ++i)
         {
-            juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {buffer.getArrayOfReadPointers() + i * IIRfloat_elements, IIRfloat_elements},
-                                                juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
-                                                L);
+            juce::AudioData::interleaveSamples (
+                juce::AudioData::NonInterleavedSource<Format> { buffer.getArrayOfReadPointers()
+                                                                    + i * IIRfloat_elements,
+                                                                IIRfloat_elements },
+                juce::AudioData::InterleavedDest<Format> {
+                    reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)),
+                    IIRfloat_elements },
+                L);
         }
 
         const float* addr[IIRfloat_elements];
@@ -456,23 +517,24 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
         }
         for (; ch < IIRfloat_elements; ++ch)
         {
-            addr[ch] = zero.getChannelPointer(ch);
+            addr[ch] = zero.getChannelPointer (ch);
         }
-        juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> {addr, IIRfloat_elements},
-                                            juce::AudioData::InterleavedDest<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
-                                            L);
+        juce::AudioData::interleaveSamples (
+            juce::AudioData::NonInterleavedSource<Format> { addr, IIRfloat_elements },
+            juce::AudioData::InterleavedDest<Format> {
+                reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)),
+                IIRfloat_elements },
+            L);
     }
 
-
-
     // apply filters
-    for (int f = 0; f <numFilterBands; ++f)
+    for (int f = 0; f < numFilterBands; ++f)
     {
         if (*filterEnabled[f] > 0.5f)
         {
             for (int i = 0; i < nSIMDFilters; ++i)
             {
-                const IIRfloat* chPtr[1] = {interleavedData[i]->getChannelPointer (0)};
+                const IIRfloat* chPtr[1] = { interleavedData[i]->getChannelPointer (0) };
                 juce::dsp::AudioBlock<IIRfloat> ab (const_cast<IIRfloat**> (chPtr), 1, L);
                 juce::dsp::ProcessContextReplacing<IIRfloat> context (ab);
                 filterArrays[f][i]->process (context);
@@ -485,42 +547,52 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
     {
         for (int i = 0; i < nSIMDFilters; ++i)
         {
-            const IIRfloat* chPtr[1] = {chPtr[0] = interleavedData[i]->getChannelPointer (0)};
+            const IIRfloat* chPtr[1] = { chPtr[0] = interleavedData[i]->getChannelPointer (0) };
             juce::dsp::AudioBlock<IIRfloat> ab (const_cast<IIRfloat**> (chPtr), 1, L);
             juce::dsp::ProcessContextReplacing<IIRfloat> context (ab);
             additionalFilterArrays[0][i]->process (context);
         }
     }
-    if (static_cast<int> (*filterType[numFilterBands - 1]) == 2 && *filterEnabled[numFilterBands - 1] > 0.5f)
+    if (static_cast<int> (*filterType[numFilterBands - 1]) == 2
+        && *filterEnabled[numFilterBands - 1] > 0.5f)
     {
         for (int i = 0; i < nSIMDFilters; ++i)
         {
-            const IIRfloat* chPtr[1] = {interleavedData[i]->getChannelPointer (0)};
+            const IIRfloat* chPtr[1] = { interleavedData[i]->getChannelPointer (0) };
             juce::dsp::AudioBlock<IIRfloat> ab (const_cast<IIRfloat**> (chPtr), 1, L);
             juce::dsp::ProcessContextReplacing<IIRfloat> context (ab);
             additionalFilterArrays[1][i]->process (context);
         }
     }
 
-
     // deinterleave
     if (partial == 0)
     {
-        for (int i = 0; i<nSIMDFilters; ++i)
+        for (int i = 0; i < nSIMDFilters; ++i)
         {
-            juce::AudioData::deinterleaveSamples (juce::AudioData::InterleavedSource<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
-                                                  juce::AudioData::NonInterleavedDest<Format> {buffer.getArrayOfWritePointers() + i * IIRfloat_elements, IIRfloat_elements},
-                                                  L);
+            juce::AudioData::deinterleaveSamples (
+                juce::AudioData::InterleavedSource<Format> {
+                    reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)),
+                    IIRfloat_elements },
+                juce::AudioData::NonInterleavedDest<Format> { buffer.getArrayOfWritePointers()
+                                                                  + i * IIRfloat_elements,
+                                                              IIRfloat_elements },
+                L);
         }
     }
     else
     {
         int i;
-        for (i = 0; i<nSIMDFilters-1; ++i)
+        for (i = 0; i < nSIMDFilters - 1; ++i)
         {
-            juce::AudioData::deinterleaveSamples (juce::AudioData::InterleavedSource<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
-                                                  juce::AudioData::NonInterleavedDest<Format> {buffer.getArrayOfWritePointers() + i * IIRfloat_elements, IIRfloat_elements},
-                                                  L);
+            juce::AudioData::deinterleaveSamples (
+                juce::AudioData::InterleavedSource<Format> {
+                    reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)),
+                    IIRfloat_elements },
+                juce::AudioData::NonInterleavedDest<Format> { buffer.getArrayOfWritePointers()
+                                                                  + i * IIRfloat_elements,
+                                                              IIRfloat_elements },
+                L);
         }
 
         float* addr[IIRfloat_elements];
@@ -533,12 +605,14 @@ void MultiEQAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce:
         {
             addr[ch] = zero.getChannelPointer (ch);
         }
-        juce::AudioData::deinterleaveSamples (juce::AudioData::InterleavedSource<Format> {reinterpret_cast<float*>(interleavedData[i]->getChannelPointer (0)), IIRfloat_elements},
-                                              juce::AudioData::NonInterleavedDest<Format> {addr, IIRfloat_elements},
-                                              L);
+        juce::AudioData::deinterleaveSamples (
+            juce::AudioData::InterleavedSource<Format> {
+                reinterpret_cast<float*> (interleavedData[i]->getChannelPointer (0)),
+                IIRfloat_elements },
+            juce::AudioData::NonInterleavedDest<Format> { addr, IIRfloat_elements },
+            L);
         zero.clear();
     }
-
 }
 
 //==============================================================================
@@ -555,15 +629,14 @@ juce::AudioProcessorEditor* MultiEQAudioProcessor::createEditor()
 //==============================================================================
 void MultiEQAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-  auto state = parameters.copyState();
+    auto state = parameters.copyState();
 
-  auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
-  oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
+    auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
+    oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
 
-  std::unique_ptr<juce::XmlElement> xml (state.createXml());
-  copyXmlToBinary (*xml, destData);
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
-
 
 void MultiEQAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
@@ -574,7 +647,8 @@ void MultiEQAudioProcessor::setStateInformation (const void* data, int sizeInByt
             parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
             if (parameters.state.hasProperty ("OSCPort")) // legacy
             {
-                oscParameterInterface.getOSCReceiver().connect (parameters.state.getProperty ("OSCPort", juce::var (-1)));
+                oscParameterInterface.getOSCReceiver().connect (
+                    parameters.state.getProperty ("OSCPort", juce::var (-1)));
                 parameters.state.removeProperty ("OSCPort", nullptr);
             }
 
@@ -585,7 +659,7 @@ void MultiEQAudioProcessor::setStateInformation (const void* data, int sizeInByt
 }
 
 //==============================================================================
-void MultiEQAudioProcessor::parameterChanged (const juce::String &parameterID, float newValue)
+void MultiEQAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     DBG ("Parameter with ID " << parameterID << " has changed. New value: " << newValue);
 
@@ -593,7 +667,7 @@ void MultiEQAudioProcessor::parameterChanged (const juce::String &parameterID, f
         userChangedIOSettings = true;
     else if (parameterID.startsWith ("filter"))
     {
-        const int i = parameterID.getLastCharacters(1).getIntValue();
+        const int i = parameterID.getLastCharacters (1).getIntValue();
 
         createFilterCoefficients (i, getSampleRate());
 
@@ -609,105 +683,189 @@ void MultiEQAudioProcessor::updateBuffers()
 }
 
 //==============================================================================
-std::vector<std::unique_ptr<juce::RangedAudioParameter>> MultiEQAudioProcessor::createParameterLayout()
+std::vector<std::unique_ptr<juce::RangedAudioParameter>>
+    MultiEQAudioProcessor::createParameterLayout()
 {
     // add your audio parameters here
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-
-
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("inputChannelsSetting", "Number of input channels ", "",
-                                     juce::NormalisableRange<float> (0.0f, 64.0f, 1.0f), 0.0f,
-                                     [](float value) {return value < 0.5f ? "Auto" : juce::String (value);}, nullptr));
-
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "inputChannelsSetting",
+        "Number of input channels ",
+        "",
+        juce::NormalisableRange<float> (0.0f, 64.0f, 1.0f),
+        0.0f,
+        [] (float value) { return value < 0.5f ? "Auto" : juce::String (value); },
+        nullptr));
 
     int i = 0;
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterEnabled" + juce::String (i), "Filter Enablement " + juce::String (i + 1), "",
-                                     juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f,
-                                     [](float value) { return value < 0.5 ? juce::String ("OFF") : juce::String ("ON");}, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterEnabled" + juce::String (i),
+        "Filter Enablement " + juce::String (i + 1),
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        1.0f,
+        [] (float value) { return value < 0.5 ? juce::String ("OFF") : juce::String ("ON"); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterType" + juce::String (i), "Filter Type " + juce::String (i + 1), "",
-                                     juce::NormalisableRange<float> (0.0f, 3.0f, 1.0f),  filterTypePresets[i],
-                                     [](float value) {
-                                         if (value < 0.5f) return "HP (6dB/oct)";
-                                         else if (value >= 0.5f && value < 1.5f) return "HP (12dB/oct)";
-                                         else if (value >= 1.5f && value < 2.5f) return "HP (24dB/oct)";
-                                         else return "Low-shelf";},
-                                     nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterType" + juce::String (i),
+        "Filter Type " + juce::String (i + 1),
+        "",
+        juce::NormalisableRange<float> (0.0f, 3.0f, 1.0f),
+        filterTypePresets[i],
+        [] (float value)
+        {
+            if (value < 0.5f)
+                return "HP (6dB/oct)";
+            else if (value >= 0.5f && value < 1.5f)
+                return "HP (12dB/oct)";
+            else if (value >= 1.5f && value < 2.5f)
+                return "HP (24dB/oct)";
+            else
+                return "Low-shelf";
+        },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterFrequency" + juce::String (i), "Filter Frequency " + juce::String (i + 1), "Hz",
-                                     juce::NormalisableRange<float> (20.0f, 20000.0f, 1.0f, 0.4f), filterFrequencyPresets[i],
-                                     [](float value) { return juce::String(value, 0); }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterFrequency" + juce::String (i),
+        "Filter Frequency " + juce::String (i + 1),
+        "Hz",
+        juce::NormalisableRange<float> (20.0f, 20000.0f, 1.0f, 0.4f),
+        filterFrequencyPresets[i],
+        [] (float value) { return juce::String (value, 0); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterQ" + juce::String (i), "Filter Q " + juce::String (i+1), "",
-                                     juce::NormalisableRange<float> (0.05f, 8.0f, 0.05f), 0.7f,
-                                     [](float value) { return juce::String (value, 2); },
-                                     nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterQ" + juce::String (i),
+        "Filter Q " + juce::String (i + 1),
+        "",
+        juce::NormalisableRange<float> (0.05f, 8.0f, 0.05f),
+        0.7f,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterGain" + juce::String (i), "Filter Gain " + juce::String (i + 1), "dB",
-                                     juce::NormalisableRange<float> (-60.0f, 15.0f, 0.1f), 0.0f,
-                                     [](float value) { return juce::String (value, 1); },
-                                     nullptr));
-
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterGain" + juce::String (i),
+        "Filter Gain " + juce::String (i + 1),
+        "dB",
+        juce::NormalisableRange<float> (-60.0f, 15.0f, 0.1f),
+        0.0f,
+        [] (float value) { return juce::String (value, 1); },
+        nullptr));
 
     for (int i = 1; i < numFilterBands - 1; ++i)
     {
-        params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterEnabled" + juce::String (i), "Filter Enablement " + juce::String (i + 1), "",
-                                         juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f,
-                                         [](float value) { return value < 0.5 ? juce::String ("OFF") : juce::String ("ON");}, nullptr));
+        params.push_back (OSCParameterInterface::createParameterTheOldWay (
+            "filterEnabled" + juce::String (i),
+            "Filter Enablement " + juce::String (i + 1),
+            "",
+            juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+            1.0f,
+            [] (float value) { return value < 0.5 ? juce::String ("OFF") : juce::String ("ON"); },
+            nullptr));
 
-        params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterType" + juce::String (i), "Filter Type " + juce::String (i + 1), "",
-                                         juce::NormalisableRange<float> (0.0f, 2.0f, 1.0f),  filterTypePresets[i],
-                                         [](float value) {
-                                             if (value < 0.5f) return "Low-shelf";
-                                             else if (value >= 0.5f && value < 1.5f) return "Peak";
-                                             else return "High-shelf";},
-                                         nullptr));
+        params.push_back (OSCParameterInterface::createParameterTheOldWay (
+            "filterType" + juce::String (i),
+            "Filter Type " + juce::String (i + 1),
+            "",
+            juce::NormalisableRange<float> (0.0f, 2.0f, 1.0f),
+            filterTypePresets[i],
+            [] (float value)
+            {
+                if (value < 0.5f)
+                    return "Low-shelf";
+                else if (value >= 0.5f && value < 1.5f)
+                    return "Peak";
+                else
+                    return "High-shelf";
+            },
+            nullptr));
 
-        params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterFrequency" + juce::String (i), "Filter Frequency " + juce::String (i + 1), "Hz",
-                                         juce::NormalisableRange<float> (20.0f, 20000.0f, 1.0f, 0.4f), filterFrequencyPresets[i],
-                                         [](float value) { return juce::String(value, 0); }, nullptr));
+        params.push_back (OSCParameterInterface::createParameterTheOldWay (
+            "filterFrequency" + juce::String (i),
+            "Filter Frequency " + juce::String (i + 1),
+            "Hz",
+            juce::NormalisableRange<float> (20.0f, 20000.0f, 1.0f, 0.4f),
+            filterFrequencyPresets[i],
+            [] (float value) { return juce::String (value, 0); },
+            nullptr));
 
-        params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterQ" + juce::String (i), "Filter Q " + juce::String (i+1), "",
-                                         juce::NormalisableRange<float> (0.05f, 8.0f, 0.05f), 0.7f,
-                                         [](float value) { return juce::String (value, 2); },
-                                         nullptr));
+        params.push_back (OSCParameterInterface::createParameterTheOldWay (
+            "filterQ" + juce::String (i),
+            "Filter Q " + juce::String (i + 1),
+            "",
+            juce::NormalisableRange<float> (0.05f, 8.0f, 0.05f),
+            0.7f,
+            [] (float value) { return juce::String (value, 2); },
+            nullptr));
 
-        params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterGain" + juce::String (i), "Filter Gain " + juce::String (i + 1), "dB",
-                                         juce::NormalisableRange<float> (-60.0f, 15.0f, 0.1f), 0.0f,
-                                         [](float value) { return juce::String (value, 1); },
-                                         nullptr));
+        params.push_back (OSCParameterInterface::createParameterTheOldWay (
+            "filterGain" + juce::String (i),
+            "Filter Gain " + juce::String (i + 1),
+            "dB",
+            juce::NormalisableRange<float> (-60.0f, 15.0f, 0.1f),
+            0.0f,
+            [] (float value) { return juce::String (value, 1); },
+            nullptr));
     }
 
     i = numFilterBands - 1;
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterEnabled" + juce::String (i), "Filter Enablement " + juce::String (i + 1), "",
-                                     juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f,
-                                     [](float value) { return value < 0.5 ? juce::String ("OFF") : juce::String ("ON");}, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterEnabled" + juce::String (i),
+        "Filter Enablement " + juce::String (i + 1),
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        1.0f,
+        [] (float value) { return value < 0.5 ? juce::String ("OFF") : juce::String ("ON"); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterType" + juce::String (i), "Filter Type " + juce::String (i + 1), "",
-                                     juce::NormalisableRange<float> (0.0f, 3.0f, 1.0f),  filterTypePresets[i],
-                                     [](float value) {
-                                         if (value < 0.5f) return "LP (6dB/Oct)";
-                                         else if (value >= 0.5f && value < 1.5f) return "LP (12dB/oct)";
-                                         else if (value >= 1.5f && value < 2.5f) return "LP (24dB/oct)";
-                                         else return "High-shelf";},
-                                     nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterType" + juce::String (i),
+        "Filter Type " + juce::String (i + 1),
+        "",
+        juce::NormalisableRange<float> (0.0f, 3.0f, 1.0f),
+        filterTypePresets[i],
+        [] (float value)
+        {
+            if (value < 0.5f)
+                return "LP (6dB/Oct)";
+            else if (value >= 0.5f && value < 1.5f)
+                return "LP (12dB/oct)";
+            else if (value >= 1.5f && value < 2.5f)
+                return "LP (24dB/oct)";
+            else
+                return "High-shelf";
+        },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterFrequency" + juce::String (i), "Filter Frequency " + juce::String (i + 1), "Hz",
-                                     juce::NormalisableRange<float> (20.0f, 20000.0f, 1.0f, 0.4f), filterFrequencyPresets[i],
-                                     [](float value) { return juce::String(value, 0); }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterFrequency" + juce::String (i),
+        "Filter Frequency " + juce::String (i + 1),
+        "Hz",
+        juce::NormalisableRange<float> (20.0f, 20000.0f, 1.0f, 0.4f),
+        filterFrequencyPresets[i],
+        [] (float value) { return juce::String (value, 0); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterQ" + juce::String (i), "Filter Q " + juce::String (i+1), "",
-                                     juce::NormalisableRange<float> (0.05f, 8.0f, 0.05f), 0.7f,
-                                     [](float value) { return juce::String (value, 2); },
-                                     nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterQ" + juce::String (i),
+        "Filter Q " + juce::String (i + 1),
+        "",
+        juce::NormalisableRange<float> (0.05f, 8.0f, 0.05f),
+        0.7f,
+        [] (float value) { return juce::String (value, 2); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("filterGain" + juce::String (i), "Filter Gain " + juce::String (i + 1), "dB",
-                                     juce::NormalisableRange<float> (-60.0f, 15.0f, 0.1f), 0.0f,
-                                     [](float value) { return juce::String (value, 1); },
-                                     nullptr));
-
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "filterGain" + juce::String (i),
+        "Filter Gain " + juce::String (i + 1),
+        "dB",
+        juce::NormalisableRange<float> (-60.0f, 15.0f, 0.1f),
+        0.0f,
+        [] (float value) { return juce::String (value, 1); },
+        nullptr));
 
     return params;
 }

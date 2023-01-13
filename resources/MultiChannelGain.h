@@ -24,13 +24,11 @@
  This processor is based on JUCE's juce::dsp::Gain processor.
  */
 
-
 template <typename FloatType>
 class MultiChannelGain
 {
 public:
-    MultiChannelGain()
-    {}
+    MultiChannelGain() {}
 
     //==============================================================================
     /** Applies a new gain as a linear value. */
@@ -57,12 +55,12 @@ public:
     }
 
     /** Returns the ramp duration in seconds. */
-    double getRampDurationSeconds() const noexcept              { return rampDurationSeconds; }
+    double getRampDurationSeconds() const noexcept { return rampDurationSeconds; }
 
     /** Returns true if the current value is currently being interpolated. */
     bool isSmoothing (const int channel)
     {
-        jassert(channel < gains.size());
+        jassert (channel < gains.size());
         return gains.getUnchecked (channel).isSmoothing();
     }
 
@@ -73,7 +71,7 @@ public:
         sampleRate = spec.sampleRate;
         gains.clear();
         for (int ch = 0; ch < spec.numChannels; ++ch)
-            gains.add(new juce::LinearSmoothedValue<float> ());
+            gains.add (new juce::LinearSmoothedValue<float>());
 
         reset();
     }
@@ -86,26 +84,24 @@ public:
                 gains.getUnchecked (i)->reset (sampleRate, rampDurationSeconds);
     }
 
-
-
     /** Processes the input and output buffers supplied in the processing context. */
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
-        auto&& inBlock  = context.getInputBlock();
+        auto&& inBlock = context.getInputBlock();
         auto&& outBlock = context.getOutputBlock();
 
         jassert (inBlock.getNumChannels() == outBlock.getNumChannels());
         jassert (inBlock.getNumChannels() <= gains.size());
         jassert (inBlock.getNumSamples() == outBlock.getNumSamples());
 
-        auto len         = inBlock.getNumSamples();
+        auto len = inBlock.getNumSamples();
         auto numChannels = inBlock.getNumChannels();
 
         if (context.isBypassed)
         {
             for (int i = 0; i < gains.size(); ++i)
-                gains.getUnchecked(i)->skip (static_cast<int> (len));
+                gains.getUnchecked (i)->skip (static_cast<int> (len));
 
             if (context.usesSeparateInputAndOutputBlocks())
                 outBlock.copyFrom (inBlock);
@@ -118,7 +114,7 @@ public:
             auto* src = inBlock.getChannelPointer (ch);
             auto* dst = outBlock.getChannelPointer (ch);
             for (size_t i = 0; i < len; ++i)
-                dst[i] = src[i] * gains.getUnchecked(ch)->getNextValue();
+                dst[i] = src[i] * gains.getUnchecked (ch)->getNextValue();
         }
 
         for (int ch = (int) numChannels; ch < gains.size(); ++ch)
@@ -131,4 +127,3 @@ private:
     juce::OwnedArray<juce::LinearSmoothedValue<FloatType>> gains;
     double sampleRate = 0, rampDurationSeconds = 0;
 };
-

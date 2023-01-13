@@ -20,8 +20,8 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "PluginProcessor.h"
 
 //==============================================================================
 MultiEncoderAudioProcessorEditor::MultiEncoderAudioProcessorEditor (

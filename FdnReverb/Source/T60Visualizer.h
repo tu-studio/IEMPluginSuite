@@ -20,17 +20,17 @@
  ==============================================================================
  */
 
-
 #pragma once
 
-class  T60Visualizer :  public juce::Component
+class T60Visualizer : public juce::Component
 {
-    struct Settings {
-        float fMin = 20.0f;        // minimum displayed frequency
-        float fMax = 20000.0f;        // maximum displayed frequency
-        float yMin = 0.1f;       // min displayed seconds
-        float yMax = 60.0f;       // max displayed seconds
-        float gridDiv = 5.0f;     // how many seconds per divisions (between grid lines)
+    struct Settings
+    {
+        float fMin = 20.0f; // minimum displayed frequency
+        float fMax = 20000.0f; // maximum displayed frequency
+        float yMin = 0.1f; // min displayed seconds
+        float yMax = 60.0f; // max displayed seconds
+        float gridDiv = 5.0f; // how many seconds per divisions (between grid lines)
     };
 
     const float mL = 23.0f;
@@ -40,20 +40,23 @@ class  T60Visualizer :  public juce::Component
     const float OH = 3.0f;
 
 public:
-    T60Visualizer() : juce::Component(), overallGainInDb(0.0f), sampleRate(48000) {};
-    T60Visualizer(float fMin, float fMax, float yMin, float yMax, float gridDiv) : juce::Component(), overallGainInDb(0.0f), sampleRate(48000), s{fMin, fMax, yMin, yMax, gridDiv} {};
+    T60Visualizer() : juce::Component(), overallGainInDb (0.0f), sampleRate (48000) {};
+    T60Visualizer (float fMin, float fMax, float yMin, float yMax, float gridDiv) :
+        juce::Component(),
+        overallGainInDb (0.0f),
+        sampleRate (48000),
+        s { fMin, fMax, yMin, yMax, gridDiv } {};
     ~T60Visualizer() {};
-
 
     void paint (juce::Graphics& g) override
     {
-        g.setColour(juce::Colours::steelblue.withMultipliedAlpha(0.01f));
+        g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.01f));
         g.fillAll();
 
         //int width = getWidth();
 
-        g.setFont(getLookAndFeel().getTypefaceForFont (juce::Font(12.0f, 2)));
-        g.setFont(12.0f);
+        g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 2)));
+        g.setFont (12.0f);
 
         // time labels
         g.setColour (juce::Colours::white);
@@ -64,143 +67,168 @@ public:
         axislabel = juce::String (1.f);
         g.drawText (axislabel, 0, t60ToY (1.f) - 6, 18, 12.0f, juce::Justification::right, false);
 
-        for (float t=s.yMin; t <= s.yMax; t += powf(10, floorf(log10(t)))) {
+        for (float t = s.yMin; t <= s.yMax; t += powf (10, floorf (log10 (t))))
+        {
             int ypos = t60ToY (t);
 
             juce::String axislabel;
             bool drawText = false;
 
-            if ((t == 1) || (t == 10) || (t==60))
+            if ((t == 1) || (t == 10) || (t == 60))
             {
-                axislabel = juce::String((int)t);
+                axislabel = juce::String ((int) t);
                 drawText = true;
             }
             if (drawText)
             {
-                g.drawText (axislabel, 0, ypos-6, 18, 12.0f, juce::Justification::right, false);
+                g.drawText (axislabel, 0, ypos - 6, 18, 12.0f, juce::Justification::right, false);
             }
         }
 
         // frequency labels
-        for (float f=s.fMin; f <= s.fMax; f += powf(10, floorf(log10(f)))) {
-            int xpos = hzToX(f);
+        for (float f = s.fMin; f <= s.fMax; f += powf (10, floorf (log10 (f))))
+        {
+            int xpos = hzToX (f);
 
             juce::String axislabel;
             bool drawText = false;
 
             if ((f == 20) || (f == 50) || (f == 100) || (f == 500))
             {
-                axislabel = juce::String((int)f);
+                axislabel = juce::String ((int) f);
                 drawText = true;
             }
             else if ((f == 1000) || (f == 5000) || (f == 10000) || (f == 20000))
             {
-                axislabel = juce::String((int)f/1000);
+                axislabel = juce::String ((int) f / 1000);
                 axislabel << "k";
                 drawText = true;
             }
 
             if (drawText)
             {
-                g.drawText (axislabel, xpos - 10, t60ToY(s.yMin) + OH + 0.0f, 20, 12, juce::Justification::centred, false);
+                g.drawText (axislabel,
+                            xpos - 10,
+                            t60ToY (s.yMin) + OH + 0.0f,
+                            20,
+                            12,
+                            juce::Justification::centred,
+                            false);
             }
         }
 
-
-        g.setColour (juce::Colours::steelblue.withMultipliedAlpha(0.8f));
+        g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.8f));
         g.strokePath (dbGridPath, juce::PathStrokeType (0.5f));
 
-        g.setColour (juce::Colours::steelblue.withMultipliedAlpha(0.9f));
+        g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.9f));
         g.strokePath (dbGridPathBold, juce::PathStrokeType (1.0f));
 
-        g.setColour(juce::Colours::steelblue.withMultipliedAlpha(0.9f));
+        g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.9f));
         g.strokePath (hzGridPathBold, juce::PathStrokeType (1.0f));
 
-        g.setColour(juce::Colours::steelblue.withMultipliedAlpha(0.8f));
+        g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.8f));
         g.strokePath (hzGridPath, juce::PathStrokeType (0.5f));
-
 
         // draw filter magnitude responses
         juce::Path magnitude;
-        allMagnitudesInDb.fill(overallGainInDb);
+        allMagnitudesInDb.fill (overallGainInDb);
 
-        int xMin = hzToX(s.fMin);
-        int xMax = hzToX(s.fMax);
-        int yMax = t60ToY(s.yMin);
-        int yMin = t60ToY(s.yMax);
+        int xMin = hzToX (s.fMin);
+        int xMax = hzToX (s.fMax);
+        int yMax = t60ToY (s.yMin);
+        int yMin = t60ToY (s.yMax);
 
-        g.excludeClipRegion(juce::Rectangle<int>(0.0f, yMax+OH, getWidth(), getHeight()-yMax-OH));
+        g.excludeClipRegion (
+            juce::Rectangle<int> (0.0f, yMax + OH, getWidth(), getHeight() - yMax - OH));
 
-        for (int i = arrayOfCoefficients.size (); --i >= 0;) {
+        for (int i = arrayOfCoefficients.size(); --i >= 0;)
+        {
             //bool isActive = activeElem == i;
 
-            juce::dsp::IIR::Coefficients<float>::Ptr handle = (juce::dsp::IIR::Coefficients<float>::Ptr) arrayOfCoefficients.getUnchecked (i);
+            juce::dsp::IIR::Coefficients<float>::Ptr handle =
+                (juce::dsp::IIR::Coefficients<float>::Ptr) arrayOfCoefficients.getUnchecked (i);
             magnitude.clear();
 
-            float db = juce::Decibels::gainToDecibels(handle->getMagnitudeForFrequency(xToHz(xMin), sampleRate));
-            allMagnitudesInDb.setUnchecked(0, allMagnitudesInDb[0] + db);
+            float db = juce::Decibels::gainToDecibels (
+                handle->getMagnitudeForFrequency (xToHz (xMin), sampleRate));
+            allMagnitudesInDb.setUnchecked (0, allMagnitudesInDb[0] + db);
 
-            for (int x = xMin+1; x<=xMax; ++x)
+            for (int x = xMin + 1; x <= xMax; ++x)
             {
-                float db = juce::Decibels::gainToDecibels(handle->getMagnitudeForFrequency(xToHz(x), sampleRate));
-                allMagnitudesInDb.setUnchecked(x-xMin, allMagnitudesInDb[x-xMin] + db);
+                float db = juce::Decibels::gainToDecibels (
+                    handle->getMagnitudeForFrequency (xToHz (x), sampleRate));
+                allMagnitudesInDb.setUnchecked (x - xMin, allMagnitudesInDb[x - xMin] + db);
             }
         }
 
         //all magnitudes combined
         magnitude.clear();
 
-        magnitude.startNewSubPath(xMin, juce::jlimit((float) yMin, (float) yMax + OH + 1, t60ToYFloat (gainToT60Float (allMagnitudesInDb[0]))));
+        magnitude.startNewSubPath (
+            xMin,
+            juce::jlimit ((float) yMin,
+                          (float) yMax + OH + 1,
+                          t60ToYFloat (gainToT60Float (allMagnitudesInDb[0]))));
 
-        for (int x = xMin + 1; x<=xMax; ++x)
+        for (int x = xMin + 1; x <= xMax; ++x)
         {
-            magnitude.lineTo(x, juce::jlimit((float) yMin, (float) yMax + OH + 1, t60ToYFloat (gainToT60Float (allMagnitudesInDb[x-xMin]))));
+            magnitude.lineTo (
+                x,
+                juce::jlimit ((float) yMin,
+                              (float) yMax + OH + 1,
+                              t60ToYFloat (gainToT60Float (allMagnitudesInDb[x - xMin]))));
         }
-        g.setColour(juce::Colours::white);
-        g.strokePath(magnitude, juce::PathStrokeType(1.5f));
+        g.setColour (juce::Colours::white);
+        g.strokePath (magnitude, juce::PathStrokeType (1.5f));
 
-
-        g.setColour(juce::Colours::white.withMultipliedAlpha(0.3f));
-        g.fillPath(tolerancePath, juce::AffineTransform::translation(0.0f, t60ToY(gainToT60Float(overallGainInDb)) - t60ToY(10.0f)));
+        g.setColour (juce::Colours::white.withMultipliedAlpha (0.3f));
+        g.fillPath (tolerancePath,
+                    juce::AffineTransform::translation (0.0f,
+                                                        t60ToY (gainToT60Float (overallGainInDb))
+                                                            - t60ToY (10.0f)));
     };
 
-    void mouseWheelMove(const juce::MouseEvent &e, const juce::MouseWheelDetails &wheel) override {
-        const double delta = 100*(std::abs (wheel.deltaX) > std::abs (wheel.deltaY) ? -wheel.deltaX : wheel.deltaY);
+    void mouseWheelMove (const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
+    {
+        const double delta =
+            100
+            * (std::abs (wheel.deltaX) > std::abs (wheel.deltaY) ? -wheel.deltaX : wheel.deltaY);
         //bool positiveDelta = delta >= 0.0;
 
-        float value = s.yMax + juce::roundToInt(delta);
-        value = juce::jmin(value, 80.0f);
-        value = juce::jmax(value, 5.0f);
+        float value = s.yMax + juce::roundToInt (delta);
+        value = juce::jmin (value, 80.0f);
+        value = juce::jmax (value, 5.0f);
 
         s.yMax = value;
         resized();
         repaint();
     }
 
-    void createTolerancePath ()
+    void createTolerancePath()
     {
         const float tRef = 10; //10 is our reference, can be anything
         tolerancePath.clear();
 
-        tolerancePath.startNewSubPath(hzToX(s.fMin), t60ToYFloat(getToleranceT60(s.fMin, tRef, true)));
-        tolerancePath.lineTo(hzToX(250.0f), t60ToYFloat(1.2f*tRef));
-        tolerancePath.lineTo(hzToX(s.fMax), t60ToYFloat(1.2f*tRef));
-        tolerancePath.lineTo(hzToX(s.fMax), t60ToYFloat(getToleranceT60(s.fMax, tRef, false)));
-        tolerancePath.lineTo(hzToX(2000.0f), t60ToYFloat(0.8*tRef));
-        tolerancePath.lineTo(hzToX(250.0f), t60ToYFloat(0.8*tRef));
-        tolerancePath.lineTo(hzToX(s.fMin), t60ToYFloat(getToleranceT60(s.fMin, tRef, false)));
+        tolerancePath.startNewSubPath (hzToX (s.fMin),
+                                       t60ToYFloat (getToleranceT60 (s.fMin, tRef, true)));
+        tolerancePath.lineTo (hzToX (250.0f), t60ToYFloat (1.2f * tRef));
+        tolerancePath.lineTo (hzToX (s.fMax), t60ToYFloat (1.2f * tRef));
+        tolerancePath.lineTo (hzToX (s.fMax), t60ToYFloat (getToleranceT60 (s.fMax, tRef, false)));
+        tolerancePath.lineTo (hzToX (2000.0f), t60ToYFloat (0.8 * tRef));
+        tolerancePath.lineTo (hzToX (250.0f), t60ToYFloat (0.8 * tRef));
+        tolerancePath.lineTo (hzToX (s.fMin), t60ToYFloat (getToleranceT60 (s.fMin, tRef, false)));
         tolerancePath.closeSubPath();
     }
 
     float getToleranceT60 (float frequency, float tRef, bool upper)
     {
         if (frequency < 250)
-            {
-                if (upper)
-                    return tRef * (frequency * -0.002673797f + 1.868449198f);
-                else
-                    return tRef * (frequency * -0.002139037f + 1.334759358f);
-            }
+        {
+            if (upper)
+                return tRef * (frequency * -0.002673797f + 1.868449198f);
+            else
+                return tRef * (frequency * -0.002139037f + 1.334759358f);
+        }
         else if (frequency < 2000)
         {
             if (upper)
@@ -213,28 +241,21 @@ public:
             if (upper)
                 return tRef * 1.2f;
             else
-                return tRef * juce::jlimit(0.1f, 1.f,
-                    frequency * -0.00005f + 0.9f);
+                return tRef * juce::jlimit (0.1f, 1.f, frequency * -0.00005f + 0.9f);
         }
     }
 
-    float gainToT60Float (float db)
-    {
-        return -3.f * 20.f / db;
-    }
+    float gainToT60Float (float db) { return -3.f * 20.f / db; }
 
-    float t60ToGain (float T60)
-    {
-        return -3.f * 20.f / T60;
-    }
+    float t60ToGain (float T60) { return -3.f * 20.f / T60; }
 
-    int t60ToY(float db)
+    int t60ToY (float db)
     {
-        int ypos = t60ToYFloat(db);
+        int ypos = t60ToYFloat (db);
         return ypos;
     }
 
-    float t60ToYFloat(float db)
+    float t60ToYFloat (float db)
     {
         float height = (float) getHeight() - mB - mT;
         float ypos = mT + height * (1.f - (log (db / s.yMin) / log (s.yMax / s.yMin)));
@@ -248,23 +269,20 @@ public:
         return db;
     }
 
-    int hzToX(float hz)
+    int hzToX (float hz)
     {
         float width = (float) getWidth() - mL - mR;
-        int xpos = mL + width * (log(hz/s.fMin) / log(s.fMax/s.fMin));
+        int xpos = mL + width * (log (hz / s.fMin) / log (s.fMax / s.fMin));
         return xpos;
     }
 
-    float xToHz(int x)
+    float xToHz (int x)
     {
         float width = (float) getWidth() - mL - mR;
         return s.fMin * powf ((s.fMax / s.fMin), ((x - mL) / width));
     }
 
-    void setSampleRate (int newSampleRate)
-    {
-        sampleRate = newSampleRate;
-    }
+    void setSampleRate (int newSampleRate) { sampleRate = newSampleRate; }
 
     void setOverallGain (float newGain)
     {
@@ -272,7 +290,7 @@ public:
         repaint();
     }
 
-    void mouseDrag(const juce::MouseEvent &event) override
+    void mouseDrag (const juce::MouseEvent& event) override
     {
         juce::Point<int> pos = event.getPosition();
         float frequency = xToHz (pos.x);
@@ -284,23 +302,29 @@ public:
 
             slHandle = arrayOfFrequencySliders[activeElem];
             if (slHandle != nullptr)
-                slHandle->setValue(frequency);
+                slHandle->setValue (frequency);
 
             slHandle = arrayOfGainSliders[activeElem];
             if (slHandle != nullptr)
-                slHandle->setValue(gain);
+                slHandle->setValue (gain);
         }
     }
 
-    void mouseMove(const juce::MouseEvent &event) override
+    void mouseMove (const juce::MouseEvent& event) override
     {
         juce::Point<int> pos = event.getPosition();
         int oldActiveElem = activeElem;
         activeElem = -1;
-        for (int i = arrayOfCoefficients.size (); --i >= 0;)
+        for (int i = arrayOfCoefficients.size(); --i >= 0;)
         {
-            juce::Point<int> filterPos (arrayOfFrequencySliders[i] == nullptr ? hzToX(0.0f) : hzToX(arrayOfFrequencySliders[i]->getValue()), arrayOfGainSliders[i] == nullptr ? t60ToY(0.0f) : t60ToY(arrayOfGainSliders[i]->getValue()));
-            if (pos.getDistanceSquaredFrom(filterPos) < 45) {
+            juce::Point<int> filterPos (arrayOfFrequencySliders[i] == nullptr
+                                            ? hzToX (0.0f)
+                                            : hzToX (arrayOfFrequencySliders[i]->getValue()),
+                                        arrayOfGainSliders[i] == nullptr
+                                            ? t60ToY (0.0f)
+                                            : t60ToY (arrayOfGainSliders[i]->getValue()));
+            if (pos.getDistanceSquaredFrom (filterPos) < 45)
+            {
                 activeElem = i;
                 break;
             }
@@ -308,70 +332,75 @@ public:
 
         if (oldActiveElem != activeElem)
             repaint();
-
     }
 
-    void resized() override {
-
-        int xMin = hzToX(s.fMin);
-        int xMax = hzToX(s.fMax);
-        allMagnitudesInDb.resize(xMax - xMin + 1);
+    void resized() override
+    {
+        int xMin = hzToX (s.fMin);
+        int xMax = hzToX (s.fMax);
+        allMagnitudesInDb.resize (xMax - xMin + 1);
 
         const float width = getWidth() - mL - mR;
         dbGridPath.clear();
         dbGridPathBold.clear();
 
-        dbGridPathBold.startNewSubPath(mL-OH, t60ToY (0.1f));
-        dbGridPathBold.lineTo(mL + width+OH, t60ToY (0.1f));
+        dbGridPathBold.startNewSubPath (mL - OH, t60ToY (0.1f));
+        dbGridPathBold.lineTo (mL + width + OH, t60ToY (0.1f));
 
-        dbGridPathBold.startNewSubPath(mL-OH, t60ToY (1.f));
-        dbGridPathBold.lineTo(mL + width+OH, t60ToY (1.f));
+        dbGridPathBold.startNewSubPath (mL - OH, t60ToY (1.f));
+        dbGridPathBold.lineTo (mL + width + OH, t60ToY (1.f));
 
-        for (float t=s.yMin; t <= s.yMax; t += powf(10, floorf(log10(t)))) {
+        for (float t = s.yMin; t <= s.yMax; t += powf (10, floorf (log10 (t))))
+        {
             int ypos = t60ToY (t);
 
-            if ((t == 10) || (t==60))
+            if ((t == 10) || (t == 60))
             {
-                dbGridPathBold.startNewSubPath(mL-OH, ypos);
-                dbGridPathBold.lineTo(mL + width+OH, ypos);
-            } else
+                dbGridPathBold.startNewSubPath (mL - OH, ypos);
+                dbGridPathBold.lineTo (mL + width + OH, ypos);
+            }
+            else
             {
-                dbGridPath.startNewSubPath(mL-OH, ypos);
-                dbGridPath.lineTo(mL + width+OH, ypos);
+                dbGridPath.startNewSubPath (mL - OH, ypos);
+                dbGridPath.lineTo (mL + width + OH, ypos);
             }
         }
 
         hzGridPath.clear();
         hzGridPathBold.clear();
 
-        for (float f=s.fMin; f <= s.fMax; f += powf(10, floorf(log10(f)))) {
-            int xpos = hzToX(f);
+        for (float f = s.fMin; f <= s.fMax; f += powf (10, floorf (log10 (f))))
+        {
+            int xpos = hzToX (f);
 
-            if ((f == 20) || (f == 50) || (f == 100) || (f == 500) || (f == 1000) || (f == 5000) || (f == 10000) || (f == 20000))
+            if ((f == 20) || (f == 50) || (f == 100) || (f == 500) || (f == 1000) || (f == 5000)
+                || (f == 10000) || (f == 20000))
             {
-                hzGridPathBold.startNewSubPath(xpos, t60ToY(s.yMax)-OH);
-                hzGridPathBold.lineTo(xpos, t60ToY(s.yMin)+OH);
-
-            } else
+                hzGridPathBold.startNewSubPath (xpos, t60ToY (s.yMax) - OH);
+                hzGridPathBold.lineTo (xpos, t60ToY (s.yMin) + OH);
+            }
+            else
             {
-                hzGridPath.startNewSubPath(xpos, t60ToY(s.yMax)-OH);
-                hzGridPath.lineTo(xpos, t60ToY(s.yMin)+OH);
+                hzGridPath.startNewSubPath (xpos, t60ToY (s.yMax) - OH);
+                hzGridPath.lineTo (xpos, t60ToY (s.yMin) + OH);
             }
         }
 
         createTolerancePath();
     }
 
-    void addCoefficients(juce::dsp::IIR::Coefficients<float>::Ptr newCoeffs, juce::Colour newColourForCoeffs, juce::Slider* frequencySlider = nullptr, juce::Slider* gainSlider = nullptr)
+    void addCoefficients (juce::dsp::IIR::Coefficients<float>::Ptr newCoeffs,
+                          juce::Colour newColourForCoeffs,
+                          juce::Slider* frequencySlider = nullptr,
+                          juce::Slider* gainSlider = nullptr)
     {
-        arrayOfCoefficients.add(newCoeffs);
-        arrayOfColours.add(newColourForCoeffs);
-        arrayOfGainSliders.add(gainSlider);
-        arrayOfFrequencySliders.add(frequencySlider);
+        arrayOfCoefficients.add (newCoeffs);
+        arrayOfColours.add (newColourForCoeffs);
+        arrayOfGainSliders.add (gainSlider);
+        arrayOfFrequencySliders.add (frequencySlider);
     }
 
 private:
-
     float overallGainInDb;
 
     int sampleRate;
@@ -390,5 +419,4 @@ private:
     juce::Array<juce::Slider*> arrayOfGainSliders, arrayOfFrequencySliders;
 
     juce::Array<juce::Colour> arrayOfColours;
-
 };

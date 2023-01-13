@@ -27,17 +27,15 @@ namespace iem
 class Compressor
 {
 public:
-    Compressor()
-    {
-    }
+    Compressor() {}
     ~Compressor() {}
 
     void prepare (const juce::dsp::ProcessSpec spec)
     {
         sampleRate = spec.sampleRate;
 
-        alphaAttack = 1.0 - timeToGain(attackTime);
-        alphaRelease = 1.0 - timeToGain(releaseTime);
+        alphaAttack = 1.0 - timeToGain (attackTime);
+        alphaRelease = 1.0 - timeToGain (releaseTime);
 
         prepared = true;
     }
@@ -45,19 +43,16 @@ public:
     void setAttackTime (float attackTimeInSeconds)
     {
         attackTime = attackTimeInSeconds;
-        alphaAttack = 1.0 - timeToGain(attackTime);
+        alphaAttack = 1.0 - timeToGain (attackTime);
     }
 
     void setReleaseTime (float releaseTimeInSeconds)
     {
         releaseTime = releaseTimeInSeconds;
-        alphaRelease = 1.0 - timeToGain(releaseTime);
+        alphaRelease = 1.0 - timeToGain (releaseTime);
     }
 
-    double timeToGain (float timeInSeconds)
-    {
-        return exp(-1.0/(sampleRate * timeInSeconds));
-    }
+    double timeToGain (float timeInSeconds) { return exp (-1.0 / (sampleRate * timeInSeconds)); }
 
     void setKnee (float kneeInDecibels)
     {
@@ -65,64 +60,46 @@ public:
         kneeHalf = knee / 2.0f;
     }
 
-    const float getKnee ()
-    {
-        return knee;
-    }
+    const float getKnee() { return knee; }
 
-    void setThreshold (float thresholdInDecibels)
-    {
-        threshold = thresholdInDecibels;
-    }
+    void setThreshold (float thresholdInDecibels) { threshold = thresholdInDecibels; }
 
-    const float getTreshold ()
-    {
-        return threshold;
-    }
+    const float getTreshold() { return threshold; }
 
-    void setMakeUpGain (float makeUpGainInDecibels)
-    {
-        makeUpGain = makeUpGainInDecibels;
-    }
+    void setMakeUpGain (float makeUpGainInDecibels) { makeUpGain = makeUpGainInDecibels; }
 
-    const float getMakeUpGain()
-    {
-        return makeUpGain;
-    }
+    const float getMakeUpGain() { return makeUpGain; }
 
-    void setRatio (float ratio)
-    {
-        slope = 1.0f / ratio - 1.0f;
-    }
+    void setRatio (float ratio) { slope = 1.0f / ratio - 1.0f; }
 
-    const float getMaxLevelInDecibels()
-    {
-        return maxLevel;
-    }
+    const float getMaxLevelInDecibels() { return maxLevel; }
 
-
-    void applyCharacteristicToOverShoot (float &overShoot)
+    void applyCharacteristicToOverShoot (float& overShoot)
     {
         if (overShoot <= -kneeHalf)
             overShoot = 0.0f; //y_G = levelInDecibels;
         else if (overShoot > -kneeHalf && overShoot <= kneeHalf)
-            overShoot = 0.5f * slope * juce::square (overShoot + kneeHalf) / knee; //y_G = levelInDecibels + 0.5f * slope * square(overShoot + kneeHalf) / knee;
+            overShoot =
+                0.5f * slope * juce::square (overShoot + kneeHalf)
+                / knee; //y_G = levelInDecibels + 0.5f * slope * square(overShoot + kneeHalf) / knee;
         else
             overShoot = slope * overShoot;
     }
 
-    void getGainFromSidechainSignal (const float* sideChainSignal, float* destination, const int numSamples)
+    void getGainFromSidechainSignal (const float* sideChainSignal,
+                                     float* destination,
+                                     const int numSamples)
     {
         maxLevel = -INFINITY;
         for (int i = 0; i < numSamples; ++i)
         {
             // convert sample to decibels
-            float levelInDecibels =  juce::Decibels::gainToDecibels(abs(sideChainSignal[i]));
+            float levelInDecibels = juce::Decibels::gainToDecibels (abs (sideChainSignal[i]));
             if (levelInDecibels > maxLevel)
                 maxLevel = levelInDecibels;
             // calculate overshoot and apply knee and ratio
             float overShoot = levelInDecibels - threshold;
-            applyCharacteristicToOverShoot(overShoot); //y_G = levelInDecibels + slope * overShoot;
+            applyCharacteristicToOverShoot (overShoot); //y_G = levelInDecibels + slope * overShoot;
 
             // ballistics
             const float diff = overShoot - state;
@@ -131,22 +108,24 @@ public:
             else
                 state += alphaRelease * diff;
 
-            destination[i] = juce::Decibels::decibelsToGain(state + makeUpGain);
+            destination[i] = juce::Decibels::decibelsToGain (state + makeUpGain);
         }
     }
 
-    void getGainFromSidechainSignalInDecibelsWithoutMakeUpGain (const float* sideChainSignal, float* destination, const int numSamples)
+    void getGainFromSidechainSignalInDecibelsWithoutMakeUpGain (const float* sideChainSignal,
+                                                                float* destination,
+                                                                const int numSamples)
     {
         maxLevel = -INFINITY;
         for (int i = 0; i < numSamples; ++i)
         {
             // convert sample to decibels
-            float levelInDecibels =  juce::Decibels::gainToDecibels(abs(sideChainSignal[i]));
+            float levelInDecibels = juce::Decibels::gainToDecibels (abs (sideChainSignal[i]));
             if (levelInDecibels > maxLevel)
                 maxLevel = levelInDecibels;
             // calculate overshoot and apply knee and ratio
             float overShoot = levelInDecibels - threshold;
-            applyCharacteristicToOverShoot(overShoot); //y_G = levelInDecibels + slope * overShoot;
+            applyCharacteristicToOverShoot (overShoot); //y_G = levelInDecibels + slope * overShoot;
 
             // ballistics
             const float diff = overShoot - state;
@@ -163,34 +142,32 @@ public:
     {
         for (int i = 0; i < numSamples; ++i)
         {
-            dest[i] =  getCharacteristicSample (inputLevels[i]);
+            dest[i] = getCharacteristicSample (inputLevels[i]);
         }
     }
 
     inline float getCharacteristicSample (float inputLevel)
     {
         float overShoot = inputLevel - threshold;
-        applyCharacteristicToOverShoot(overShoot);
+        applyCharacteristicToOverShoot (overShoot);
         return overShoot + inputLevel + makeUpGain;
     }
 
-
-
 private:
-    double sampleRate {0.0};
+    double sampleRate { 0.0 };
     bool prepared;
 
-    float knee {0.0f}, kneeHalf {0.0f};
-    float threshold {- 10.0f};
-    float attackTime {0.01f};
-    float releaseTime {0.15f};
-    float slope {0.0f};
-    float makeUpGain {0.0f};
+    float knee { 0.0f }, kneeHalf { 0.0f };
+    float threshold { -10.0f };
+    float attackTime { 0.01f };
+    float releaseTime { 0.15f };
+    float slope { 0.0f };
+    float makeUpGain { 0.0f };
 
-    float maxLevel {-INFINITY};
+    float maxLevel { -INFINITY };
 
     //state juce::variable
-    float state {0.0f};
+    float state { 0.0f };
 
     double alphaAttack;
     double alphaRelease;

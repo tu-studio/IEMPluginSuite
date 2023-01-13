@@ -20,7 +20,6 @@
  ==============================================================================
  */
 
-
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
 
@@ -28,10 +27,7 @@ using namespace juce::dsp;
 class LookAheadGainReduction
 {
 public:
-
-    LookAheadGainReduction()
-    {
-    }
+    LookAheadGainReduction() {}
     ~LookAheadGainReduction() {}
 
     void setDelayTime (float delayTimeInSeconds)
@@ -45,13 +41,10 @@ public:
             delay = delayTimeInSeconds;
         }
 
-        prepare(spec);
+        prepare (spec);
     }
 
-    const int getDelayInSamples()
-    {
-        return delayInSamples;
-    }
+    const int getDelayInSamples() { return delayInSamples; }
 
     void prepare (const juce::dsp::ProcessSpec& specs)
     {
@@ -59,7 +52,7 @@ public:
 
         delayInSamples = delay * specs.sampleRate;
 
-        buffer.setSize(specs.numChannels, specs.maximumBlockSize + delayInSamples);
+        buffer.setSize (specs.numChannels, specs.maximumBlockSize + delayInSamples);
         buffer.clear();
         writePosition = 0;
     }
@@ -71,17 +64,16 @@ public:
         // write in delay line
         getWritePositions (numSamples, startIndex, blockSize1, blockSize2);
 
-        buffer.copyFrom(0, startIndex, src, blockSize1);
+        buffer.copyFrom (0, startIndex, src, blockSize1);
 
         if (blockSize2 > 0)
-            buffer.copyFrom(0, 0, src + blockSize1, blockSize2);
+            buffer.copyFrom (0, 0, src + blockSize1, blockSize2);
 
         writePosition += numSamples;
         writePosition = writePosition % buffer.getNumSamples();
 
         lastPushedSamples = numSamples;
     }
-
 
     void readSamples (float* dest, int numSamples)
     {
@@ -91,12 +83,15 @@ public:
 
         // read from delay line
         getReadPositions (numSamples, startIndex, blockSize1, blockSize2);
-        juce::FloatVectorOperations::copy(dest, buffer.getReadPointer(0) + startIndex, blockSize1);
+        juce::FloatVectorOperations::copy (dest,
+                                           buffer.getReadPointer (0) + startIndex,
+                                           blockSize1);
 
         if (blockSize2 > 0)
-            juce::FloatVectorOperations::copy(dest + blockSize1, buffer.getReadPointer(0), blockSize2);
+            juce::FloatVectorOperations::copy (dest + blockSize1,
+                                               buffer.getReadPointer (0),
+                                               blockSize2);
     }
-
 
     void process()
     {
@@ -117,15 +112,15 @@ public:
         getProcessPositions (startIndex, lastPushedSamples, size1, size2);
         for (int i = 0; i < size1; ++i)
         {
-            float smpl = buffer.getSample(0, startIndex);
+            float smpl = buffer.getSample (0, startIndex);
             if (smpl > nextGainReductionValue)
             {
-                buffer.setSample(0, startIndex, nextGainReductionValue);
+                buffer.setSample (0, startIndex, nextGainReductionValue);
                 nextGainReductionValue += step;
             }
             else
             {
-                step = - smpl / delayInSamples;
+                step = -smpl / delayInSamples;
                 nextGainReductionValue = smpl + step;
             }
             --startIndex;
@@ -135,15 +130,15 @@ public:
             startIndex = buffer.getNumSamples() - 1;
             for (int i = 0; i < size2; ++i)
             {
-                float smpl = buffer.getSample(0, startIndex);
+                float smpl = buffer.getSample (0, startIndex);
                 if (smpl > nextGainReductionValue)
                 {
-                    buffer.setSample(0, startIndex, nextGainReductionValue);
+                    buffer.setSample (0, startIndex, nextGainReductionValue);
                     nextGainReductionValue += step;
                 }
                 else
                 {
-                    step = - smpl / delayInSamples;
+                    step = -smpl / delayInSamples;
                     nextGainReductionValue = smpl + step;
                 }
                 --startIndex;
@@ -158,10 +153,10 @@ public:
 
         for (int i = 0; i < size1; ++i)
         {
-            float smpl = buffer.getSample(0, startIndex);
+            float smpl = buffer.getSample (0, startIndex);
             if (smpl > nextGainReductionValue)
             {
-                buffer.setSample(0, startIndex, nextGainReductionValue);
+                buffer.setSample (0, startIndex, nextGainReductionValue);
                 nextGainReductionValue += step;
             }
             else
@@ -176,10 +171,10 @@ public:
             startIndex = buffer.getNumSamples() - 1;
             for (int i = 0; i < size2; ++i)
             {
-                float smpl = buffer.getSample(0, startIndex);
+                float smpl = buffer.getSample (0, startIndex);
                 if (smpl > nextGainReductionValue)
                 {
-                    buffer.setSample(0, startIndex, nextGainReductionValue);
+                    buffer.setSample (0, startIndex, nextGainReductionValue);
                     nextGainReductionValue += step;
                 }
                 else
@@ -189,15 +184,11 @@ public:
                 --startIndex;
             }
         }
-
-
     }
 
 private:
-
-
-
-    inline void getProcessPositions (int startIndex, int numSamples, int& blockSize1, int& blockSize2)
+    inline void
+        getProcessPositions (int startIndex, int numSamples, int& blockSize1, int& blockSize2)
     {
         jassert (startIndex >= 0 && startIndex < buffer.getNumSamples());
 
@@ -214,7 +205,8 @@ private:
         }
     }
 
-    inline void getWritePositions (int numSamples, int& startIndex, int& blockSize1, int& blockSize2)
+    inline void
+        getWritePositions (int numSamples, int& startIndex, int& blockSize1, int& blockSize2)
     {
         const int L = buffer.getNumSamples();
         int pos = writePosition;
@@ -223,7 +215,7 @@ private:
             pos = pos + L;
         pos = pos % L;
 
-        jassert(pos >= 0 && pos < L);
+        jassert (pos >= 0 && pos < L);
 
         if (numSamples <= 0)
         {
@@ -249,7 +241,7 @@ private:
             pos = pos + L;
         pos = pos % L;
 
-        jassert(pos >= 0 && pos < L);
+        jassert (pos >= 0 && pos < L);
 
         if (numSamples <= 0)
         {
@@ -266,11 +258,9 @@ private:
         }
     }
 
-
-
 private:
     //==============================================================================
-    juce::dsp::ProcessSpec spec = {-1, 0, 0};
+    juce::dsp::ProcessSpec spec = { -1, 0, 0 };
     float delay;
     int delayInSamples = 0;
     int writePosition = 0;

@@ -26,7 +26,6 @@
 class HammerAitov
 {
 public:
-
     /**
      Calculates the HammerAitov-projection for azimuth and elevation.
      The x output represents the horizontal axis, with 0 being in the middle. Negative azimuth values result in positive x values (to the right) and vice versa.
@@ -36,12 +35,12 @@ public:
     {
         while (azimuthInRadians > juce::MathConstants<float>::pi + FLT_EPSILON)
             azimuthInRadians -= 2.0f * juce::MathConstants<float>::pi;
-        while (azimuthInRadians < - juce::MathConstants<float>::pi - FLT_EPSILON)
+        while (azimuthInRadians < -juce::MathConstants<float>::pi - FLT_EPSILON)
             azimuthInRadians += 2.0f * juce::MathConstants<float>::pi;
 
         const float cosEle = std::cos (elevationInRadians);
         const float factor = 1.0f / std::sqrt (1.0f + cosEle * std::cos (0.5f * azimuthInRadians));
-        x = factor * - cosEle * std::sin (0.5f * azimuthInRadians);
+        x = factor * -cosEle * std::sin (0.5f * azimuthInRadians);
         y = factor * std::sin (elevationInRadians);
     }
 
@@ -55,9 +54,9 @@ public:
     static void XYToSpherical (float x, float y, float& azimuthInRadians, float& elevationInRadians)
     {
         constexpr float sqrt2Half = 0.5f * 1.41421356237309504880168872420969808;
-        const float z = std::sqrt (1.0f - juce::square (x * sqrt2Half) - juce::square (y * sqrt2Half));
+        const float z =
+            std::sqrt (1.0f - juce::square (x * sqrt2Half) - juce::square (y * sqrt2Half));
         azimuthInRadians = 2.0f * std::atan (sqrt2Half * -x * z / (juce::square (z) - 0.5f));
         elevationInRadians = std::asin (std::sqrt (2) * y * z);
     }
-
 };

@@ -20,19 +20,18 @@
  ==============================================================================
  */
 
-
 #pragma once
 #include <complex>
 template <typename coefficientsType>
-class  FilterVisualizer :  public juce::Component
+class FilterVisualizer : public juce::Component
 {
     struct Settings
     {
-        float fMin = 20.0f;    // minimum displayed frequency
+        float fMin = 20.0f; // minimum displayed frequency
         float fMax = 20000.0f; // maximum displayed frequency
-        float dbMin = -15.0f;  // min displayed dB
-        float dbMax = 15.0f;   // max displayed dB
-        float gridDiv = 5.0f;  // how many dB per divisions (between grid lines)
+        float dbMin = -15.0f; // min displayed dB
+        float dbMax = 15.0f; // max displayed dB
+        float gridDiv = 5.0f; // how many dB per divisions (between grid lines)
         bool gainHandleLin = false; // are the filter gain sliders linear?
     };
 
@@ -48,7 +47,6 @@ class  FilterVisualizer :  public juce::Component
         bool enabled = true;
     };
 
-
     const float mL = 23.0f;
     const float mR = 10.0f;
     const float mT = 7.0f;
@@ -56,12 +54,16 @@ class  FilterVisualizer :  public juce::Component
     const float OH = 3.0f;
 
 public:
-    FilterVisualizer() : overallGainInDb (0.0f), sampleRate (48000.0)
-    {
-        init();
-    }
+    FilterVisualizer() : overallGainInDb (0.0f), sampleRate (48000.0) { init(); }
 
-    FilterVisualizer (float fMin, float fMax, float dbMin, float dbMax, float gridDiv, bool gainHandleLin = false) : overallGainInDb (0.0f), sampleRate (48000.0), s {fMin, fMax, dbMin, dbMax, gridDiv, gainHandleLin}
+    FilterVisualizer (float fMin,
+                      float fMax,
+                      float dbMin,
+                      float dbMax,
+                      float gridDiv,
+                      bool gainHandleLin = false) :
+        overallGainInDb (0.0f), sampleRate (48000.0), s { fMin,  fMax,    dbMin,
+                                                          dbMax, gridDiv, gainHandleLin }
     {
         init();
     }
@@ -74,7 +76,6 @@ public:
         zero = 2.0f * s.dbMax / dynamic;
         scale = 1.0f / (zero + std::tanh (s.dbMin / dynamic * -2.0f));
     }
-
 
     void paint (juce::Graphics& g) override
     {
@@ -94,15 +95,17 @@ public:
         for (int i = 0; i < numgridlines; ++i)
         {
             const auto db_val = s.dbMax - i * s.gridDiv;
-            lastTextDrawPos = drawLevelMark (g, 0, 20,
+            lastTextDrawPos = drawLevelMark (g,
+                                             0,
+                                             20,
                                              juce::roundToInt (db_val),
                                              juce::String (db_val, 0),
                                              lastTextDrawPos);
         }
 
-
         // frequency labels
-        for (float f = s.fMin; f <= s.fMax; f += pow (10.0f, floor (log10 (f)))) {
+        for (float f = s.fMin; f <= s.fMax; f += pow (10.0f, floor (log10 (f))))
+        {
             int xpos = hzToX (f);
 
             juce::String axislabel;
@@ -115,16 +118,21 @@ public:
             }
             else if ((f == 1000) || (f == 5000) || (f == 10000) || (f == 20000))
             {
-                axislabel = juce::String(f / 1000, 0);
+                axislabel = juce::String (f / 1000, 0);
                 axislabel << "k";
                 drawText = true;
             }
             else
                 continue;
 
-            g.drawText (axislabel, xpos - 10, dbToY (s.dbMin) + OH + 0.0f, 20, 12, juce::Justification::centred, false);
+            g.drawText (axislabel,
+                        xpos - 10,
+                        dbToY (s.dbMin) + OH + 0.0f,
+                        20,
+                        12,
+                        juce::Justification::centred,
+                        false);
         }
-
 
         g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.8f));
         g.strokePath (dbGridPath, juce::PathStrokeType (0.5f));
@@ -134,7 +142,6 @@ public:
 
         g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.8f));
         g.strokePath (hzGridPath, juce::PathStrokeType (0.5f));
-
 
         // draw filter magnitude responses
         juce::Path magnitude;
@@ -147,33 +154,43 @@ public:
 
         const int yZero = filtersAreParallel ? yMax + 10 : dbToY (0.0f);
 
-        g.excludeClipRegion (juce::Rectangle<int> (0.0f, yMax + OH, getWidth(), getHeight() - yMax - OH));
+        g.excludeClipRegion (
+            juce::Rectangle<int> (0.0f, yMax + OH, getWidth(), getHeight() - yMax - OH));
 
         if (filtersAreParallel)
             complexMagnitudes.fill (std::complex<double>());
 
-
-        for (int b = elements.size(); --b >= 0;) {
+        for (int b = elements.size(); --b >= 0;)
+        {
             bool isActive = activeElem == b;
             magnitude.clear();
 
             auto handle (elements[b]);
             const bool isEnabled = handle->enabled;
-            typename juce::dsp::IIR::Coefficients<coefficientsType>::Ptr coeffs = handle->coefficients;
+            typename juce::dsp::IIR::Coefficients<coefficientsType>::Ptr coeffs =
+                handle->coefficients;
             //calculate magnitude response
             if (coeffs != nullptr)
-                coeffs->getMagnitudeForFrequencyArray (frequencies.getRawDataPointer(), magnitudes.getRawDataPointer(), numPixels, sampleRate);
+                coeffs->getMagnitudeForFrequencyArray (frequencies.getRawDataPointer(),
+                                                       magnitudes.getRawDataPointer(),
+                                                       numPixels,
+                                                       sampleRate);
             float additiveDB = 0.0f;
             if (filtersAreParallel && handle->gainSlider != nullptr)
                 additiveDB = handle->gainSlider->getValue();
 
-
             //calculate phase response if needed
             if (filtersAreParallel && coeffs != nullptr)
-                coeffs->getPhaseForFrequencyArray (frequencies.getRawDataPointer(), phases.getRawDataPointer(), numPixels, sampleRate);
+                coeffs->getPhaseForFrequencyArray (frequencies.getRawDataPointer(),
+                                                   phases.getRawDataPointer(),
+                                                   numPixels,
+                                                   sampleRate);
 
             float db = juce::Decibels::gainToDecibels (magnitudes[0]) + additiveDB;
-            magnitude.startNewSubPath (xMin, juce::jlimit (static_cast<float> (yMin), static_cast<float> (yMax) + OH + 1.0f, dbToYFloat (db)));
+            magnitude.startNewSubPath (xMin,
+                                       juce::jlimit (static_cast<float> (yMin),
+                                                     static_cast<float> (yMax) + OH + 1.0f,
+                                                     dbToYFloat (db)));
 
             for (int i = 1; i < numPixels; ++i)
             {
@@ -195,7 +212,9 @@ public:
             g.setColour (handle->colour.withMultipliedAlpha (isEnabled ? 0.3f : 0.1f));
             g.fillPath (magnitude);
 
-            float multGain = (handle->overrideGain != nullptr) ? *handle->overrideGain : juce::Decibels::decibelsToGain (additiveDB);
+            float multGain = (handle->overrideGain != nullptr)
+                                 ? *handle->overrideGain
+                                 : juce::Decibels::decibelsToGain (additiveDB);
 
             //overall magnitude update
             if (isEnabled)
@@ -204,7 +223,10 @@ public:
                 {
                     for (int i = 0; i < numPixels; ++i)
                     {
-                        complexMagnitudes.setUnchecked (i, complexMagnitudes[i] + std::polar (magnitudes[i] * multGain, phases[i])); //*addGain
+                        complexMagnitudes.setUnchecked (
+                            i,
+                            complexMagnitudes[i]
+                                + std::polar (magnitudes[i] * multGain, phases[i])); //*addGain
                     }
                 }
                 else
@@ -225,15 +247,20 @@ public:
                 allMagnitudesInDb.setUnchecked (i, allMagnitudesInDb[i] + dB);
             }
 
-
         //all magnitudes combined
         magnitude.clear();
 
-        magnitude.startNewSubPath (xMin, juce::jlimit (static_cast<float> (yMin), static_cast<float> (yMax) + OH + 1.0f, dbToYFloat (allMagnitudesInDb[0])));
+        magnitude.startNewSubPath (xMin,
+                                   juce::jlimit (static_cast<float> (yMin),
+                                                 static_cast<float> (yMax) + OH + 1.0f,
+                                                 dbToYFloat (allMagnitudesInDb[0])));
 
-        for (int x = xMin + 1; x<=xMax; ++x)
+        for (int x = xMin + 1; x <= xMax; ++x)
         {
-            magnitude.lineTo (x, juce::jlimit (static_cast<float> (yMin), static_cast<float> (yMax) + OH + 1.0f, dbToYFloat (allMagnitudesInDb[x-xMin])));
+            magnitude.lineTo (x,
+                              juce::jlimit (static_cast<float> (yMin),
+                                            static_cast<float> (yMax) + OH + 1.0f,
+                                            dbToYFloat (allMagnitudesInDb[x - xMin])));
         }
 
         g.setColour (juce::Colours::white);
@@ -249,24 +276,35 @@ public:
         for (int i = 0; i < size; ++i)
         {
             auto handle (elements[i]);
-            float circX = handle->frequencySlider == nullptr ? hzToX (s.fMin) : hzToX (handle->frequencySlider->getValue());
+            float circX = handle->frequencySlider == nullptr
+                              ? hzToX (s.fMin)
+                              : hzToX (handle->frequencySlider->getValue());
             float circY;
-            if (!s.gainHandleLin)
-                circY = handle->gainSlider == nullptr ? dbToY(0.0f) : dbToY (handle->gainSlider->getValue());
+            if (! s.gainHandleLin)
+                circY = handle->gainSlider == nullptr ? dbToY (0.0f)
+                                                      : dbToY (handle->gainSlider->getValue());
             else
-                circY = handle->gainSlider == nullptr ? dbToY(0.0f) : dbToY (juce::Decibels::gainToDecibels (handle->gainSlider->getValue()));
+                circY =
+                    handle->gainSlider == nullptr
+                        ? dbToY (0.0f)
+                        : dbToY (juce::Decibels::gainToDecibels (handle->gainSlider->getValue()));
 
             g.setColour (juce::Colour (0xFF191919));
-            g.drawEllipse (circX - 5.0f, circY - 5.0f , 10.0f, 10.0f, 3.0f);
+            g.drawEllipse (circX - 5.0f, circY - 5.0f, 10.0f, 10.0f, 3.0f);
 
             g.setColour (handle->colour);
-            g.drawEllipse (circX - 5.0f, circY - 5.0f , 10.0f, 10.0f, 2.0f);
+            g.drawEllipse (circX - 5.0f, circY - 5.0f, 10.0f, 10.0f, 2.0f);
             g.setColour (activeElem == i ? handle->colour : handle->colour.withSaturation (0.2));
-            g.fillEllipse (circX - 5.0f, circY - 5.0f , 10.0f, 10.0f);
+            g.fillEllipse (circX - 5.0f, circY - 5.0f, 10.0f, 10.0f);
         }
     }
 
-    int inline drawLevelMark (juce::Graphics& g, int x, int width, const int level, const juce::String& label, int lastTextDrawPos = -1)
+    int inline drawLevelMark (juce::Graphics& g,
+                              int x,
+                              int width,
+                              const int level,
+                              const juce::String& label,
+                              int lastTextDrawPos = -1)
     {
         float yPos = dbToYFloat (level);
         x = x + 1;
@@ -289,10 +327,11 @@ public:
     float dbToYFloat (float dB)
     {
         const float height = static_cast<float> (getHeight()) - mB - mT;
-        if (height <= 0.0f) return 0.0f;
+        if (height <= 0.0f)
+            return 0.0f;
         float temp;
         if (dB < 0.0f)
-            temp = zero + std::tanh(dB / dynamic * -2.0f);
+            temp = zero + std::tanh (dB / dynamic * -2.0f);
         else
             temp = zero - 2.0f * dB / dynamic;
 
@@ -306,9 +345,9 @@ public:
         float temp = (y - mT) / height / scale - zero;
         float dB;
         if (temp > 0.0f)
-            dB =  std::atanh (temp) * dynamic * -0.5f;
+            dB = std::atanh (temp) * dynamic * -0.5f;
         else
-            dB = - 0.5f * temp * dynamic;
+            dB = -0.5f * temp * dynamic;
         return std::isnan (dB) ? s.dbMin : dB;
     }
 
@@ -354,7 +393,8 @@ public:
         }
     }
 
-    void mouseWheelMove (const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override
+    void mouseWheelMove (const juce::MouseEvent& event,
+                         const juce::MouseWheelDetails& wheel) override
     {
         if (activeElem != -1)
         {
@@ -363,13 +403,13 @@ public:
                 slHandle->mouseWheelMove (event, wheel);
         }
     }
-    void mouseDrag (const juce::MouseEvent &event) override
+    void mouseDrag (const juce::MouseEvent& event) override
     {
         juce::Point<int> pos = event.getPosition();
         float frequency = xToHz (pos.x);
         float gain;
-        if (!s.gainHandleLin)
-            gain = yToDb(pos.y);
+        if (! s.gainHandleLin)
+            gain = yToDb (pos.y);
         else
             gain = juce::Decibels::decibelsToGain (yToDb (pos.y));
 
@@ -383,7 +423,7 @@ public:
         }
     }
 
-    void mouseMove (const juce::MouseEvent &event) override
+    void mouseMove (const juce::MouseEvent& event) override
     {
         juce::Point<int> pos = event.getPosition();
         int oldActiveElem = activeElem;
@@ -397,13 +437,16 @@ public:
                 gain = 0.0f;
             else
             {
-                if (!s.gainHandleLin)
+                if (! s.gainHandleLin)
                     gain = handle->gainSlider->getValue();
                 else
                     gain = juce::Decibels::gainToDecibels (handle->gainSlider->getValue());
             }
 
-            juce::Point<int> filterPos (handle->frequencySlider == nullptr ? hzToX (0.0f) : hzToX (handle->frequencySlider->getValue()), handle->gainSlider == nullptr ? dbToY (0.0f) : dbToY (gain));
+            juce::Point<int> filterPos (
+                handle->frequencySlider == nullptr ? hzToX (0.0f)
+                                                   : hzToX (handle->frequencySlider->getValue()),
+                handle->gainSlider == nullptr ? dbToY (0.0f) : dbToY (gain));
             if (pos.getDistanceSquaredFrom (filterPos) < 45)
             {
                 activeElem = i;
@@ -413,13 +456,12 @@ public:
 
         if (oldActiveElem != activeElem)
             repaint();
-
     }
 
     void resized() override
     {
-        int xMin = hzToX(s.fMin);
-        int xMax = hzToX(s.fMax);
+        int xMin = hzToX (s.fMin);
+        int xMax = hzToX (s.fMax);
         numPixels = xMax - xMin + 1;
 
         frequencies.resize (numPixels);
@@ -451,16 +493,17 @@ public:
         hzGridPath.clear();
         hzGridPathBold.clear();
 
-        for (float f = s.fMin; f <= s.fMax; f += powf(10, floor (log10 (f))))
+        for (float f = s.fMin; f <= s.fMax; f += powf (10, floor (log10 (f))))
         {
             int xpos = hzToX (f);
 
-            if ((f == 20) || (f == 50) || (f == 100) || (f == 500) || (f == 1000) || (f == 5000) || (f == 10000) || (f == 20000))
+            if ((f == 20) || (f == 50) || (f == 100) || (f == 500) || (f == 1000) || (f == 5000)
+                || (f == 10000) || (f == 20000))
             {
                 hzGridPathBold.startNewSubPath (xpos, dbToY (s.dbMax) - OH);
                 hzGridPathBold.lineTo (xpos, dbToY (s.dbMin) + OH);
-
-            } else
+            }
+            else
             {
                 hzGridPath.startNewSubPath (xpos, dbToY (s.dbMax) - OH);
                 hzGridPath.lineTo (xpos, dbToY (s.dbMin) + OH);
@@ -478,7 +521,9 @@ public:
         }
     }
 
-    void replaceCoefficients (const int filterIdx, typename juce::dsp::IIR::Coefficients<coefficientsType>::Ptr newCoefficients)
+    void replaceCoefficients (
+        const int filterIdx,
+        typename juce::dsp::IIR::Coefficients<coefficientsType>::Ptr newCoefficients)
     {
         if (filterIdx < elements.size())
         {
@@ -488,19 +533,26 @@ public:
         }
     }
 
-    void addCoefficients (typename juce::dsp::IIR::Coefficients<coefficientsType>::Ptr newCoeffs, juce::Colour newColourForCoeffs, juce::Slider* frequencySlider = nullptr, juce::Slider* gainSlider = nullptr, juce::Slider* qSlider = nullptr, float* overrideLinearGain = nullptr)
+    void addCoefficients (typename juce::dsp::IIR::Coefficients<coefficientsType>::Ptr newCoeffs,
+                          juce::Colour newColourForCoeffs,
+                          juce::Slider* frequencySlider = nullptr,
+                          juce::Slider* gainSlider = nullptr,
+                          juce::Slider* qSlider = nullptr,
+                          float* overrideLinearGain = nullptr)
     {
-        elements.add (new FilterWithSlidersAndColour<coefficientsType> {newCoeffs, newColourForCoeffs, frequencySlider, gainSlider, qSlider, overrideLinearGain});
+        elements.add (new FilterWithSlidersAndColour<coefficientsType> { newCoeffs,
+                                                                         newColourForCoeffs,
+                                                                         frequencySlider,
+                                                                         gainSlider,
+                                                                         qSlider,
+                                                                         overrideLinearGain });
     }
 
-    void setParallel (bool shouldBeParallel)
-    {
-        filtersAreParallel = shouldBeParallel;
-    }
+    void setParallel (bool shouldBeParallel) { filtersAreParallel = shouldBeParallel; }
 
 private:
     bool filtersAreParallel = false;
-    float overallGainInDb {0.0};
+    float overallGainInDb { 0.0 };
 
     double sampleRate;
 

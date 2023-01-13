@@ -22,11 +22,10 @@
 
 #pragma once
 
-
 //==============================================================================
 /*
 */
-class MuteSoloButton    : public juce::ToggleButton
+class MuteSoloButton : public juce::ToggleButton
 {
 public:
     enum Type
@@ -35,38 +34,40 @@ public:
         solo
     };
 
-    MuteSoloButton()
-    {
-        setType(Type::mute);
-    }
-    ~MuteSoloButton()
-    {
-    }
+    MuteSoloButton() { setType (Type::mute); }
+    ~MuteSoloButton() {}
 
     void setType (Type newType)
     {
         type = newType;
-        setColour (juce::ToggleButton::tickColourId, type == Type::mute ? juce::Colours::red : juce::Colours::yellow);
+        setColour (juce::ToggleButton::tickColourId,
+                   type == Type::mute ? juce::Colours::red : juce::Colours::yellow);
         repaint();
     }
     void paint (juce::Graphics& g) override
     {
-        juce::Rectangle<int> bounds = getLocalBounds().reduced(1,1);
+        juce::Rectangle<int> bounds = getLocalBounds().reduced (1, 1);
         const bool state = getToggleState();
 
-        getLookAndFeel().drawTickBox(g, *this, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), getToggleState(), isEnabled(), isMouseOver(), isMouseButtonDown());
+        getLookAndFeel().drawTickBox (g,
+                                      *this,
+                                      bounds.getX(),
+                                      bounds.getY(),
+                                      bounds.getWidth(),
+                                      bounds.getHeight(),
+                                      getToggleState(),
+                                      isEnabled(),
+                                      isMouseOver(),
+                                      isMouseButtonDown());
 
-        g.setFont(getLookAndFeel().getTypefaceForFont (juce::Font(12.0f, 0)));
-        g.setFont(bounds.getHeight()-4);
+        g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 0)));
+        g.setFont (bounds.getHeight() - 4);
 
-        g.setColour(state ? juce::Colours::black : findColour(juce::ToggleButton::tickColourId));
-        g.drawFittedText(type == solo ? "S" : "M", bounds, juce::Justification::centred, 1);
-
+        g.setColour (state ? juce::Colours::black : findColour (juce::ToggleButton::tickColourId));
+        g.drawFittedText (type == solo ? "S" : "M", bounds, juce::Justification::centred, 1);
     }
 
-    void resized() override
-    {
-    }
+    void resized() override {}
 
 private:
     Type type;

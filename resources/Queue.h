@@ -22,20 +22,16 @@
 
 #pragma once
 
-
 // A simple queue of arbitrary sample type (SampleType) with fixed numbers of samples (BufferSize).
 // A good thing to transfer data between processor and editoras it should be lock-free.
 // IMPORTANT INFORMATION: If this queue is full, new data WON'T be inserted!
 // The two methods return the number of actually written or read samples.
 
-
 template <typename SampleType, int BufferSize>
 class Queue
 {
 public:
-    Queue() : abstractFifo(BufferSize)
-    {
-    }
+    Queue() : abstractFifo (BufferSize) {}
 
     int addToQueue (const SampleType* samples, size_t numSamples)
     {
@@ -54,7 +50,6 @@ public:
 
         return size1 + size2;
     }
-
 
     int readFromQueue (SampleType* outputBuffer, int numItems)
     {
@@ -76,5 +71,4 @@ public:
 private:
     AbstractFifo abstractFifo;
     std::array<SampleType, BufferSize> buffer;
-
 };

@@ -26,96 +26,93 @@
 //==============================================================================
 /*
 */
-class DoubleSlider    : public juce::Component, public juce::Slider::Listener
+class DoubleSlider : public juce::Component, public juce::Slider::Listener
 {
 public:
     DoubleSlider()
     {
-        leftSlider.reset (new ReverseSlider("left"));
-        middleSlider.reset (new ReverseSlider("middle"));
-        rightSlider.reset (new ReverseSlider("right"));
+        leftSlider.reset (new ReverseSlider ("left"));
+        middleSlider.reset (new ReverseSlider ("middle"));
+        rightSlider.reset (new ReverseSlider ("right"));
 
         addAndMakeVisible (leftSlider.get());
         addAndMakeVisible (middleSlider.get());
         addAndMakeVisible (rightSlider.get());
 
-        leftSlider->setSliderStyle(juce::Slider::IncDecButtons);
-        leftSlider->setTextBoxStyle(juce::Slider::TextBoxLeft, false, 50, 50);
-        leftSlider->setRange(minRange, maxRange,1);
-        leftSlider->setIncDecButtonsMode(juce::Slider::incDecButtonsDraggable_AutoDirection);
-        leftSlider->addListener(this);
+        leftSlider->setSliderStyle (juce::Slider::IncDecButtons);
+        leftSlider->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 50);
+        leftSlider->setRange (minRange, maxRange, 1);
+        leftSlider->setIncDecButtonsMode (juce::Slider::incDecButtonsDraggable_AutoDirection);
+        leftSlider->addListener (this);
 
-        middleSlider->setSliderStyle(juce::Slider::TwoValueHorizontal);
-        middleSlider->setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 50);
-        middleSlider->addListener(this);
+        middleSlider->setSliderStyle (juce::Slider::TwoValueHorizontal);
+        middleSlider->setTextBoxStyle (juce::Slider::NoTextBox, false, 50, 50);
+        middleSlider->addListener (this);
 
-        rightSlider->setSliderStyle(juce::Slider::IncDecButtons);
-        rightSlider->setTextBoxStyle(juce::Slider::TextBoxRight, false, 50, 50);
-        rightSlider->setRange(minRange, maxRange,1);
-        rightSlider->setIncDecButtonsMode(juce::Slider::incDecButtonsDraggable_AutoDirection);
-        rightSlider->addListener(this);
+        rightSlider->setSliderStyle (juce::Slider::IncDecButtons);
+        rightSlider->setTextBoxStyle (juce::Slider::TextBoxRight, false, 50, 50);
+        rightSlider->setRange (minRange, maxRange, 1);
+        rightSlider->setIncDecButtonsMode (juce::Slider::incDecButtonsDraggable_AutoDirection);
+        rightSlider->addListener (this);
     }
 
     ~DoubleSlider() {}
 
-    ReverseSlider* getLeftSliderAddress() {return leftSlider.get();}
-    ReverseSlider* getMiddleSliderAddress() {return middleSlider.get();}
-    ReverseSlider* getRightSliderAddress() {return rightSlider.get();}
+    ReverseSlider* getLeftSliderAddress() { return leftSlider.get(); }
+    ReverseSlider* getMiddleSliderAddress() { return middleSlider.get(); }
+    ReverseSlider* getRightSliderAddress() { return rightSlider.get(); }
 
-    void setLeftRightSliderWidth(float width)
+    void setLeftRightSliderWidth (float width)
     {
         leftRightSliderWidth = width;
         resized();
     };
 
-    void setColour(juce::Colour colour)
+    void setColour (juce::Colour colour)
     {
         middleSlider->setColour (juce::Slider::rotarySliderOutlineColourId, colour);
     };
 
-    void setRangeAndPosition(juce::NormalisableRange<float> leftRange, juce::NormalisableRange<float> rightRange)
+    void setRangeAndPosition (juce::NormalisableRange<float> leftRange,
+                              juce::NormalisableRange<float> rightRange)
     {
-        minRange = juce::jmin(leftRange.start,rightRange.start);
-        maxRange = juce::jmax(leftRange.end,rightRange.end);
-        middleSlider->setRange(minRange, maxRange);
-        middleSlider->setSkewFactor(leftRange.skew);
+        minRange = juce::jmin (leftRange.start, rightRange.start);
+        maxRange = juce::jmax (leftRange.end, rightRange.end);
+        middleSlider->setRange (minRange, maxRange);
+        middleSlider->setSkewFactor (leftRange.skew);
 
-        middleSlider->setMinAndMaxValues(leftSlider->getValue(), rightSlider->getValue());
+        middleSlider->setMinAndMaxValues (leftSlider->getValue(), rightSlider->getValue());
     };
 
-    void setSkew(double skew)
+    void setSkew (double skew)
     {
-        leftSlider->setSkewFactor(skew);
-        middleSlider->setSkewFactor(skew);
-        rightSlider->setSkewFactor(skew);
+        leftSlider->setSkewFactor (skew);
+        middleSlider->setSkewFactor (skew);
+        rightSlider->setSkewFactor (skew);
     }
 
-    void mouseDown( const juce::MouseEvent &event) override {};
-    void mouseUp( const juce::MouseEvent &event) override {};
-    void sliderDragStarted(juce::Slider* slider) override {};
-    void sliderDragEnded(juce::Slider* slider) override {};
+    void mouseDown (const juce::MouseEvent& event) override {};
+    void mouseUp (const juce::MouseEvent& event) override {};
+    void sliderDragStarted (juce::Slider* slider) override {};
+    void sliderDragEnded (juce::Slider* slider) override {};
     void sliderValueChanged (juce::Slider* slider) override
     {
-
-        if (slider->getName().equalsIgnoreCase("middle"))
+        if (slider->getName().equalsIgnoreCase ("middle"))
         {
-            leftSlider->setValue(slider->getMinValue());
-            rightSlider->setValue(slider->getMaxValue());
+            leftSlider->setValue (slider->getMinValue());
+            rightSlider->setValue (slider->getMaxValue());
         }
-        else if (slider->getName().equalsIgnoreCase("left"))
+        else if (slider->getName().equalsIgnoreCase ("left"))
         {
-            middleSlider->setMinValue(leftSlider->getValue(), juce::dontSendNotification, true);
+            middleSlider->setMinValue (leftSlider->getValue(), juce::dontSendNotification, true);
         }
-        else if (slider->getName().equalsIgnoreCase("right"))
+        else if (slider->getName().equalsIgnoreCase ("right"))
         {
-            middleSlider->setMaxValue(rightSlider->getValue(), juce::dontSendNotification, true);
+            middleSlider->setMaxValue (rightSlider->getValue(), juce::dontSendNotification, true);
         }
     };
 
-    void paint (juce::Graphics& g) override
-    {
-
-    }
+    void paint (juce::Graphics& g) override {}
 
     void resized() override
     {
@@ -123,14 +120,19 @@ public:
         // components that your component contains..
         juce::Rectangle<int> bounds = getLocalBounds();
 
+        leftSlider->setBounds (bounds.removeFromLeft (leftRightSliderWidth + buttonsWidth));
+        leftSlider->setTextBoxStyle (juce::Slider::TextBoxLeft,
+                                     false,
+                                     leftRightSliderWidth,
+                                     bounds.getHeight());
 
-        leftSlider->setBounds(bounds.removeFromLeft(leftRightSliderWidth + buttonsWidth));
-        leftSlider->setTextBoxStyle(juce::Slider::TextBoxLeft, false, leftRightSliderWidth, bounds.getHeight());
+        rightSlider->setBounds (bounds.removeFromRight (leftRightSliderWidth + buttonsWidth));
+        rightSlider->setTextBoxStyle (juce::Slider::TextBoxRight,
+                                      false,
+                                      leftRightSliderWidth,
+                                      bounds.getHeight());
 
-        rightSlider->setBounds(bounds.removeFromRight(leftRightSliderWidth + buttonsWidth));
-        rightSlider->setTextBoxStyle(juce::Slider::TextBoxRight, false, leftRightSliderWidth, bounds.getHeight());
-
-        middleSlider->setBounds(bounds);
+        middleSlider->setBounds (bounds);
     }
 
 private:

@@ -23,21 +23,21 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-
 //==============================================================================
-EnergyVisualizerAudioProcessor::EnergyVisualizerAudioProcessor()
-     : AudioProcessorBase (
+EnergyVisualizerAudioProcessor::EnergyVisualizerAudioProcessor() :
+    AudioProcessorBase (
 #ifndef JucePlugin_PreferredChannelConfigurations
-                       BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::discreteChannels(64), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::discreteChannels(64), true)
-                     #endif
-                       ,
+        BusesProperties()
+    #if ! JucePlugin_IsMidiEffect
+        #if ! JucePlugin_IsSynth
+            .withInput ("Input", juce::AudioChannelSet::discreteChannels (64), true)
+        #endif
+            .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
+    #endif
+            ,
 #endif
-createParameterLayout()), decoderMatrix (nSamplePoints, 64)
+        createParameterLayout()),
+    decoderMatrix (nSamplePoints, 64)
 {
     orderSetting = parameters.getRawParameterValue ("orderSetting");
     useSN3D = parameters.getRawParameterValue ("useSN3D");
@@ -52,10 +52,19 @@ createParameterLayout()), decoderMatrix (nSamplePoints, 64)
     for (int point = 0; point < nSamplePoints; ++point)
     {
         auto* matrixRowPtr = decoderMatrix.getRawDataPointer() + point * 64;
-        SHEval (7, hammerAitovSampleX[point], hammerAitovSampleY[point], hammerAitovSampleZ[point], matrixRowPtr, false);
-        juce::FloatVectorOperations::multiply (matrixRowPtr, matrixRowPtr, sn3d2n3d, 64); //expecting sn3d normalization -> converting it to handle n3d
+        SHEval (7,
+                hammerAitovSampleX[point],
+                hammerAitovSampleY[point],
+                hammerAitovSampleZ[point],
+                matrixRowPtr,
+                false);
+        juce::FloatVectorOperations::multiply (
+            matrixRowPtr,
+            matrixRowPtr,
+            sn3d2n3d,
+            64); //expecting sn3d normalization -> converting it to handle n3d
     }
-    decoderMatrix *= 1.0f / decodeCorrection(7); // revert 7th order correction
+    decoderMatrix *= 1.0f / decodeCorrection (7); // revert 7th order correction
 
     rms.resize (nSamplePoints);
     std::fill (rms.begin(), rms.end(), 0.0f);
@@ -72,8 +81,8 @@ EnergyVisualizerAudioProcessor::~EnergyVisualizerAudioProcessor()
 //==============================================================================
 int EnergyVisualizerAudioProcessor::getNumPrograms()
 {
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+        // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int EnergyVisualizerAudioProcessor::getCurrentProgram()
@@ -111,8 +120,8 @@ void EnergyVisualizerAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-
-void EnergyVisualizerAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiMessages)
+void EnergyVisualizerAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer,
+                                                   juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
 
@@ -125,11 +134,13 @@ void EnergyVisualizerAudioProcessor::processBlock (juce::AudioSampleBuffer& buff
     const int L = buffer.getNumSamples();
     const int workingOrder = juce::jmin (isqrt (buffer.getNumChannels()) - 1, input.getOrder());
 
-    const int nCh = squares[workingOrder+1];
-
+    const int nCh = squares[workingOrder + 1];
 
     copyMaxRE (workingOrder, weights.data());
-    juce::FloatVectorOperations::multiply (weights.data(), maxRECorrection[workingOrder] * decodeCorrection (workingOrder), nCh);
+    juce::FloatVectorOperations::multiply (weights.data(),
+                                           maxRECorrection[workingOrder]
+                                               * decodeCorrection (workingOrder),
+                                           nCh);
 
     if (*useSN3D < 0.5f)
         juce::FloatVectorOperations::multiply (weights.data(), n3d2sn3d, nCh);
@@ -137,9 +148,15 @@ void EnergyVisualizerAudioProcessor::processBlock (juce::AudioSampleBuffer& buff
     const float oneMinusTimeConstant = 1.0f - timeConstant;
     for (int i = 0; i < nSamplePoints; ++i)
     {
-        juce::FloatVectorOperations::copyWithMultiply (sampledSignal.data(), buffer.getReadPointer (0), decoderMatrix(i, 0) * weights[0], buffer.getNumSamples());
+        juce::FloatVectorOperations::copyWithMultiply (sampledSignal.data(),
+                                                       buffer.getReadPointer (0),
+                                                       decoderMatrix (i, 0) * weights[0],
+                                                       buffer.getNumSamples());
         for (int ch = 1; ch < nCh; ++ch)
-            juce::FloatVectorOperations::addWithMultiply (sampledSignal.data(), buffer.getReadPointer (ch), decoderMatrix(i, ch) * weights[ch], L);
+            juce::FloatVectorOperations::addWithMultiply (sampledSignal.data(),
+                                                          buffer.getReadPointer (ch),
+                                                          decoderMatrix (i, ch) * weights[ch],
+                                                          L);
 
         // calculate rms
         float sum = 0.0f;
@@ -151,7 +168,6 @@ void EnergyVisualizerAudioProcessor::processBlock (juce::AudioSampleBuffer& buff
 
         rms[i] = timeConstant * rms[i] + oneMinusTimeConstant * std::sqrt (sum / L);
     }
-
 }
 
 //==============================================================================
@@ -166,18 +182,18 @@ juce::AudioProcessorEditor* EnergyVisualizerAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void EnergyVisualizerAudioProcessor::getStateInformation (juce::MemoryBlock &destData)
+void EnergyVisualizerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-  auto state = parameters.copyState();
+    auto state = parameters.copyState();
 
-  auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
-  oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
+    auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
+    oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
 
-  std::unique_ptr<juce::XmlElement> xml (state.createXml());
-  copyXmlToBinary (*xml, destData);
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
-void EnergyVisualizerAudioProcessor::setStateInformation (const void *data, int sizeInBytes)
+void EnergyVisualizerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState.get() != nullptr)
@@ -186,7 +202,8 @@ void EnergyVisualizerAudioProcessor::setStateInformation (const void *data, int 
             parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
             if (parameters.state.hasProperty ("OSCPort")) // legacy
             {
-                oscParameterInterface.getOSCReceiver().connect (parameters.state.getProperty ("OSCPort", juce::var (-1)));
+                oscParameterInterface.getOSCReceiver().connect (
+                    parameters.state.getProperty ("OSCPort", juce::var (-1)));
                 parameters.state.removeProperty ("OSCPort", nullptr);
             }
 
@@ -197,65 +214,110 @@ void EnergyVisualizerAudioProcessor::setStateInformation (const void *data, int 
 }
 
 //==============================================================================
-void EnergyVisualizerAudioProcessor::parameterChanged (const juce::String &parameterID, float newValue)
+void EnergyVisualizerAudioProcessor::parameterChanged (const juce::String& parameterID,
+                                                       float newValue)
 {
     if (parameterID == "orderSetting")
         userChangedIOSettings = true;
     if (parameterID == "RMStimeConstant")
         timeConstant = exp (-1.0 / (getSampleRate() * (*RMStimeConstant / 1000) / getBlockSize()));
-        
 }
 
-
 //==============================================================================
-std::vector<std::unique_ptr<juce::RangedAudioParameter>> EnergyVisualizerAudioProcessor::createParameterLayout()
+std::vector<std::unique_ptr<juce::RangedAudioParameter>>
+    EnergyVisualizerAudioProcessor::createParameterLayout()
 {
     // add your audio parameters here
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("orderSetting", "Ambisonics Order", "",
-                                     juce::NormalisableRange<float> (0.0f, 8.0f, 1.0f), 0.0f,
-                                     [](float value)
-                                     {
-                                         if (value >= 0.5f && value < 1.5f) return "0th";
-                                         else if (value >= 1.5f && value < 2.5f) return "1st";
-                                         else if (value >= 2.5f && value < 3.5f) return "2nd";
-                                         else if (value >= 3.5f && value < 4.5f) return "3rd";
-                                         else if (value >= 4.5f && value < 5.5f) return "4th";
-                                         else if (value >= 5.5f && value < 6.5f) return "5th";
-                                         else if (value >= 6.5f && value < 7.5f) return "6th";
-                                         else if (value >= 7.5f) return "7th";
-                                         else return "Auto";
-                                     }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "orderSetting",
+        "Ambisonics Order",
+        "",
+        juce::NormalisableRange<float> (0.0f, 8.0f, 1.0f),
+        0.0f,
+        [] (float value)
+        {
+            if (value >= 0.5f && value < 1.5f)
+                return "0th";
+            else if (value >= 1.5f && value < 2.5f)
+                return "1st";
+            else if (value >= 2.5f && value < 3.5f)
+                return "2nd";
+            else if (value >= 3.5f && value < 4.5f)
+                return "3rd";
+            else if (value >= 4.5f && value < 5.5f)
+                return "4th";
+            else if (value >= 5.5f && value < 6.5f)
+                return "5th";
+            else if (value >= 6.5f && value < 7.5f)
+                return "6th";
+            else if (value >= 7.5f)
+                return "7th";
+            else
+                return "Auto";
+        },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("useSN3D", "Normalization", "",
-                                     juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f,
-                                     [](float value)
-                                     {
-                                         if (value >= 0.5f ) return "SN3D";
-                                         else return "N3D";
-                                     }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "useSN3D",
+        "Normalization",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        1.0f,
+        [] (float value)
+        {
+            if (value >= 0.5f)
+                return "SN3D";
+            else
+                return "N3D";
+        },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("peakLevel", "Peak level", "dB",
-                                    juce::NormalisableRange<float> (-50.0f, 10.0f, 0.1f), 0.0f,
-                                    [](float value) {return juce::String(value, 1);}, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "peakLevel",
+        "Peak level",
+        "dB",
+        juce::NormalisableRange<float> (-50.0f, 10.0f, 0.1f),
+        0.0f,
+        [] (float value) { return juce::String (value, 1); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("dynamicRange", "Dynamic Range", "dB",
-                                                       juce::NormalisableRange<float> (10.0f, 60.0f, 1.f), 35.0f,
-                                                       [](float value) {return juce::String (value, 0);}, nullptr));
-    
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("holdMax", "Hold maximal RMS value", "",
-                                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
-                                                                       [](float value) {if (value >= 0.5f) return "ON";
-                                                                           else return "OFF";}, nullptr));
-    
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("RMStimeConstant", "RMS time constant", "ms",
-                                                       juce::NormalisableRange<float> (10.0f, 1000.0f, 1.0f, 0.4f), 100.0f,
-                                                       [](float value) {return juce::String (value, 0);}, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "dynamicRange",
+        "Dynamic Range",
+        "dB",
+        juce::NormalisableRange<float> (10.0f, 60.0f, 1.f),
+        35.0f,
+        [] (float value) { return juce::String (value, 0); },
+        nullptr));
+
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "holdMax",
+        "Hold maximal RMS value",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        0.0f,
+        [] (float value)
+        {
+            if (value >= 0.5f)
+                return "ON";
+            else
+                return "OFF";
+        },
+        nullptr));
+
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "RMStimeConstant",
+        "RMS time constant",
+        "ms",
+        juce::NormalisableRange<float> (10.0f, 1000.0f, 1.0f, 0.4f),
+        100.0f,
+        [] (float value) { return juce::String (value, 0); },
+        nullptr));
 
     return params;
 }
-
 
 //==============================================================================
 void EnergyVisualizerAudioProcessor::timerCallback()
@@ -268,7 +330,9 @@ void EnergyVisualizerAudioProcessor::timerCallback()
 }
 
 //==============================================================================
-void EnergyVisualizerAudioProcessor::sendAdditionalOSCMessages (juce::OSCSender& oscSender, const juce::OSCAddressPattern& address)
+void EnergyVisualizerAudioProcessor::sendAdditionalOSCMessages (
+    juce::OSCSender& oscSender,
+    const juce::OSCAddressPattern& address)
 {
     juce::OSCMessage message (address.toString() + "/RMS");
     for (int i = 0; i < nSamplePoints; ++i)

@@ -22,36 +22,36 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "../../resources/FeedbackDelayNetwork.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../../resources/FeedbackDelayNetwork.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define ProcessorClass FdnReverbAudioProcessor
 
 //==============================================================================
 /**
 */
-class FdnReverbAudioProcessor  : public AudioProcessorBase<IOTypes::Nothing, IOTypes::Nothing>
+class FdnReverbAudioProcessor : public AudioProcessorBase<IOTypes::Nothing, IOTypes::Nothing>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
     constexpr static int numberOfOutputChannels = 64;
-//==============================================================================
+    //==============================================================================
     FdnReverbAudioProcessor();
     ~FdnReverbAudioProcessor();
 
-//==============================================================================
+    //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
     void reset() override;
 
     void processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
 
-//==============================================================================
+    //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
-//==============================================================================
+    //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
@@ -62,27 +62,24 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
-
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
 
-
-
     int maxPossibleChannels = 64;
 
     void setFreezeMode (bool freezeState);
-    void updateFilterParameters ();
+    void updateFilterParameters();
     void getT60ForFrequencyArray (double* frequencies, double* t60Data, size_t numSamples);
 
 private:
     //==============================================================================
-	juce::AudioBuffer<float> copyBuffer;
+    juce::AudioBuffer<float> copyBuffer;
 
     // parameters (from GUI)
     std::atomic<float>* revTime;
-	std::atomic<float>* fadeInTime;
+    std::atomic<float>* fadeInTime;
     std::atomic<float>* delayLength;
 
     std::atomic<float>* highCutoff;

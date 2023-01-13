@@ -22,18 +22,13 @@
 
 #pragma once
 #include "../../resources/Conversions.h"
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/Quaternion.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
-
-class SpherePannerBackground :  public juce::Component
+class SpherePannerBackground : public juce::Component
 {
-
 public:
-    SpherePannerBackground()
-    {
-        setBufferedToImage (true);
-    };
+    SpherePannerBackground() { setBufferedToImage (true); };
 
     ~SpherePannerBackground() {};
 
@@ -53,14 +48,31 @@ public:
         const float centreY = bounds.getCentreY();
 
         g.setColour (juce::Colours::white);
-        g.drawEllipse (centreX-radius, centreY - radius, 2.0f * radius, 2.0f * radius, 1.0f);
+        g.drawEllipse (centreX - radius, centreY - radius, 2.0f * radius, 2.0f * radius, 1.0f);
 
         g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 1)));
         g.setFont (12.0f);
-        g.drawText ("FRONT", centreX-15, centreY-radius - 12, 30, 12, juce::Justification::centred);
-        g.drawText ("BACK", centreX-15, centreY+radius, 30, 12, juce::Justification::centred);
-        g.drawFittedText ("L\nE\nF\nT", sphereArea.getX() - 10, centreY - 40, 10, 80, juce::Justification::centred, 4);
-        g.drawFittedText ("R\nI\nG\nH\nT", sphereArea.getRight(), centreY - 40, 10, 80, juce::Justification::centred, 5);
+        g.drawText ("FRONT",
+                    centreX - 15,
+                    centreY - radius - 12,
+                    30,
+                    12,
+                    juce::Justification::centred);
+        g.drawText ("BACK", centreX - 15, centreY + radius, 30, 12, juce::Justification::centred);
+        g.drawFittedText ("L\nE\nF\nT",
+                          sphereArea.getX() - 10,
+                          centreY - 40,
+                          10,
+                          80,
+                          juce::Justification::centred,
+                          4);
+        g.drawFittedText ("R\nI\nG\nH\nT",
+                          sphereArea.getRight(),
+                          centreY - 40,
+                          10,
+                          80,
+                          juce::Justification::centred,
+                          5);
 
         g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.2f));
 
@@ -79,7 +91,13 @@ public:
         g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.7f));
         g.strokePath (circles, juce::PathStrokeType (.5f));
 
-        juce::ColourGradient gradient (juce::Colours::black.withMultipliedAlpha (0.7f), centreX, centreY, juce::Colours::black.withMultipliedAlpha (0.1f), 0, 0, true);
+        juce::ColourGradient gradient (juce::Colours::black.withMultipliedAlpha (0.7f),
+                                       centreX,
+                                       centreY,
+                                       juce::Colours::black.withMultipliedAlpha (0.1f),
+                                       0,
+                                       0,
+                                       true);
         g.setGradientFill (gradient);
 
         juce::Path line;
@@ -88,11 +106,20 @@ public:
 
         juce::Path path;
         path.addPath (line);
-        path.addPath (line, juce::AffineTransform().rotation (0.25f * juce::MathConstants<float>::pi, centreX, centreY));
-        path.addPath (line, juce::AffineTransform().rotation (0.5f * juce::MathConstants<float>::pi, centreX, centreY));
-        path.addPath (line, juce::AffineTransform().rotation (0.75f * juce::MathConstants<float>::pi, centreX, centreY));
+        path.addPath (line,
+                      juce::AffineTransform().rotation (0.25f * juce::MathConstants<float>::pi,
+                                                        centreX,
+                                                        centreY));
+        path.addPath (line,
+                      juce::AffineTransform().rotation (0.5f * juce::MathConstants<float>::pi,
+                                                        centreX,
+                                                        centreY));
+        path.addPath (line,
+                      juce::AffineTransform().rotation (0.75f * juce::MathConstants<float>::pi,
+                                                        centreX,
+                                                        centreY));
 
-        g.strokePath(path, juce::PathStrokeType (0.5f));
+        g.strokePath (path, juce::PathStrokeType (0.5f));
     }
 
     void setElevationStyle (bool linear) { linearElevation = linear; };
@@ -103,9 +130,7 @@ private:
     bool linearElevation = false;
 };
 
-
-
-class SpherePanner :  public juce::Component
+class SpherePanner : public juce::Component
 {
 public:
     SpherePanner()
@@ -118,12 +143,13 @@ public:
 
     ~SpherePanner() override = default;
 
-
     class Listener
     {
     public:
         virtual ~Listener() {}
-        virtual void mouseWheelOnSpherePannerMoved (SpherePanner* sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) {};
+        virtual void mouseWheelOnSpherePannerMoved (SpherePanner* sphere,
+                                                    const juce::MouseEvent& event,
+                                                    const juce::MouseWheelDetails& wheel) {};
     };
 
     class Element
@@ -132,15 +158,19 @@ public:
         Element() {}
         virtual ~Element() {}
 
-        virtual void startMovement() { }
-        virtual void moveElement (const juce::MouseEvent &event, juce::Point<int> centre, float radius, bool upBeforeDrag,  bool linearElevation, bool rightClick = false) = 0;
-        virtual void stopMovement() { }
+        virtual void startMovement() {}
+        virtual void moveElement (const juce::MouseEvent& event,
+                                  juce::Point<int> centre,
+                                  float radius,
+                                  bool upBeforeDrag,
+                                  bool linearElevation,
+                                  bool rightClick = false) = 0;
+        virtual void stopMovement() {}
 
         /**
          Get cartesian coordinates
          */
         virtual juce::Vector3D<float> getCoordinates() = 0;
-
 
         void setActive (bool isActive) { active = isActive; }
         bool isActive() { return active; }
@@ -150,10 +180,10 @@ public:
         juce::Colour getColour() { return colour; }
         juce::Colour getTextColour() { return textColour; }
 
-        void setLabel (juce::String newLabel) {label = newLabel;}
+        void setLabel (juce::String newLabel) { label = newLabel; }
 
         void setGrabPriority (int newPriority) { grabPriority = newPriority; }
-        int getGrabPriority() {return grabPriority;}
+        int getGrabPriority() { return grabPriority; }
         void setGrabRadius (float newRadius) { grabRadius = newRadius; }
         float getGrabRadius() { return grabRadius; }
 
@@ -175,7 +205,12 @@ public:
     public:
         StandardElement() = default;
 
-        void moveElement (const juce::MouseEvent &event, juce::Point<int> centre, float radius, bool upBeforeDrag, bool linearElevation, bool rightClick) override
+        void moveElement (const juce::MouseEvent& event,
+                          juce::Point<int> centre,
+                          float radius,
+                          bool upBeforeDrag,
+                          bool linearElevation,
+                          bool rightClick) override
         {
             auto pos = event.getPosition();
             const float azimuth = -1.0f * centre.getAngleToPoint (pos);
@@ -183,12 +218,11 @@ public:
             if (r > 1.0f)
             {
                 r = 1.0f / r;
-                upBeforeDrag = !upBeforeDrag;
+                upBeforeDrag = ! upBeforeDrag;
             }
 
             if (linearElevation)
                 r = std::sin (r * juce::MathConstants<float>::halfPi);
-
 
             float elevation = std::acos (r);
             if (! upBeforeDrag)
@@ -200,14 +234,14 @@ public:
         /*
          Get cartesian coordinates
          */
-        juce::Vector3D<float> getCoordinates() override
-        {
-            return position;
-        };
+        juce::Vector3D<float> getCoordinates() override { return position; };
 
-        bool setCoordinates (juce::Vector3D<float> newPosition) // is true when position is updated (use it for repainting)
+        bool setCoordinates (
+            juce::Vector3D<float>
+                newPosition) // is true when position is updated (use it for repainting)
         {
-            if (position.x != newPosition.x || position.y != newPosition.y || position.z != newPosition.z)
+            if (position.x != newPosition.x || position.y != newPosition.y
+                || position.z != newPosition.z)
             {
                 position = newPosition;
                 return true;
@@ -222,7 +256,17 @@ public:
     class AzimuthElevationParameterElement : public Element
     {
     public:
-        AzimuthElevationParameterElement (juce::AudioProcessorParameter& azimuthParameter, juce::NormalisableRange<float> azimuthParameterRange, juce::AudioProcessorParameter& elevationParameter, juce::NormalisableRange<float> elevationParameterRange) : Element(), azimuth (azimuthParameter), azimuthRange (azimuthParameterRange), elevation (elevationParameter), elevationRange (elevationParameterRange) {}
+        AzimuthElevationParameterElement (juce::AudioProcessorParameter& azimuthParameter,
+                                          juce::NormalisableRange<float> azimuthParameterRange,
+                                          juce::AudioProcessorParameter& elevationParameter,
+                                          juce::NormalisableRange<float> elevationParameterRange) :
+            Element(),
+            azimuth (azimuthParameter),
+            azimuthRange (azimuthParameterRange),
+            elevation (elevationParameter),
+            elevationRange (elevationParameterRange)
+        {
+        }
 
         void startMovement() override
         {
@@ -230,26 +274,32 @@ public:
             elevation.beginChangeGesture();
         };
 
-        void moveElement (const juce::MouseEvent &event, juce::Point<int> centre, float radius, bool upBeforeDrag,  bool linearElevation, bool rightClick) override
+        void moveElement (const juce::MouseEvent& event,
+                          juce::Point<int> centre,
+                          float radius,
+                          bool upBeforeDrag,
+                          bool linearElevation,
+                          bool rightClick) override
         {
             auto pos = event.getPosition();
-            const float azi = -1.0f * centre.getAngleToPoint(pos);
+            const float azi = -1.0f * centre.getAngleToPoint (pos);
             const float azimuthInDegrees { Conversions<float>::radiansToDegrees (azi) };
 
             if (! rightClick)
             {
-                float r = centre.getDistanceFrom(pos) / radius;
+                float r = centre.getDistanceFrom (pos) / radius;
 
                 if (r > 1.0f)
                 {
                     r = 1.0f / r;
-                    upBeforeDrag = !upBeforeDrag;
+                    upBeforeDrag = ! upBeforeDrag;
                 }
 
                 if (linearElevation)
                     r = std::sin (r * juce::MathConstants<float>::halfPi);
                 float ele = std::acos (r);
-                if (! upBeforeDrag) ele *= -1.0f;
+                if (! upBeforeDrag)
+                    ele *= -1.0f;
 
                 const float elevationInDegrees { Conversions<float>::radiansToDegrees (ele) };
 
@@ -273,7 +323,8 @@ public:
 
         const float getElevationInRadians()
         {
-            const float elevationInDegrees { elevationRange.convertFrom0to1 (elevation.getValue()) };
+            const float elevationInDegrees { elevationRange.convertFrom0to1 (
+                elevation.getValue()) };
             return Conversions<float>::degreesToRadians (elevationInDegrees);
         }
 
@@ -282,7 +333,8 @@ public:
          */
         juce::Vector3D<float> getCoordinates() override
         {
-            return Conversions<float>::sphericalToCartesian (getAzimuthInRadians(), getElevationInRadians());
+            return Conversions<float>::sphericalToCartesian (getAzimuthInRadians(),
+                                                             getElevationInRadians());
         }
 
     private:
@@ -295,7 +347,18 @@ public:
     class RollWidthParameterElement : public Element
     {
     public:
-        RollWidthParameterElement (AzimuthElevationParameterElement& center, juce::AudioProcessorParameter& rollParameter, juce::NormalisableRange<float> rollParameterRange, juce::AudioProcessorParameter& widthParameter, juce::NormalisableRange<float> widthParameterRange) : centerElement (center), roll (rollParameter), rollRange(rollParameterRange), width (widthParameter), widthRange (widthParameterRange) {}
+        RollWidthParameterElement (AzimuthElevationParameterElement& center,
+                                   juce::AudioProcessorParameter& rollParameter,
+                                   juce::NormalisableRange<float> rollParameterRange,
+                                   juce::AudioProcessorParameter& widthParameter,
+                                   juce::NormalisableRange<float> widthParameterRange) :
+            centerElement (center),
+            roll (rollParameter),
+            rollRange (rollParameterRange),
+            width (widthParameter),
+            widthRange (widthParameterRange)
+        {
+        }
 
         void startMovement() override
         {
@@ -303,46 +366,55 @@ public:
             width.beginChangeGesture();
         }
 
-        void moveElement (const juce::MouseEvent &event, juce::Point<int> centre, float radius, bool upBeforeDrag, bool linearElevation, bool rightClick) override
+        void moveElement (const juce::MouseEvent& event,
+                          juce::Point<int> centre,
+                          float radius,
+                          bool upBeforeDrag,
+                          bool linearElevation,
+                          bool rightClick) override
         {
             juce::Point<int> pos = event.getPosition();
             const float azi = -1.0f * centre.getAngleToPoint (pos);
-            float r = centre.getDistanceFrom(pos) / radius;
+            float r = centre.getDistanceFrom (pos) / radius;
             if (r > 1.0f)
             {
                 r = 1.0f / r;
-                upBeforeDrag = !upBeforeDrag;
+                upBeforeDrag = ! upBeforeDrag;
             }
 
             if (linearElevation)
                 r = std::sin (r * juce::MathConstants<float>::halfPi);
 
             float ele = std::acos (r);
-            if (! upBeforeDrag) ele *= -1.0f;
+            if (! upBeforeDrag)
+                ele *= -1.0f;
 
             auto posXYZ = Conversions<float>::sphericalToCartesian (azi, ele);
 
             // ==== calculate width
             juce::Vector3D<float> dPos = posXYZ - centerElement.getCoordinates();
             const float alpha = 4.0f * std::asin (dPos.length() / 2.0f);
-            width.setValueNotifyingHost (widthRange.convertTo0to1 (Conversions<float>::radiansToDegrees (alpha)));
+            width.setValueNotifyingHost (
+                widthRange.convertTo0to1 (Conversions<float>::radiansToDegrees (alpha)));
 
             // ==== calculate roll
             iem::Quaternion<float> quat;
             float ypr[3];
             ypr[0] = centerElement.getAzimuthInRadians();
-            ypr[1] = - centerElement.getElevationInRadians(); // pitch
+            ypr[1] = -centerElement.getElevationInRadians(); // pitch
             ypr[2] = 0.0f;
 
-            quat.fromYPR(ypr);
+            quat.fromYPR (ypr);
             quat.conjugate();
 
             const auto rotated = quat.rotateVector (posXYZ);
 
             float rollInRadians = atan2 (rotated.z, rotated.y);
-            if (isMirrored) rollInRadians = atan2 (- rotated.z, - rotated.y);
+            if (isMirrored)
+                rollInRadians = atan2 (-rotated.z, -rotated.y);
 
-            roll.setValueNotifyingHost (rollRange.convertTo0to1 (Conversions<float>::radiansToDegrees (rollInRadians)));
+            roll.setValueNotifyingHost (
+                rollRange.convertTo0to1 (Conversions<float>::radiansToDegrees (rollInRadians)));
         }
 
         void stopMovement() override
@@ -358,16 +430,23 @@ public:
         {
             float ypr[3];
             ypr[0] = centerElement.getAzimuthInRadians();
-            ypr[1] = - centerElement.getElevationInRadians(); // pitch
-            ypr[2] = Conversions<float>::degreesToRadians (rollRange.convertFrom0to1 (roll.getValue()));
+            ypr[1] = -centerElement.getElevationInRadians(); // pitch
+            ypr[2] =
+                Conversions<float>::degreesToRadians (rollRange.convertFrom0to1 (roll.getValue()));
 
             //updating not active params
             iem::Quaternion<float> quat;
             quat.fromYPR (ypr);
 
-            const float widthInRadiansQuarter (Conversions<float>::degreesToRadians(widthRange.convertFrom0to1 (width.getValue())) / 4.0f);
+            const float widthInRadiansQuarter (
+                Conversions<float>::degreesToRadians (widthRange.convertFrom0to1 (width.getValue()))
+                / 4.0f);
 
-            iem::Quaternion<float> quatLRot {iem::Quaternion<float>(cos(widthInRadiansQuarter), 0.0f, 0.0f, sin(widthInRadiansQuarter))};
+            iem::Quaternion<float> quatLRot { iem::Quaternion<float> (
+                cos (widthInRadiansQuarter),
+                0.0f,
+                0.0f,
+                sin (widthInRadiansQuarter)) };
             if (isMirrored)
                 quatLRot.conjugate();
 
@@ -389,13 +468,13 @@ public:
 
     void resized() override
     {
-        background.setBounds(getLocalBounds());
-        const auto sphere = getLocalBounds().reduced(10, 10).toFloat();
+        background.setBounds (getLocalBounds());
+        const auto sphere = getLocalBounds().reduced (10, 10).toFloat();
 
         radius = 0.5f * juce::jmin (sphere.getWidth(), sphere.getHeight());
         centre = getLocalBounds().getCentre();
-        sphereArea.setBounds(0, 0, 2*radius, 2*radius);
-        sphereArea.setCentre(centre.toFloat());
+        sphereArea.setBounds (0, 0, 2 * radius, 2 * radius);
+        sphereArea.setCentre (centre.toFloat());
     }
 
     void paintOverChildren (juce::Graphics& g) override
@@ -415,7 +494,8 @@ public:
             const bool isUp = pos.z >= -0.0f;
 
             const float diam = 15.0f + 4.0f * pos.z;
-            const juce::Colour colour = handle->isActive() ? handle->getColour() : juce::Colours::grey;
+            const juce::Colour colour =
+                handle->isActive() ? handle->getColour() : juce::Colours::grey;
             g.setColour (colour);
 
             if (linearElevation)
@@ -425,7 +505,10 @@ public:
                 pos *= factor;
             }
 
-            const juce::Rectangle<float> circleArea (centreX - pos.y * radius - diam / 2, centreY - pos.x * radius - diam / 2, diam, diam);
+            const juce::Rectangle<float> circleArea (centreX - pos.y * radius - diam / 2,
+                                                     centreY - pos.x * radius - diam / 2,
+                                                     diam,
+                                                     diam);
             juce::Path panPos;
 
             panPos.addEllipse (circleArea);
@@ -442,18 +525,21 @@ public:
             g.setColour (isUp ? handle->getTextColour() : colour);
 
             g.setFont (isUp ? 15.0f : 10.0f);
-            g.drawText (handle->getLabel(), circleArea.toNearestInt(), juce::Justification::centred, false);
+            g.drawText (handle->getLabel(),
+                        circleArea.toNearestInt(),
+                        juce::Justification::centred,
+                        false);
         }
     }
 
-
-    void mouseWheelMove (const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override
+    void mouseWheelMove (const juce::MouseEvent& event,
+                         const juce::MouseWheelDetails& wheel) override
     {
         for (int i = listeners.size(); --i >= 0;)
-            listeners.getUnchecked(i)->mouseWheelOnSpherePannerMoved (this, event, wheel);
+            listeners.getUnchecked (i)->mouseWheelOnSpherePannerMoved (this, event, wheel);
     }
 
-    void mouseMove (const juce::MouseEvent &event) override
+    void mouseMove (const juce::MouseEvent& event) override
     {
         const int oldActiveElem = activeElem;
         activeElem = -1;
@@ -476,12 +562,14 @@ public:
 
                 if (linearElevation)
                 {
-                    const float r = sqrt (elementPosition.y * elementPosition.y + elementPosition.x * elementPosition.x);
+                    const float r = sqrt (elementPosition.y * elementPosition.y
+                                          + elementPosition.x * elementPosition.x);
                     const float factor = std::asin (r) / r / juce::MathConstants<float>::halfPi;
                     elementPosition *= factor;
                 }
 
-                const juce::Point<float> connection (mousePos.x - elementPosition.x, mousePos.y - elementPosition.y);
+                const juce::Point<float> connection (mousePos.x - elementPosition.x,
+                                                     mousePos.y - elementPosition.y);
                 const auto distance = connection.getDistanceFromOrigin();
 
                 if (distance <= handle->getGrabRadius())
@@ -492,7 +580,8 @@ public:
                         highestPriority = handle->getGrabPriority();
                         smallestDist = distance;
                     }
-                    else if (handle->getGrabPriority() == highestPriority && distance < smallestDist)
+                    else if (handle->getGrabPriority() == highestPriority
+                             && distance < smallestDist)
                     {
                         activeElem = i;
                         smallestDist = distance;
@@ -501,36 +590,44 @@ public:
             }
         }
 
-        if (activeElem != -1) activeElemWasUpBeforeDrag = elements.getUnchecked (activeElem)->getCoordinates().z >= 0.0f;
+        if (activeElem != -1)
+            activeElemWasUpBeforeDrag =
+                elements.getUnchecked (activeElem)->getCoordinates().z >= 0.0f;
         if (oldActiveElem != activeElem)
             repaint();
     }
-    
-    void mouseDrag (const juce::MouseEvent &event) override
+
+    void mouseDrag (const juce::MouseEvent& event) override
     {
         const bool rightClick = event.mods.isRightButtonDown();
         if (activeElem != -1)
         {
-            elements.getUnchecked (activeElem)->moveElement (event, centre, radius, activeElemWasUpBeforeDrag, linearElevation, rightClick);
+            elements.getUnchecked (activeElem)
+                ->moveElement (event,
+                               centre,
+                               radius,
+                               activeElemWasUpBeforeDrag,
+                               linearElevation,
+                               rightClick);
             repaint();
         }
     }
 
-    void mouseDown (const juce::MouseEvent &event) override
+    void mouseDown (const juce::MouseEvent& event) override
     {
         if (activeElem != -1)
             elements.getUnchecked (activeElem)->startMovement();
     }
 
-    void mouseUp (const juce::MouseEvent &event) override
+    void mouseUp (const juce::MouseEvent& event) override
     {
         if (activeElem != -1)
             elements.getUnchecked (activeElem)->stopMovement();
     }
 
-    void mouseDoubleClick (const juce::MouseEvent &event) override
+    void mouseDoubleClick (const juce::MouseEvent& event) override
     {
-        setElevationStyle(! linearElevation);
+        setElevationStyle (! linearElevation);
         background.repaint();
         repaint();
     }
@@ -554,15 +651,12 @@ public:
             elements.addIfNotAlreadyThere (element);
     }
 
-    void removeElement (Element* const element)
-    {
-        elements.removeFirstMatchingValue (element);
-    }
+    void removeElement (Element* const element) { elements.removeFirstMatchingValue (element); }
 
     void setElevationStyle (bool linear)
     {
         linearElevation = linear;
-        background.setElevationStyle(linear);
+        background.setElevationStyle (linear);
     }
 
 protected:

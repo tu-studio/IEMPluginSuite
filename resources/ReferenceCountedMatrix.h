@@ -27,24 +27,24 @@ class ReferenceCountedMatrix : public juce::ReferenceCountedObject
 public:
     typedef juce::ReferenceCountedObjectPtr<ReferenceCountedMatrix> Ptr;
 
-    ReferenceCountedMatrix (const juce::String& nameToUse, const juce::String& descriptionToUse, int rows, int columns)
-    :   name (nameToUse), description (descriptionToUse), matrix (rows, columns)
+    ReferenceCountedMatrix (const juce::String& nameToUse,
+                            const juce::String& descriptionToUse,
+                            int rows,
+                            int columns) :
+        name (nameToUse), description (descriptionToUse), matrix (rows, columns)
     {
-
         for (int i = 0; i < rows; ++i)
-            routingArray.add(i);
+            routingArray.add (i);
 
         DBG (getConstructorMessage());
     }
 
-    ~ReferenceCountedMatrix()
-    {
-        DBG (getDeconstructorMessage());
-    }
+    ~ReferenceCountedMatrix() { DBG (getDeconstructorMessage()); }
 
     virtual juce::String getConstructorMessage() const
     {
-        return "Matrix named '" + name + "' constructed. Size: " + juce::String (matrix.getNumRows()) + "x" + juce::String (matrix.getNumColumns());
+        return "Matrix named '" + name + "' constructed. Size: "
+               + juce::String (matrix.getNumRows()) + "x" + juce::String (matrix.getNumColumns());
     }
 
     virtual juce::String getDeconstructorMessage() const
@@ -52,42 +52,26 @@ public:
         return "Matrix named '" + name + "' destroyed.";
     }
 
-    juce::dsp::Matrix<float>& getMatrix()
-    {
-        return matrix;
-    }
-    juce::String getName() const
-    {
-        return name;
-    }
+    juce::dsp::Matrix<float>& getMatrix() { return matrix; }
+    juce::String getName() const { return name; }
 
-    juce::String getDescription() const
-    {
-        return description;
-    }
+    juce::String getDescription() const { return description; }
 
     const int getNumOutputChannels()
     {
         int maxChannel = 0;
         for (int i = routingArray.size(); --i >= 0;)
         {
-            const int newValue = routingArray.getUnchecked(i);
+            const int newValue = routingArray.getUnchecked (i);
             if (newValue > maxChannel)
                 maxChannel = newValue;
         }
         return maxChannel + 1;
     }
 
-    const int getNumInputChannels()
-    {
-        return (int) matrix.getNumColumns();
-    }
+    const int getNumInputChannels() { return (int) matrix.getNumColumns(); }
 
-    juce::Array<int>& getRoutingArrayReference()
-    {
-        return routingArray;
-    }
-
+    juce::Array<int>& getRoutingArrayReference() { return routingArray; }
 
 protected:
     juce::String name;

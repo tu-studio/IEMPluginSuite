@@ -38,13 +38,14 @@ public:
     {
         addAndMakeVisible (cbWeights);
         cbWeights.setJustificationType (juce::Justification::centred);
-        cbWeights.addItemList ({"basic", "maxrE", "inPhase"}, 1);
-        cbWeightsAttachment.reset (new juce::AudioProcessorValueTreeState::ComboBoxAttachment (parameters, "weights", cbWeights));
+        cbWeights.addItemList ({ "basic", "maxrE", "inPhase" }, 1);
+        cbWeightsAttachment.reset (
+            new juce::AudioProcessorValueTreeState::ComboBoxAttachment (parameters,
+                                                                        "weights",
+                                                                        cbWeights));
     }
 
-    ~DecoderInfoBox()
-    {
-    }
+    ~DecoderInfoBox() {}
 
     void setDecoderConfig (ReferenceCountedDecoder::Ptr newDecoderConfig)
     {
@@ -80,9 +81,18 @@ public:
             auto font = juce::Font (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 2)));
             font.setHeight (valueHeight);
 
-            arr.addFittedText (font, retainedDecoder->getDescription(), valueStart, valueHeight + 1, valueWidth, 3 * valueHeight, juce::Justification::topLeft, 4, 0.8f);
+            arr.addFittedText (font,
+                               retainedDecoder->getDescription(),
+                               valueStart,
+                               valueHeight + 1,
+                               valueWidth,
+                               3 * valueHeight,
+                               juce::Justification::topLeft,
+                               4,
+                               0.8f);
 
-            const int descriptionEnd = arr.getBoundingBox (juce::jmax (0, arr.getNumGlyphs() - 1), 1, true).getBottom();
+            const int descriptionEnd =
+                arr.getBoundingBox (juce::jmax (0, arr.getNumGlyphs() - 1), 1, true).getBottom();
 
             cbWeights.setBounds (valueStart, descriptionEnd + 2 * valueHeight + 2, 80, valueHeight);
         }
@@ -100,7 +110,12 @@ public:
         if (retainedDecoder == nullptr)
         {
             g.setFont (valueHeight);
-            g.drawText ("No configuration loaded.", 20, 1, width, valueHeight, juce::Justification::bottomLeft);
+            g.drawText ("No configuration loaded.",
+                        20,
+                        1,
+                        width,
+                        valueHeight,
+                        juce::Justification::bottomLeft);
             g.drawMultiLineText (errorText, 20, 30, width - 20);
         }
         else
@@ -109,32 +124,72 @@ public:
 
             const int maxAttributeWidth = getMaxAttributeWidth();
             const int resStart = maxAttributeWidth + spacing;
-            const int resWidth = juce::jmax(width - resStart, 0);
+            const int resWidth = juce::jmax (width - resStart, 0);
 
-            g.drawText ("NAME:", 0, 0, maxAttributeWidth, valueHeight, juce::Justification::bottomRight);
-            g.drawText ("DESCRIPTION:", 0, valueHeight, maxAttributeWidth, valueHeight, juce::Justification::bottomRight);
+            g.drawText ("NAME:",
+                        0,
+                        0,
+                        maxAttributeWidth,
+                        valueHeight,
+                        juce::Justification::bottomRight);
+            g.drawText ("DESCRIPTION:",
+                        0,
+                        valueHeight,
+                        maxAttributeWidth,
+                        valueHeight,
+                        juce::Justification::bottomRight);
 
             g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 1))); // bold font
             g.setFont (valueHeight);
-            g.drawText (retainedDecoder->getName(), resStart, 1, resWidth, valueHeight, juce::Justification::bottomLeft);
+            g.drawText (retainedDecoder->getName(),
+                        resStart,
+                        1,
+                        resWidth,
+                        valueHeight,
+                        juce::Justification::bottomLeft);
 
             juce::String descriptionText = retainedDecoder->getDescription();
 
             arr.draw (g);
-            const int descEnd = arr.getBoundingBox (juce::jmax (0, arr.getNumGlyphs() - 1), 1, true).getBottom();
+            const int descEnd =
+                arr.getBoundingBox (juce::jmax (0, arr.getNumGlyphs() - 1), 1, true).getBottom();
 
             g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 2))); // regular font
             g.setFont (attributeHeight);
 
-            g.drawText ("ORDER:", 0, descEnd, maxAttributeWidth, valueHeight, juce::Justification::bottomRight);
-            g.drawText ("LOUDSPEAKERS:", 0, descEnd + valueHeight, maxAttributeWidth, valueHeight, juce::Justification::bottomRight);
-            g.drawText ("WEIGHTS:", 0, descEnd + 2 * valueHeight, maxAttributeWidth, valueHeight, juce::Justification::bottomRight);
+            g.drawText ("ORDER:",
+                        0,
+                        descEnd,
+                        maxAttributeWidth,
+                        valueHeight,
+                        juce::Justification::bottomRight);
+            g.drawText ("LOUDSPEAKERS:",
+                        0,
+                        descEnd + valueHeight,
+                        maxAttributeWidth,
+                        valueHeight,
+                        juce::Justification::bottomRight);
+            g.drawText ("WEIGHTS:",
+                        0,
+                        descEnd + 2 * valueHeight,
+                        maxAttributeWidth,
+                        valueHeight,
+                        juce::Justification::bottomRight);
 
             g.setFont (valueHeight);
-            g.drawText (getOrderString (retainedDecoder->getOrder()), resStart, descEnd + 1, resWidth, valueHeight, juce::Justification::bottomLeft);
-            g.drawText (juce::String (retainedDecoder->getMatrix().getNumRows()), resStart, descEnd + valueHeight + 1, resWidth, valueHeight, juce::Justification::bottomLeft);
+            g.drawText (getOrderString (retainedDecoder->getOrder()),
+                        resStart,
+                        descEnd + 1,
+                        resWidth,
+                        valueHeight,
+                        juce::Justification::bottomLeft);
+            g.drawText (juce::String (retainedDecoder->getMatrix().getNumRows()),
+                        resStart,
+                        descEnd + valueHeight + 1,
+                        resWidth,
+                        valueHeight,
+                        juce::Justification::bottomLeft);
         }
-
     }
 
     void setErrorMessage (juce::String errorMessage)
@@ -147,8 +202,8 @@ private:
     juce::ComboBox cbWeights;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> cbWeightsAttachment;
 
-    juce::String errorText {""};
-    ReferenceCountedDecoder::Ptr decoder {nullptr};
+    juce::String errorText { "" };
+    ReferenceCountedDecoder::Ptr decoder { nullptr };
 
     juce::GlyphArrangement arr;
 

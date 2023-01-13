@@ -20,23 +20,23 @@
  ==============================================================================
  */
 
-
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "../../resources/efficientSHvanilla.h"
-#include "../../resources/tDesignN7.h"
-#include "../../resources/ambisonicTools.h"
 #include "../../resources/AudioProcessorBase.h"
 #include "../../resources/Compressor.h"
 #include "../../resources/Conversions.h"
+#include "../../resources/ambisonicTools.h"
+#include "../../resources/efficientSHvanilla.h"
+#include "../../resources/tDesignN7.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define ProcessorClass DirectionalCompressorAudioProcessor
 
 //==============================================================================
 /**
 */
-class DirectionalCompressorAudioProcessor  : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>>
+class DirectionalCompressorAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -55,7 +55,6 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
-
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -71,7 +70,7 @@ public:
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
     //==============================================================================
 
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     float c1MaxRMS;
     float c1MaxGR;
@@ -80,7 +79,6 @@ public:
 
     void calcParams();
     juce::Atomic<bool> updatedPositionData;
-
 
 private:
     //==============================================================================
@@ -98,7 +96,7 @@ private:
 
     float dist[tDesignN];
 
-    const float *drivingPointers[3];
+    const float* drivingPointers[3];
 
     juce::Array<float> c1Gains;
     juce::Array<float> c2Gains;
@@ -138,5 +136,4 @@ private:
     std::atomic<float>* c2Release;
     std::atomic<float>* c2Ratio;
     std::atomic<float>* c2Makeup;
-
 };

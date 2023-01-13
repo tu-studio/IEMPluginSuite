@@ -26,28 +26,31 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
-#include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/customComponents/SimpleLabel.h"
-#include "../../resources/customComponents/MailBox.h"
-#include "../../resources/customComponents/RoundButton.h"
 #include "../../resources/LabelAttachment.h"
+#include "../../resources/customComponents/MailBox.h"
+#include "../../resources/customComponents/ReverseSlider.h"
+#include "../../resources/customComponents/RoundButton.h"
+#include "../../resources/customComponents/SimpleLabel.h"
 
-
-typedef ReverseSlider::SliderAttachment SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
+typedef ReverseSlider::SliderAttachment
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
  */
-class DistanceCompensatorAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, private juce::Button::Listener
+class DistanceCompensatorAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                                private juce::Timer,
+                                                private juce::Button::Listener
 {
 public:
-    DistanceCompensatorAudioProcessorEditor (DistanceCompensatorAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    DistanceCompensatorAudioProcessorEditor (DistanceCompensatorAudioProcessor&,
+                                             juce::AudioProcessorValueTreeState&);
     ~DistanceCompensatorAudioProcessorEditor();
 
     //==============================================================================
@@ -69,12 +72,10 @@ private:
     OSCFooter footer;
     // ====================== end essentials ====================
 
-
     void updateEnableSetting (const int ch);
     void showControls (const int nCh);
 
     std::unique_ptr<ComboBoxAttachment> cbInputChannelsSettingAttachment;
-
 
     juce::Label lbSpeedOfSound;
     std::unique_ptr<LabelAttachment> lbSpeedOfSoundAttachment;
@@ -89,9 +90,9 @@ private:
     std::unique_ptr<ComboBoxAttachment> cbGainNormalizationAttachment;
 
     juce::Label lbReferenceX, lbReferenceY, lbReferenceZ;
-    std::unique_ptr<LabelAttachment> lbReferenceXAttachment, lbReferenceYAttachment, lbReferenceZAttachment;
+    std::unique_ptr<LabelAttachment> lbReferenceXAttachment, lbReferenceYAttachment,
+        lbReferenceZAttachment;
     SimpleLabel slbReference, slbReferenceX, slbReferenceY, slbReferenceZ;
-
 
     juce::TooltipWindow toolTipWin;
 

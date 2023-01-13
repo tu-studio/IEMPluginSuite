@@ -25,9 +25,10 @@
 //==============================================================================
 /*
 */
-class XYPad    : public juce::Component
+class XYPad : public juce::Component
 {
-    struct xySlidersAndColour {
+    struct xySlidersAndColour
+    {
         juce::Slider* xSlider = nullptr;
         juce::Slider* ySlider = nullptr;
         juce::Colour colour;
@@ -42,28 +43,32 @@ public:
         int topLeftX = plotArea.getX();
         int bottomY = plotArea.getY() + plotArea.getHeight();
 
-
         int size = elements.size();
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < size; ++i)
+        {
             bool isActive = activeElem == i;
 
-            xySlidersAndColour handle =  elements.getReference(i);
+            xySlidersAndColour handle = elements.getReference (i);
 
             juce::Range<double> xRange = handle.xSlider->getRange();
             juce::Range<double> yRange = handle.ySlider->getRange();
 
-            float xPos = topLeftX + (handle.xSlider->getValue()-xRange.getStart()) * width / xRange.getLength();
-            float yPos = bottomY - (handle.ySlider->getValue()-yRange.getStart()) * height / yRange.getLength();
+            float xPos =
+                topLeftX
+                + (handle.xSlider->getValue() - xRange.getStart()) * width / xRange.getLength();
+            float yPos =
+                bottomY
+                - (handle.ySlider->getValue() - yRange.getStart()) * height / yRange.getLength();
 
             juce::Path path;
-            path.addEllipse(xPos-8, yPos-8, 16, 16);
-            g.setColour(handle.colour);
-            g.fillPath(path);
+            path.addEllipse (xPos - 8, yPos - 8, 16, 16);
+            g.setColour (handle.colour);
+            g.fillPath (path);
 
             if (isActive)
             {
-                g.setColour(juce::Colours::white);
-                g.strokePath(path, juce::PathStrokeType(2.0f));
+                g.setColour (juce::Colours::white);
+                g.strokePath (path, juce::PathStrokeType (2.0f));
             }
         }
     }
@@ -72,14 +77,14 @@ public:
     {
         juce::Rectangle<int> bounds = getLocalBounds();
 
-        bounds.reduce(12, 12);
+        bounds.reduce (12, 12);
 
         plotArea = bounds;
         width = bounds.getWidth();
         height = bounds.getHeight();
     }
 
-    void mouseMove(const juce::MouseEvent &event) override
+    void mouseMove (const juce::MouseEvent& event) override
     {
         juce::Point<int> pos = event.getPosition();
         int oldActiveElem = activeElem;
@@ -87,48 +92,54 @@ public:
 
         int topLeftX = plotArea.getX();
         int bottomY = plotArea.getY() + plotArea.getHeight();
-        for (int i = elements.size (); --i >= 0;)
+        for (int i = elements.size(); --i >= 0;)
         {
-            xySlidersAndColour handle =  elements.getReference(i);
+            xySlidersAndColour handle = elements.getReference (i);
 
             juce::Range<double> xRange = handle.xSlider->getRange();
             juce::Range<double> yRange = handle.ySlider->getRange();
 
-            float xPos = topLeftX + (handle.xSlider->getValue()-xRange.getStart()) * width / xRange.getLength();
-            float yPos = bottomY - (handle.ySlider->getValue()-yRange.getStart()) * height / yRange.getLength();
+            float xPos =
+                topLeftX
+                + (handle.xSlider->getValue() - xRange.getStart()) * width / xRange.getLength();
+            float yPos =
+                bottomY
+                - (handle.ySlider->getValue() - yRange.getStart()) * height / yRange.getLength();
 
-            if (pos.getDistanceSquaredFrom(juce::Point<float>(xPos, yPos).toInt()) < 80) {
+            if (pos.getDistanceSquaredFrom (juce::Point<float> (xPos, yPos).toInt()) < 80)
+            {
                 activeElem = i;
                 break;
             }
-
         }
         if (oldActiveElem != activeElem)
             repaint();
     }
 
-    void mouseDrag(const juce::MouseEvent &event) override
+    void mouseDrag (const juce::MouseEvent& event) override
     {
         juce::Point<int> pos = event.getPosition() - plotArea.getTopLeft();
         if (activeElem != -1 && elements.size() - 1 >= activeElem)
         {
-            xySlidersAndColour handle =  elements.getReference(activeElem);
+            xySlidersAndColour handle = elements.getReference (activeElem);
             juce::Range<double> xRange = handle.xSlider->getRange();
             juce::Range<double> yRange = handle.ySlider->getRange();
 
-            handle.xSlider->setValue(xRange.getLength() * pos.x/width + xRange.getStart());
-            handle.ySlider->setValue(yRange.getLength() * (height - pos.y)/height + yRange.getStart());
+            handle.xSlider->setValue (xRange.getLength() * pos.x / width + xRange.getStart());
+            handle.ySlider->setValue (yRange.getLength() * (height - pos.y) / height
+                                      + yRange.getStart());
             repaint();
         }
     }
-    void mouseUp (const juce::MouseEvent &event) override {
+    void mouseUp (const juce::MouseEvent& event) override
+    {
         activeElem = -1;
         repaint();
     }
 
-    void addElement(juce::Slider& newXSlider, juce::Slider& newYSlider, juce::Colour newColour)
+    void addElement (juce::Slider& newXSlider, juce::Slider& newYSlider, juce::Colour newColour)
     {
-        elements.add({&newXSlider, &newYSlider, newColour});
+        elements.add ({ &newXSlider, &newYSlider, newColour });
     }
 
 protected:

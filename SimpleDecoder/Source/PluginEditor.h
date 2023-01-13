@@ -26,37 +26,40 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
+#include "../../resources/customComponents/FilterVisualizer.h"
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
-#include "../../resources/customComponents/FilterVisualizer.h"
 #include "DecoderInfoBox.h"
 
-
-typedef ReverseSlider::SliderAttachment SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
+typedef ReverseSlider::SliderAttachment
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class SimpleDecoderAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, public juce::AudioProcessorValueTreeState::Listener
+class SimpleDecoderAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                          private juce::Timer,
+                                          public juce::AudioProcessorValueTreeState::Listener
 {
 public:
-    SimpleDecoderAudioProcessorEditor (SimpleDecoderAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    SimpleDecoderAudioProcessorEditor (SimpleDecoderAudioProcessor&,
+                                       juce::AudioProcessorValueTreeState&);
     ~SimpleDecoderAudioProcessorEditor();
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
-
     void timerCallback() override;
     void loadPresetFile();
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
+
 private:
     // ====================== beging essentials ==================
     // lookAndFeel class with the IEM plug-in suite design
@@ -66,7 +69,6 @@ private:
     SimpleDecoderAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
 
-
     /* title and footer component
      title component can hold different widgets for in- and output:
         - NoIOWidget (if there's no need for an input or output widget)
@@ -75,7 +77,7 @@ private:
         - DirectivitiyIOWidget
      */
 
-    TitleBar<AmbisonicIOWidget<>, AudioChannelsIOWidget<0,false>> title;
+    TitleBar<AmbisonicIOWidget<>, AudioChannelsIOWidget<0, false>> title;
     OSCFooter footer;
     // =============== end essentials ============
 
@@ -93,7 +95,8 @@ private:
 
     // Filter slider
     ReverseSlider slLowPassFrequency, slHighPassFrequency, slLowPassGain;
-    std::unique_ptr<SliderAttachment> slLowPassFrequencyAttachment, slLowPassGainAttachment, slHighPassFrequencyAttachment;
+    std::unique_ptr<SliderAttachment> slLowPassFrequencyAttachment, slLowPassGainAttachment,
+        slHighPassFrequencyAttachment;
     SimpleLabel lbLowPassFrequency, lbLowPassGain, lbHighPassFrequency;
 
     // Subwoofer mode

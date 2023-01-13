@@ -22,14 +22,14 @@
 
 #pragma once
 
+#include "../../resources/customComponents/FilterVisualizer.h"
+#include "../../resources/customComponents/PositionPlane.h"
+#include "../../resources/customComponents/ReverseSlider.h"
+#include "../../resources/customComponents/SimpleLabel.h"
+#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-#include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/lookAndFeel/IEM_LaF.h"
-#include "../../resources/customComponents/TitleBar.h"
-#include "../../resources/customComponents/PositionPlane.h"
-#include "../../resources/customComponents/SimpleLabel.h"
-#include "../../resources/customComponents/FilterVisualizer.h"
 #include "ReflectionsVisualizer.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
@@ -39,11 +39,14 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class RoomEncoderAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer,
-private juce::Slider::Listener, private juce::Button::Listener
+class RoomEncoderAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                        private juce::Timer,
+                                        private juce::Slider::Listener,
+                                        private juce::Button::Listener
 {
 public:
-    RoomEncoderAudioProcessorEditor (RoomEncoderAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    RoomEncoderAudioProcessorEditor (RoomEncoderAudioProcessor&,
+                                     juce::AudioProcessorValueTreeState&);
     ~RoomEncoderAudioProcessorEditor();
 
     //==============================================================================
@@ -51,11 +54,11 @@ public:
     void resized() override;
 
     //==============================================================================
-    void sliderValueChanged(juce::Slider *slider) override;
+    void sliderValueChanged (juce::Slider* slider) override;
 
     //==============================================================================
-    void buttonClicked (juce::Button *button) override {};
-    void buttonStateChanged (juce::Button *button) override;
+    void buttonClicked (juce::Button* button) override {};
+    void buttonStateChanged (juce::Button* button) override;
 
 private:
     //==============================================================================
@@ -79,8 +82,10 @@ private:
     juce::ToggleButton tbSyncRoomSize, tbSyncReflection, tbSyncListener;
     juce::ToggleButton tbDirectPathUnityGain, tbDirectPathZeroDelay, tbRenderDirectPath;
     std::unique_ptr<ComboBoxAttachment> cbSyncChannelAttachment;
-    std::unique_ptr<ButtonAttachment> tbSyncRoomSizeAttachment, tbSyncReflectionAttachment, tbSyncListenerAttachment;
-    std::unique_ptr<ButtonAttachment> tbDirectPathUnityGainAttachment, tbDirectPathZeroDelayAttachment, tbRenderDirectPathAttachment;
+    std::unique_ptr<ButtonAttachment> tbSyncRoomSizeAttachment, tbSyncReflectionAttachment,
+        tbSyncListenerAttachment;
+    std::unique_ptr<ButtonAttachment> tbDirectPathUnityGainAttachment,
+        tbDirectPathZeroDelayAttachment, tbRenderDirectPathAttachment;
 
     juce::GroupComponent gcRoomDimensions, gcSourcePosition, gcListenerPosition;
     juce::GroupComponent gcReflectionProperties;
@@ -93,8 +98,8 @@ private:
     SimpleLabel lbLSF, lbLSG, lbHSF, lbHSG;
 
     SimpleLabel lbWallAttenuation;
-    SimpleLabel lbWallAttenuationFront, lbWallAttenuationBack, lbWallAttenuationLeft, lbWallAttenuationRight, lbWallAttenuationCeiling, lbWallAttenuationFloor;
-
+    SimpleLabel lbWallAttenuationFront, lbWallAttenuationBack, lbWallAttenuationLeft,
+        lbWallAttenuationRight, lbWallAttenuationCeiling, lbWallAttenuationFloor;
 
     ReverseSlider slSourceX, slSourceY, slSourceZ;
     ReverseSlider slListenerX, slListenerY, slListenerZ;
@@ -103,18 +108,22 @@ private:
     ReverseSlider slReflCoeff, slLowShelfFreq, slLowShelfGain, slHighShelfFreq, slHighShelfGain;
     ReverseSlider slNumReflections;
 
-    ReverseSlider slWallAttenuationFront, slWallAttenuationBack, slWallAttenuationLeft, slWallAttenuationRight, slWallAttenuationCeiling, slWallAttenuationFloor;
-
+    ReverseSlider slWallAttenuationFront, slWallAttenuationBack, slWallAttenuationLeft,
+        slWallAttenuationRight, slWallAttenuationCeiling, slWallAttenuationFloor;
 
     std::unique_ptr<SliderAttachment> slSourceXAttachment, slSourceYAttachment, slSourceZAttachment;
-    std::unique_ptr<SliderAttachment> slListenerXAttachment, slListenerYAttachment, slListenerZAttachment;
+    std::unique_ptr<SliderAttachment> slListenerXAttachment, slListenerYAttachment,
+        slListenerZAttachment;
     std::unique_ptr<SliderAttachment> slRoomXAttachment, slRoomYAttachment, slRoomZAttachment;
 
-    std::unique_ptr<SliderAttachment> slReflCoeffAttachment, slLowShelfFreqAttachment, slLowShelfGainAttachment, slHighShelfFreqAttachment, slHighShelfGainAttachment;
+    std::unique_ptr<SliderAttachment> slReflCoeffAttachment, slLowShelfFreqAttachment,
+        slLowShelfGainAttachment, slHighShelfFreqAttachment, slHighShelfGainAttachment;
     std::unique_ptr<SliderAttachment> slNumReflectionsAttachment;
 
-    std::unique_ptr<SliderAttachment> slWallAttenuationFrontAttachment, slWallAttenuationBackAttachment, slWallAttenuationLeftAttachment, slWallAttenuationRightAttachment, slWallAttenuationCeilingAttachment, slWallAttenuationFloorAttachment;
-
+    std::unique_ptr<SliderAttachment> slWallAttenuationFrontAttachment,
+        slWallAttenuationBackAttachment, slWallAttenuationLeftAttachment,
+        slWallAttenuationRightAttachment, slWallAttenuationCeilingAttachment,
+        slWallAttenuationFloorAttachment;
 
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAttachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAttachement;
@@ -127,8 +136,6 @@ private:
     juce::OpenGLContext mOpenGlContext;
 
     juce::TooltipWindow toolTipWin;
-
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RoomEncoderAudioProcessorEditor)
 };

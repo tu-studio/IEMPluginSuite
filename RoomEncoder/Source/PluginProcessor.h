@@ -24,31 +24,30 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "../../resources/interpLagrangeWeights.h"
-#include "../../resources/efficientSHvanilla.h"
-#include "reflections.h"
-#include "../../resources/ambisonicTools.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../../resources/ambisonicTools.h"
 #include "../../resources/customComponents/FilterVisualizer.h"
-
+#include "../../resources/efficientSHvanilla.h"
+#include "../../resources/interpLagrangeWeights.h"
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "reflections.h"
 
 #ifdef JUCE_MAC
-#define VIMAGE_H // avoid namespace clashes
-#include <Accelerate/Accelerate.h>
+    #define VIMAGE_H // avoid namespace clashes
+    #include <Accelerate/Accelerate.h>
 #endif
 
 #if JUCE_USE_SIMD
-    using IIRfloat = juce::dsp::SIMDRegister<float>;
-    static constexpr int IIRfloat_elements = juce::dsp::SIMDRegister<float>::size();
+using IIRfloat = juce::dsp::SIMDRegister<float>;
+static constexpr int IIRfloat_elements = juce::dsp::SIMDRegister<float>::size();
 #else /* !JUCE_USE_SIMD */
-    using IIRfloat = float;
-    static constexpr int IIRfloat_elements = 1;
+using IIRfloat = float;
+static constexpr int IIRfloat_elements = 1;
 #endif /* JUCE_USE_SIMD */
 
 #define ProcessorClass RoomEncoderAudioProcessor
 
-const int mSig[] = {1,-1};
+const int mSig[] = { 1, -1 };
 using namespace juce::dsp;
 
 struct RoomParams
@@ -59,16 +58,18 @@ struct RoomParams
     float roomX, roomY, roomZ;
     float listenerX, listenerY, listenerZ;
     float reflCoeff, lowShelfFreq, lowShelfGain, highShelfFreq, highShelfGain, numRefl;
-    float wallAttenuationFront, wallAttenuationBack, wallAttenuationLeft, wallAttenuationRight, wallAttenuationCeiling, wallAttenuationFloor;
+    float wallAttenuationFront, wallAttenuationBack, wallAttenuationLeft, wallAttenuationRight,
+        wallAttenuationCeiling, wallAttenuationFloor;
 };
 
-struct SharedParams {
+struct SharedParams
+{
     SharedParams()
     {
-        rooms.add(RoomParams());
-        rooms.add(RoomParams());
-        rooms.add(RoomParams());
-        rooms.add(RoomParams());
+        rooms.add (RoomParams());
+        rooms.add (RoomParams());
+        rooms.add (RoomParams());
+        rooms.add (RoomParams());
     }
     juce::Array<RoomParams> rooms;
 };
@@ -90,8 +91,9 @@ struct ReflectionProperty
 //==============================================================================
 /**
 */
-class RoomEncoderAudioProcessor  :  public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>>,
-                                    private juce::Timer
+class RoomEncoderAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>>,
+      private juce::Timer
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -125,8 +127,7 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
-
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
@@ -158,7 +159,8 @@ private:
     //==============================================================================
     inline void clear (juce::dsp::AudioBlock<IIRfloat>& ab);
 
-    bool readingSharedParams = false;;
+    bool readingSharedParams = false;
+    ;
 
     double phi;
     double theta;
@@ -216,7 +218,7 @@ private:
     juce::OwnedArray<juce::dsp::AudioBlock<IIRfloat>> interleavedData;
     juce::dsp::AudioBlock<float> zero;
 
-    juce::Array<int> filterPoints {1, 7, 25, 61, 113, 169, 213};
+    juce::Array<int> filterPoints { 1, 7, 25, 61, 113, 169, 213 };
 
     juce::Vector3D<float> sourcePos, listenerPos;
 
@@ -232,7 +234,7 @@ private:
 
     int readOffset;
 
-    float powReflCoeff[maxOrderImgSrc+1];
+    float powReflCoeff[maxOrderImgSrc + 1];
     double dist2smpls;
 
     float SHcoeffsOld[nImgSrc][64];
