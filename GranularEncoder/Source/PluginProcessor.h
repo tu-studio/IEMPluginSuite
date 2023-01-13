@@ -37,6 +37,10 @@
 #define maxNumGrains 512
 #define windowResolution 1024
 #define CIRC_BUFFER_SECONDS 8.0f
+#define MAX_GRAIN_LENGTH 2.0f
+#define MIN_GRAIN_LENGTH 0.001f
+#define MAX_DELTA_T 2.0f
+#define MIN_DELTA_T 0.001f
 #define GUI_SKEW 0.5f
 
 //==============================================================================
