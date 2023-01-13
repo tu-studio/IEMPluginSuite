@@ -21,6 +21,7 @@
  */
 
 #pragma once
+#include <JuceHeader.h>
 #include <complex>
 template <typename coefficientsType>
 class FilterVisualizer : public juce::Component

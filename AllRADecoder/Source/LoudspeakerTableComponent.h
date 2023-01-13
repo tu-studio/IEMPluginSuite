@@ -23,6 +23,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "LoudspeakerVisualizer.h"
 
 //==============================================================================
 /*

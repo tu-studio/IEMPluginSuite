@@ -21,6 +21,8 @@
  */
 
 #pragma once
+#include "PluginProcessor.h"
+#include <JuceHeader.h>
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;

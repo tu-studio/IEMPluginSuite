@@ -21,6 +21,8 @@
  */
 
 #pragma once
+
+#include <JuceHeader.h>
 namespace iem
 {
 

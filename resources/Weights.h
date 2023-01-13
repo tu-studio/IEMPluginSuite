@@ -21,6 +21,11 @@
  */
 
 #pragma once
+
+#ifndef sqrt4PI
+    #define sqrt4PI 3.544907701811032
+#endif
+
 namespace Weights
 {
 constexpr const static float maxRe[8][8] = {
