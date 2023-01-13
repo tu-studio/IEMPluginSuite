@@ -8,7 +8,7 @@ juce_add_plugin (ProbeDecoder
     PRODUCT_NAME "ProbeDecoder"
     FORMATS ${IEM_FORMATS}
     VERSION "0.5.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/ProbeDecoder")
+    LV2URI "http://plugins.iem.at/ProbeDecoder")
 
 
 juce_generate_juce_header(ProbeDecoder)
@@ -45,6 +45,7 @@ target_include_directories(ProbeDecoder PRIVATE Source)
 
 target_link_libraries(ProbeDecoder PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

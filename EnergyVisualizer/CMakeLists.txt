@@ -8,7 +8,7 @@ juce_add_plugin (EnergyVisualizer
     PRODUCT_NAME "EnergyVisualizer"
     FORMATS ${IEM_FORMATS}
     VERSION "1.0.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/EnergyVisualizer")
+    LV2URI "http://plugins.iem.at/EnergyVisualizer")
 
 
 juce_generate_juce_header (EnergyVisualizer)
@@ -45,6 +45,7 @@ target_include_directories (EnergyVisualizer PRIVATE Source)
 
 target_link_libraries (EnergyVisualizer PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

@@ -8,7 +8,7 @@ juce_add_plugin (DualDelay
     PRODUCT_NAME "DualDelay"
     FORMATS ${IEM_FORMATS}
     VERSION "0.5.2"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/DualDelay")
+    LV2URI "http://plugins.iem.at/DualDelay")
 
 
 juce_generate_juce_header (DualDelay)
@@ -45,6 +45,7 @@ target_include_directories (DualDelay PRIVATE Source)
 
 target_link_libraries (DualDelay PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

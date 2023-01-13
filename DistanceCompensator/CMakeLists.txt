@@ -8,7 +8,7 @@ juce_add_plugin (DistanceCompensator
     PRODUCT_NAME "DistanceCompensator"
     FORMATS ${IEM_FORMATS}
     VERSION "0.3.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/DistanceCompensator")
+    LV2URI "http://plugins.iem.at/DistanceCompensator")
 
 juce_generate_juce_header (DistanceCompensator)
 
@@ -44,6 +44,7 @@ target_include_directories (DistanceCompensator PRIVATE Source)
 
 target_link_libraries (DistanceCompensator PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

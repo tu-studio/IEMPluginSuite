@@ -8,7 +8,7 @@ juce_add_plugin (BinauralDecoder
     PRODUCT_NAME "BinauralDecoder"
     FORMATS ${IEM_FORMATS}
     VERSION "0.6.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/BinauralDecoder")
+    LV2URI "http://plugins.iem.at/BinauralDecoder")
 
 
 juce_generate_juce_header(BinauralDecoder)
@@ -86,6 +86,7 @@ juce_add_binary_data (BinauralDecoderIRs
 
 target_link_libraries (BinauralDecoder PRIVATE
     LAF_fonts
+    IEM_logo
     BinauralDecoderEQs
     BinauralDecoderIRs
     juce::juce_audio_utils

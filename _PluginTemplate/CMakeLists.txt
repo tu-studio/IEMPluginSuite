@@ -7,7 +7,7 @@ juce_add_plugin (PluginTemplate
     PRODUCT_NAME "PluginTemplate"
     FORMATS ${IEM_FORMATS}
     VERSION "0.0.1"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/_PluginTemplate")
+    LV2URI "http://plugins.iem.at/_PluginTemplate")
 
 
 juce_generate_juce_header(PluginTemplate)
@@ -45,6 +45,7 @@ target_include_directories(PluginTemplate PRIVATE Source)
 
 target_link_libraries(PluginTemplate PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

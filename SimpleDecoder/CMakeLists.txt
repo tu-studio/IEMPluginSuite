@@ -8,7 +8,7 @@ juce_add_plugin (SimpleDecoder
     PRODUCT_NAME "SimpleDecoder"
     FORMATS ${IEM_FORMATS}
     VERSION "0.5.3"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/SimpleDecoder")
+    LV2URI "http://plugins.iem.at/SimpleDecoder")
 
 
 juce_generate_juce_header(SimpleDecoder)
@@ -62,6 +62,7 @@ target_include_directories(SimpleDecoder PRIVATE Source)
 
 target_link_libraries(SimpleDecoder PRIVATE
     LAF_fonts
+    IEM_logo
     SimpleDecoderPresets
     juce::juce_audio_utils
     juce::juce_audio_plugin_client

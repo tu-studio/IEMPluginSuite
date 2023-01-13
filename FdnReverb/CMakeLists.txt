@@ -8,7 +8,7 @@ juce_add_plugin (FdnReverb
     PRODUCT_NAME "FdnReverb"
     FORMATS ${IEM_FORMATS}
     VERSION "1.2.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/FdnReverb")
+    LV2URI "http://plugins.iem.at/FdnReverb")
 
 
 juce_generate_juce_header (FdnReverb)
@@ -45,6 +45,7 @@ target_include_directories (FdnReverb PRIVATE Source)
 
 target_link_libraries (FdnReverb PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

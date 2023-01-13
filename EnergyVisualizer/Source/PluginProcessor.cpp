@@ -43,8 +43,11 @@ createParameterLayout()), decoderMatrix (nSamplePoints, 64)
     useSN3D = parameters.getRawParameterValue ("useSN3D");
     peakLevel = parameters.getRawParameterValue ("peakLevel");
     dynamicRange = parameters.getRawParameterValue ("dynamicRange");
+    holdMax = parameters.getRawParameterValue ("holdMax");
+    RMStimeConstant = parameters.getRawParameterValue ("RMStimeConstant");
 
     parameters.addParameterListener ("orderSetting", this);
+    parameters.addParameterListener ("RMStimeConstant", this);
 
     for (int point = 0; point < nSamplePoints; ++point)
     {
@@ -96,7 +99,7 @@ void EnergyVisualizerAudioProcessor::prepareToPlay (double sampleRate, int sampl
 {
     checkInputAndOutput (this, *orderSetting, 0, true);
 
-    timeConstant = exp (-1.0 / (sampleRate * 0.1 / samplesPerBlock)); // 100ms RMS averaging
+    timeConstant = exp (-1.0 / (sampleRate * (*RMStimeConstant / 1000) / samplesPerBlock));
 
     sampledSignal.resize (samplesPerBlock);
     std::fill (rms.begin(), rms.end(), 0.0f);
@@ -196,7 +199,11 @@ void EnergyVisualizerAudioProcessor::setStateInformation (const void *data, int 
 //==============================================================================
 void EnergyVisualizerAudioProcessor::parameterChanged (const juce::String &parameterID, float newValue)
 {
-    if (parameterID == "orderSetting") userChangedIOSettings = true;
+    if (parameterID == "orderSetting")
+        userChangedIOSettings = true;
+    if (parameterID == "RMStimeConstant")
+        timeConstant = exp (-1.0 / (getSampleRate() * (*RMStimeConstant / 1000) / getBlockSize()));
+        
 }
 
 
@@ -230,11 +237,20 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>> EnergyVisualizerAudioPr
                                      }, nullptr));
 
     params.push_back (OSCParameterInterface::createParameterTheOldWay ("peakLevel", "Peak level", "dB",
-                                    juce::NormalisableRange<float> (-50.0f, 10.0f, 0.1f), 0.0,
+                                    juce::NormalisableRange<float> (-50.0f, 10.0f, 0.1f), 0.0f,
                                     [](float value) {return juce::String(value, 1);}, nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("dynamicRange", "Dynamic juce::Range", "dB",
-                                                       juce::NormalisableRange<float> (10.0f, 60.0f, 1.f), 35.0,
+    params.push_back (OSCParameterInterface::createParameterTheOldWay ("dynamicRange", "Dynamic Range", "dB",
+                                                       juce::NormalisableRange<float> (10.0f, 60.0f, 1.f), 35.0f,
+                                                       [](float value) {return juce::String (value, 0);}, nullptr));
+    
+    params.push_back (OSCParameterInterface::createParameterTheOldWay ("holdMax", "Hold maximal RMS value", "",
+                                                                       juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                                                       [](float value) {if (value >= 0.5f) return "ON";
+                                                                           else return "OFF";}, nullptr));
+    
+    params.push_back (OSCParameterInterface::createParameterTheOldWay ("RMStimeConstant", "RMS time constant", "ms",
+                                                       juce::NormalisableRange<float> (10.0f, 1000.0f, 1.0f, 0.4f), 100.0f,
                                                        [](float value) {return juce::String (value, 0);}, nullptr));
 
     return params;

@@ -12,10 +12,21 @@ For more information, installation guides and plug-in descriptions see:
 
 
 ## Compilation Guide
-The IEM Plug-in Suite can be built using [CMake](https://cmake.org) (see commands below) and already comes with the JUCE dependency as a git submodule. You can still build the plug-ins using the Projucer projects (*.jucer), however consider this  deprecated, the Projucer files will no longer be updated.
+The IEM Plug-in Suite can be built using [CMake](https://cmake.org) (see commands below) and already comes with the JUCE dependency as a git submodule. You can still build the plug-ins using the Projucer projects (*.jucer), however consider this deprecated, the Projucer files will no longer be updated. The general system requirements are listed in the [JUCE Repository](https://github.com/juce-framework/JUCE/blob/7.0.3/README.md#minimum-system-requirements).
+
+### Dependencies on Linux
+Before compiling on Linux, some dependencies must be met. For Ubuntu (and most likely the majority of Debian-based systems), those are listed in the [JUCE docs](https://github.com/juce-framework/JUCE/blob/7.0.3/docs/Linux%20Dependencies.md). On RMP-based systems (e.g. Fedora), those are installed with 
+```
+dnf install alsa-lib-devel fftw-devel findutils freetype-devel gcc-c++  \
+             libX11-devel libXcursor-devel curl-devel libXinerama-devel \
+             libXrandr-devel libglvnd-devel make \
+             pipewire-jack-audio-connection-kit-devel pkgconf-pkg-config \
+             unzip util-linux which xorg-x11-server-Xvfb
+```
+Please note, that we are testing the plug-ins only on Debian and cannot guarantee operation on other distributions.
 
 ### FFTW Dependency on Windows and Linux
-The BinauralDecoder plug-ins uses fast convolution for decoding the Ambisonic signals to binaural ear signals. Fast convolution relies on the Discrete Fourier Transform (DFT) to make the convolution more efficient. There are several DFT engines around, Apple comes with VDSP, and also JUCE comes with one, which should be considered as a fallback as its not very optimized. For the remaining platforms Windows and Linux the fftw3 library](http://fftw.org) is recommended. On Linux, you can simply install the `libfftw3-dev` package (for the static library) and you should be all set.
+The **Binaural**Decoder plug-ins uses fast convolution for decoding the Ambisonic signals to binaural ear signals. Fast convolution relies on the Discrete Fourier Transform (DFT) to make the convolution more efficient. There are several DFT engines around, Apple comes with VDSP, and also JUCE comes with one, which should be considered as a fallback as its not very optimized. For the remaining platforms Windows and Linux the [fftw3 library](http://fftw.org) is recommended. On Linux, you can simply install the `libfftw3-dev` package (for the static library) and you should be all set.
 
 On Windows, you will need to download the source code from http://fftw.org/download.html (e.g. `fftw-3.3.10.tar.gz`) and unpack it into an `fftw` directory in the root of this repository, so that the FFTW's `CMakeLists.txt` is placed into `<directoryofthisreadme>/fftw/CMakeLists.txt`. That way, the IEM Plug-in Suite CMake project can find it!
 

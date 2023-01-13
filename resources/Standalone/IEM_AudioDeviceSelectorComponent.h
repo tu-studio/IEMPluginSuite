@@ -54,6 +54,12 @@ PURPOSE, ARE
 */
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#if JUCE_JACK
+    #define IEM_JACK_DEVICENAME "JACK(iem)"
+#else
+    #define IEM_JACK_DEVICENAME "JACK"
+#endif
+
 namespace iem
 {
 

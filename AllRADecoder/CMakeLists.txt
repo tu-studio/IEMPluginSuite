@@ -8,7 +8,7 @@ juce_add_plugin (AllRADecoder
     PRODUCT_NAME "AllRADecoder"
     FORMATS ${IEM_FORMATS}
     VERSION "0.9.3"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/AllRADecoder")
+    LV2URI "http://plugins.iem.at/AllRADecoder")
 
 
 juce_generate_juce_header (AllRADecoder)
@@ -55,6 +55,7 @@ target_include_directories (AllRADecoder PRIVATE Source)
 
 target_link_libraries (AllRADecoder PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

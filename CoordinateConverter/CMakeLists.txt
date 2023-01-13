@@ -8,7 +8,7 @@ juce_add_plugin (CoordinateConverter
     PRODUCT_NAME "CoordinateConverter"
     FORMATS ${IEM_FORMATS}
     VERSION "0.4.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/CoordinateConverter")
+    LV2URI "http://plugins.iem.at/CoordinateConverter")
 
 
 juce_generate_juce_header (CoordinateConverter)
@@ -45,6 +45,7 @@ target_include_directories (CoordinateConverter PRIVATE Source)
 
 target_link_libraries (CoordinateConverter PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

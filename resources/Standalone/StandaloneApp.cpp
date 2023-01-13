@@ -73,20 +73,33 @@ public:
 
         options.applicationName = getApplicationName();
         options.filenameSuffix = ".settings";
-        options.osxLibrarySubFolder = "Application Support";
+        options.osxLibrarySubFolder = "Application Support/IEMAudioPlugins";
 #if JUCE_LINUX || JUCE_BSD
-        options.folderName = "~/.config";
+        options.folderName =
+            File::getSpecialLocation (File::userApplicationDataDirectory).getFullPathName()
+            + File::getSeparatorString() + "IEMAudioPlugins";
 #else
-        options.folderName = "";
+        options.folderName = "IEMAudioPlugins";
 #endif
 
         appProperties.setStorageParameters (options);
     }
 
-    const juce::String getApplicationName() override { return CharPointer_UTF8 (JucePlugin_Name); }
-    const juce::String getApplicationVersion() override { return JucePlugin_VersionString; }
-    bool moreThanOneInstanceAllowed() override { return true; }
-    void anotherInstanceStarted (const juce::String&) override {}
+    const juce::String getApplicationName() override
+    {
+        return CharPointer_UTF8 (JucePlugin_Name);
+    }
+    const juce::String getApplicationVersion() override
+    {
+        return JucePlugin_VersionString;
+    }
+    bool moreThanOneInstanceAllowed() override
+    {
+        return true;
+    }
+    void anotherInstanceStarted (const juce::String&) override
+    {
+    }
 
     virtual MyStandaloneFilterWindow* createWindow()
     {

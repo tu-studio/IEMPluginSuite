@@ -8,7 +8,7 @@ juce_add_plugin (ToolBox
     PRODUCT_NAME "ToolBox"
     FORMATS ${IEM_FORMATS}
     VERSION "0.5.4"
-    LV2URI "https://git.iem.at/audioplugins/IEMPluginSuite/-/tree/master/ToolBox")
+    LV2URI "http://plugins.iem.at/ToolBox")
 
 
 juce_generate_juce_header(ToolBox)
@@ -45,6 +45,7 @@ target_include_directories(ToolBox PRIVATE Source)
 
 target_link_libraries(ToolBox PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

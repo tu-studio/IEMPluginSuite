@@ -73,8 +73,13 @@ public:
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
     //==============================================================================
 
-    const float getPeakLevelSetting() { return *peakLevel; }
-    const float getDynamicRange() { return *dynamicRange; }
+    float getPeakLevelSetting() const { return peakLevel->load (std::memory_order_relaxed); }
+    float getDynamicRange() const { return dynamicRange->load (std::memory_order_relaxed); }
+    bool getHoldRMSSetting() const
+    {
+        if (holdMax->load (std::memory_order_relaxed) >= 0.5f) return true;
+        else return false;
+    }
 
     std::vector<float> rms;
     juce::Atomic<juce::Time> lastEditorTime;
@@ -86,6 +91,8 @@ private:
     std::atomic<float>* useSN3D;
     std::atomic<float>* peakLevel;
     std::atomic<float>* dynamicRange;
+    std::atomic<float>* holdMax;
+    std::atomic<float>* RMStimeConstant;
 
     float timeConstant;
 

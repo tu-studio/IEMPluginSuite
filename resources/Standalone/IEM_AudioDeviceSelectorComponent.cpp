@@ -1071,7 +1071,7 @@ IEMAudioDeviceSelectorComponent::IEMAudioDeviceSelectorComponent (
 
     auto* device = deviceManager.getCurrentAudioDevice();
     if (device != nullptr)
-        jackActive = device->getTypeName() == "JACK";
+        jackActive = device->getTypeName() == IEM_JACK_DEVICENAME;
 
     if (types.size() > 1)
     {
@@ -1193,7 +1193,7 @@ void IEMAudioDeviceSelectorComponent::updateDeviceType()
     {
         audioDeviceSettingsComp.reset();
         deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
-        jackActive = type->getTypeName() == "JACK";
+        jackActive = type->getTypeName() == IEM_JACK_DEVICENAME;
 
         updateAllControls(); // needed in case the type hasn't actually changed
     }
