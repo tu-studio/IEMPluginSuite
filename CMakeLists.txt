@@ -40,9 +40,9 @@ set (PLUGINS_TO_BUILD
 # You can either change them here or use the command line to switch them on/off.
 option (IEM_USE_SYSTEM_JUCE "Use JUCE found via CMake rather than the bundled one." OFF)
 option (IEM_BUILD_VST2 "Build VST2 version of the plug-ins." OFF)
-option (IEM_BUILD_VST3 "Build VST3 version of the plug-ins." ON)
+option (IEM_BUILD_VST3 "Build VST3 version of the plug-ins." OFF)
 option (IEM_BUILD_LV2 "Build LV2 version of the plug-ins." OFF)
-option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." OFF)
+option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." ON)
 option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." ON)
 
 set (IEM_POST_BUILD_INSTALL "USER" CACHE STRING "Define if plug-ins are installed for USER, SYSTEM or if you want NO installation")
