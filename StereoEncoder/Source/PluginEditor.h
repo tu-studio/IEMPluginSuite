@@ -24,10 +24,10 @@
 #include "PluginProcessor.h"
 
 #include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/lookAndFeel/IEM_LaF.h"
-#include "../../resources/customComponents/TitleBar.h"
-#include "../../resources/customComponents/SpherePanner.h"
 #include "../../resources/customComponents/SimpleLabel.h"
+#include "../../resources/customComponents/SpherePanner.h"
+#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -35,28 +35,30 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 //==============================================================================
 /**
 */
-class StereoEncoderAudioProcessorEditor  : public juce::AudioProcessorEditor,
-private juce::Timer,
-public SpherePanner::Listener,
-private juce::KeyListener
+class StereoEncoderAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                          private juce::Timer,
+                                          public SpherePanner::Listener,
+                                          private juce::KeyListener
 {
 public:
-
-    StereoEncoderAudioProcessorEditor (StereoEncoderAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    StereoEncoderAudioProcessorEditor (StereoEncoderAudioProcessor&,
+                                       juce::AudioProcessorValueTreeState&);
     ~StereoEncoderAudioProcessorEditor();
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    void mouseWheelOnSpherePannerMoved (SpherePanner* sphere, const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
+    void mouseWheelOnSpherePannerMoved (SpherePanner* sphere,
+                                        const juce::MouseEvent& event,
+                                        const juce::MouseWheelDetails& wheel) override;
 
-    bool keyPressed (const juce::KeyPress &key, juce::Component *originatingComponent) override;
+    bool keyPressed (const juce::KeyPress& key, juce::Component* originatingComponent) override;
 
 private:
     LaF globalLaF;
 
-    TitleBar<AudioChannelsIOWidget<2,false>, AmbisonicIOWidget<>> title;
+    TitleBar<AudioChannelsIOWidget<2, false>, AmbisonicIOWidget<>> title;
     OSCFooter footer;
 
     void timerCallback() override;
@@ -66,8 +68,9 @@ private:
     StereoEncoderAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
 
-    juce::GroupComponent quatGroup,ypGroup,settingsGroup;
-    ReverseSlider azimuthSlider, elevationSlider, rollSlider, widthSlider, qwSlider, qxSlider, qySlider, qzSlider;
+    juce::GroupComponent quatGroup, ypGroup, settingsGroup;
+    ReverseSlider azimuthSlider, elevationSlider, rollSlider, widthSlider, qwSlider, qxSlider,
+        qySlider, qzSlider;
     juce::ComboBox inputChooser;
 
     SpherePanner sphere;

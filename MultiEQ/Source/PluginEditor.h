@@ -26,24 +26,27 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
-#include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/customComponents/SimpleLabel.h"
 #include "../../resources/customComponents/FilterVisualizer.h"
 #include "../../resources/customComponents/OnOffButton.h"
+#include "../../resources/customComponents/ReverseSlider.h"
+#include "../../resources/customComponents/SimpleLabel.h"
 
-
-typedef ReverseSlider::SliderAttachment SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
+typedef ReverseSlider::SliderAttachment
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class MultiEQAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, private juce::Button::Listener, private juce::ComboBox::Listener
+class MultiEQAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                    private juce::Timer,
+                                    private juce::Button::Listener,
+                                    private juce::ComboBox::Listener
 {
 public:
     MultiEQAudioProcessorEditor (MultiEQAudioProcessor&, juce::AudioProcessorValueTreeState&);
@@ -53,14 +56,13 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-
     void extracted();
 
     void timerCallback() override;
-    void extracted(int f, bool state);
+    void extracted (int f, bool state);
 
     void buttonClicked (juce::Button* button) override;
-    void comboBoxChanged (juce::ComboBox *comboBoxThatHasChanged) override;
+    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
 
     void updateFilterVisualizer();
     void updateEnablement (const int idx, const bool shouldBeEnabled);
@@ -73,7 +75,6 @@ private:
     // stored references to the AudioProcessor and juce::ValueTreeState holding all the parameters
     MultiEQAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
-
 
     /* title and footer component
      title component can hold different widgets for in- and output:
@@ -105,7 +106,6 @@ private:
 
     bool gainEnabled[numFilterBands];
     bool qEnabled[numFilterBands];
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiEQAudioProcessorEditor)
 };

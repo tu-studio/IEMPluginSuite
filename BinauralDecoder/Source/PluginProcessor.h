@@ -22,12 +22,13 @@
 
 #pragma once
 
-#include <JuceHeader.h>
 #include "../../resources/AudioProcessorBase.h"
+#include <JuceHeader.h>
 
 #define ProcessorClass BinauralDecoderAudioProcessor
 
-class BinauralDecoderAudioProcessor  :  public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::AudioChannels<2>>
+class BinauralDecoderAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::AudioChannels<2>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -47,7 +48,6 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
-
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -60,14 +60,12 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
-
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
     //==============================================================================
-
 
     static const juce::StringArray headphoneEQs;
 
@@ -81,7 +79,7 @@ private:
 
     int fftLength = -1;
     int irLength = 236;
-    int irLengthMinusOne = irLength-1;
+    int irLengthMinusOne = irLength - 1;
 
     std::vector<std::complex<float>> fftBuffer;
     std::vector<std::complex<float>> accumMid;
@@ -95,9 +93,12 @@ private:
     juce::AudioBuffer<float> irsFrequencyDomain;
     double irsSampleRate = 44100.0;
     //mapping between mid-channel index and channel index
-    const int mix2cix[36] = { 0, 2, 3, 6, 7, 8, 12, 13, 14, 15, 20, 21, 22, 23, 24, 30, 31, 32, 33, 34, 35, 42, 43, 44, 45, 46, 47, 48, 56, 57, 58, 59, 60, 61, 62, 63 };
+    const int mix2cix[36] = { 0,  2,  3,  6,  7,  8,  12, 13, 14, 15, 20, 21,
+                              22, 23, 24, 30, 31, 32, 33, 34, 35, 42, 43, 44,
+                              45, 46, 47, 48, 56, 57, 58, 59, 60, 61, 62, 63 };
     //mapping between side-channel index and channel index
-    const int six2cix[28] = { 1, 4, 5, 9, 10, 11, 16, 17, 18, 19, 25, 26, 27, 28, 29, 36, 37, 38, 39, 40, 41, 49, 50, 51, 52, 53, 54, 55 };
+    const int six2cix[28] = { 1,  4,  5,  9,  10, 11, 16, 17, 18, 19, 25, 26, 27, 28,
+                              29, 36, 37, 38, 39, 40, 41, 49, 50, 51, 52, 53, 54, 55 };
     int nMidCh;
     int nSideCh;
 

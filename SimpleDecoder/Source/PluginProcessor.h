@@ -22,21 +22,22 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-#include "../../resources/AudioProcessorBase.h"
 #include "../../resources/AmbisonicDecoder.h"
+#include "../../resources/AudioProcessorBase.h"
+#include <JuceHeader.h>
 
 #define CONFIGURATIONHELPER_ENABLE_DECODER_METHODS 1
 #include "../../resources/ConfigurationHelper.h"
 
-#include "../../resources/ReferenceCountedDecoder.h"
 #include "../../resources/FilterVisualizerHelper.h"
+#include "../../resources/ReferenceCountedDecoder.h"
 
 #define ProcessorClass SimpleDecoderAudioProcessor
 
 using namespace juce::dsp;
 //==============================================================================
-class SimpleDecoderAudioProcessor  :   public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::AudioChannels<>>
+class SimpleDecoderAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::AudioChannels<>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -69,29 +70,25 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
-
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
 
     //======= OSC ==================================================================
-    inline const bool processNotYetConsumedOSCMessage (const juce::OSCMessage &message) override;
+    inline const bool processNotYetConsumedOSCMessage (const juce::OSCMessage& message) override;
 
     //==============================================================================
-    juce::File getLastDir() {return lastDir;}
-    void setLastDir(juce::File newLastDir);
-    void loadConfiguration(const juce::File& presetFile);
+    juce::File getLastDir() { return lastDir; }
+    void setLastDir (juce::File newLastDir);
+    void loadConfiguration (const juce::File& presetFile);
 
     juce::Atomic<bool> updateDecoderInfo = true;
-    juce::Atomic<bool> messageChanged {true};
-    juce::String getMessageForEditor() {return messageForEditor;}
+    juce::Atomic<bool> messageChanged { true };
+    juce::String getMessageForEditor() { return messageForEditor; }
 
-    ReferenceCountedDecoder::Ptr getCurrentDecoderConfig()
-    {
-        return decoderConfig;
-    }
+    ReferenceCountedDecoder::Ptr getCurrentDecoderConfig() { return decoderConfig; }
 
     IIR::Coefficients<double>::Ptr cascadedHighPassCoeffs, cascadedLowPassCoeffs;
     juce::Atomic<bool> guiUpdateLowPassCoefficients = true;
@@ -129,7 +126,6 @@ private:
 
     juce::AudioBuffer<float> swBuffer;
 
-
     // processors
     std::unique_ptr<IIR::Filter<float>> lowPass1;
     std::unique_ptr<IIR::Filter<float>> lowPass2;
@@ -141,12 +137,12 @@ private:
 
     juce::dsp::Gain<float> masterGain;
 
-    juce::dsp::ProcessSpec highPassSpecs {48000, 0, 0};
+    juce::dsp::ProcessSpec highPassSpecs { 48000, 0, 0 };
 
     AmbisonicDecoder decoder;
 
-    ReferenceCountedDecoder::Ptr decoderConfig {nullptr};
-    juce::String messageForEditor {""};
+    ReferenceCountedDecoder::Ptr decoderConfig { nullptr };
+    juce::String messageForEditor { "" };
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDecoderAudioProcessor)
 };

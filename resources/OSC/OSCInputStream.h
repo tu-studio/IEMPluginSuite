@@ -27,8 +27,8 @@
 #include <sys/types.h>
 
 #if defined(_MSC_VER)
-	#include <BaseTsd.h>
-	typedef SSIZE_T ssize_t;
+    #include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
 #endif
 
 class MyOSCInputStream
@@ -39,28 +39,29 @@ public:
      @param sourceData               the block of data to use as the stream's source
      @param sourceDataSize           the number of bytes in the source data block
      */
-    MyOSCInputStream (const void* sourceData, size_t sourceDataSize)
-    : input (sourceData, sourceDataSize, false)
-    {}
+    MyOSCInputStream (const void* sourceData, size_t sourceDataSize) :
+        input (sourceData, sourceDataSize, false)
+    {
+    }
 
     //==============================================================================
     /** Returns a pointer to the source data block from which this stream is reading. */
-    const void* getData() const noexcept        { return input.getData(); }
+    const void* getData() const noexcept { return input.getData(); }
 
     /** Returns the number of bytes of source data in the block from which this stream is reading. */
-    size_t getDataSize() const noexcept         { return input.getDataSize(); }
+    size_t getDataSize() const noexcept { return input.getDataSize(); }
 
     /** Returns the current position of the stream. */
-    juce::uint64 getPosition()                        { return (juce::uint64) input.getPosition(); }
+    juce::uint64 getPosition() { return (juce::uint64) input.getPosition(); }
 
     /** Attempts to set the current position of the stream. Returns true if this was successful. */
-    bool setPosition (juce::int64 pos)                { return input.setPosition (pos); }
+    bool setPosition (juce::int64 pos) { return input.setPosition (pos); }
 
     /** Returns the total amount of data in bytes accessible by this stream. */
-    juce::int64 getTotalLength()                      { return input.getTotalLength(); }
+    juce::int64 getTotalLength() { return input.getTotalLength(); }
 
     /** Returns true if the stream has no more data to read. */
-    bool isExhausted()                          { return input.isExhausted(); }
+    bool isExhausted() { return input.isExhausted(); }
 
     //==============================================================================
     juce::int32 readInt32()
@@ -89,8 +90,9 @@ public:
         auto s = input.readString();
         auto posEnd = (size_t) getPosition();
 
-        if (static_cast<const char*> (getData()) [posEnd - 1] != '\0')
-            throw juce::OSCFormatError ("OSC input stream exhausted before finding null terminator of string");
+        if (static_cast<const char*> (getData())[posEnd - 1] != '\0')
+            throw juce::OSCFormatError (
+                "OSC input stream exhausted before finding null terminator of string");
 
         size_t bytesRead = posEnd - posBegin;
         readPaddingZeros (bytesRead);
@@ -103,7 +105,8 @@ public:
         checkBytesAvailable (4, "OSC input stream exhausted while reading blob");
 
         auto blobDataSize = input.readIntBigEndian();
-        checkBytesAvailable ((blobDataSize + 3) % 4, "OSC input stream exhausted before reaching end of blob");
+        checkBytesAvailable ((blobDataSize + 3) % 4,
+                             "OSC input stream exhausted before reaching end of blob");
 
         juce::MemoryBlock blob;
         auto bytesRead = input.readIntoMemoryBlock (blob, (ssize_t) blobDataSize);
@@ -124,15 +127,9 @@ public:
         return juce::OSCTimeTag (juce::uint64 (input.readInt64BigEndian()));
     }
 
-    juce::OSCAddress readAddress()
-    {
-        return juce::OSCAddress (readString());
-    }
+    juce::OSCAddress readAddress() { return juce::OSCAddress (readString()); }
 
-    juce::OSCAddressPattern readAddressPattern()
-    {
-        return juce::OSCAddressPattern (readString());
-    }
+    juce::OSCAddressPattern readAddressPattern() { return juce::OSCAddressPattern (readString()); }
 
     //==============================================================================
     juce::OSCTypeList readTypeTagString()
@@ -147,15 +144,17 @@ public:
         for (;;)
         {
             if (isExhausted())
-                throw juce::OSCFormatError ("OSC input stream exhausted while reading type tag string");
+                throw juce::OSCFormatError (
+                    "OSC input stream exhausted while reading type tag string");
 
             const juce::OSCType type = input.readByte();
 
             if (type == 0)
-                break;  // encountered null terminator. list is complete.
+                break; // encountered null terminator. list is complete.
 
             if (! juce::OSCTypes::isSupportedType (type))
-                throw juce::OSCFormatError ("OSC input stream format error: encountered unsupported type tag");
+                throw juce::OSCFormatError (
+                    "OSC input stream format error: encountered unsupported type tag");
 
             typeList.add (type);
         }
@@ -171,16 +170,22 @@ public:
     {
         switch (type)
         {
-            case 'i':       return juce::OSCArgument (readInt32());
-            case 'f':     return juce::OSCArgument (readFloat32());
-            case 's':      return juce::OSCArgument (readString());
-            case 'b':        return juce::OSCArgument (readBlob());
-            case 'r':      return juce::OSCArgument (readColour());
+            case 'i':
+                return juce::OSCArgument (readInt32());
+            case 'f':
+                return juce::OSCArgument (readFloat32());
+            case 's':
+                return juce::OSCArgument (readString());
+            case 'b':
+                return juce::OSCArgument (readBlob());
+            case 'r':
+                return juce::OSCArgument (readColour());
 
             default:
                 // You supplied an invalid OSCType when calling readArgument! This should never happen.
                 jassertfalse;
-                throw juce::OSCInternalError ("OSC input stream: internal error while reading message argument");
+                throw juce::OSCInternalError (
+                    "OSC input stream: internal error while reading message argument");
         }
     }
 
@@ -208,7 +213,8 @@ public:
         checkBytesAvailable (16, "OSC input stream exhausted while reading bundle");
 
         if (readString() != "#bundle")
-            throw juce::OSCFormatError ("OSC input stream format error: bundle does not start with string '#bundle'");
+            throw juce::OSCFormatError (
+                "OSC input stream format error: bundle does not start with string '#bundle'");
 
         juce::OSCBundle bundle (readTimeTag());
 
@@ -235,7 +241,8 @@ public:
         auto elementSize = (size_t) readInt32();
 
         if (elementSize < 4)
-            throw juce::OSCFormatError ("OSC input stream format error: invalid bundle element size");
+            throw juce::OSCFormatError (
+                "OSC input stream format error: invalid bundle element size");
 
         return readElementWithKnownSize (elementSize);
     }
@@ -243,12 +250,15 @@ public:
     //==============================================================================
     juce::OSCBundle::Element readElementWithKnownSize (size_t elementSize)
     {
-        checkBytesAvailable ((juce::int64) elementSize, "OSC input stream exhausted while reading bundle element content");
+        checkBytesAvailable ((juce::int64) elementSize,
+                             "OSC input stream exhausted while reading bundle element content");
 
-        auto firstContentChar = static_cast<const char*> (getData()) [getPosition()];
+        auto firstContentChar = static_cast<const char*> (getData())[getPosition()];
 
-        if (firstContentChar == '/')  return juce::OSCBundle::Element (readMessageWithCheckedSize (elementSize));
-        if (firstContentChar == '#')  return juce::OSCBundle::Element (readBundleWithCheckedSize (elementSize));
+        if (firstContentChar == '/')
+            return juce::OSCBundle::Element (readMessageWithCheckedSize (elementSize));
+        if (firstContentChar == '#')
+            return juce::OSCBundle::Element (readBundleWithCheckedSize (elementSize));
 
         throw juce::OSCFormatError ("OSC input stream: invalid bundle element content");
     }
@@ -278,7 +288,8 @@ private:
         juce::OSCBundle bundle (readBundle (maxBytesToRead));
 
         if (getPosition() - begin != size)
-            throw juce::OSCFormatError ("OSC input stream format error: wrong element content size encountered while reading");
+            throw juce::OSCFormatError (
+                "OSC input stream format error: wrong element content size encountered while reading");
 
         return bundle;
     }
@@ -289,7 +300,8 @@ private:
         auto message = readMessage();
 
         if (getPosition() - begin != size)
-            throw juce::OSCFormatError ("OSC input stream format error: wrong element content size encountered while reading");
+            throw juce::OSCFormatError (
+                "OSC input stream format error: wrong element content size encountered while reading");
 
         return message;
     }

@@ -20,12 +20,10 @@
  ==============================================================================
  */
 
-
 #pragma once
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "ReferenceCountedMatrix.h"
 #include "ReferenceCountedDecoder.h"
-
+#include "ReferenceCountedMatrix.h"
 
 class MatrixMultiplication
 {
@@ -66,18 +64,24 @@ public:
 
         auto& T = retainedCurrentMatrix->getMatrix();
 
-        const int nInputChannels = juce::jmin (static_cast<int> (data.getNumChannels()), static_cast<int> (T.getNumColumns()));
+        const int nInputChannels = juce::jmin (static_cast<int> (data.getNumChannels()),
+                                               static_cast<int> (T.getNumColumns()));
         const int nSamples = static_cast<int> (data.getNumSamples());
 
         // copy input data to buffer
         for (int ch = 0; ch < nInputChannels; ++ch)
-            buffer.copyFrom(ch, 0, data.getChannelPointer (ch), nSamples);
+            buffer.copyFrom (ch, 0, data.getChannelPointer (ch), nSamples);
 
-        juce::dsp::AudioBlock<float> ab (buffer.getArrayOfWritePointers(), nInputChannels, 0, nSamples);
+        juce::dsp::AudioBlock<float> ab (buffer.getArrayOfWritePointers(),
+                                         nInputChannels,
+                                         0,
+                                         nSamples);
         processNonReplacing (ab, data, false);
     }
 
-    void processNonReplacing (const juce::dsp::AudioBlock<float> inputBlock, juce::dsp::AudioBlock<float> outputBlock, const bool checkNewMatrix = true)
+    void processNonReplacing (const juce::dsp::AudioBlock<float> inputBlock,
+                              juce::dsp::AudioBlock<float> outputBlock,
+                              const bool checkNewMatrix = true)
     {
         // you should call the processReplacing instead, it will buffer the input data
         // this is a weak check, as e.g. if number channels differ, it won't trigger
@@ -97,18 +101,25 @@ public:
 
         auto& T = retainedCurrentMatrix->getMatrix();
 
-        const int nInputChannels = juce::jmin (static_cast<int> (inputBlock.getNumChannels()), static_cast<int> (T.getNumColumns()));
+        const int nInputChannels = juce::jmin (static_cast<int> (inputBlock.getNumChannels()),
+                                               static_cast<int> (T.getNumColumns()));
         const int nSamples = static_cast<int> (inputBlock.getNumSamples());
 
         for (int row = 0; row < T.getNumRows(); ++row)
         {
-            const int destCh = retainedCurrentMatrix->getRoutingArrayReference().getUnchecked(row);
+            const int destCh = retainedCurrentMatrix->getRoutingArrayReference().getUnchecked (row);
             if (destCh < outputBlock.getNumChannels())
             {
                 float* dest = outputBlock.getChannelPointer (destCh);
-                juce::FloatVectorOperations::multiply (dest, inputBlock.getChannelPointer (0), T(row, 0), nSamples); // first channel
+                juce::FloatVectorOperations::multiply (dest,
+                                                       inputBlock.getChannelPointer (0),
+                                                       T (row, 0),
+                                                       nSamples); // first channel
                 for (int i = 1; i < nInputChannels; ++i) // remaining channels
-                    juce::FloatVectorOperations::addWithMultiply (dest, inputBlock.getChannelPointer (i), T(row, i), nSamples);
+                    juce::FloatVectorOperations::addWithMultiply (dest,
+                                                                  inputBlock.getChannelPointer (i),
+                                                                  T (row, i),
+                                                                  nSamples);
             }
         }
 
@@ -121,12 +132,14 @@ public:
             const int destCh = routingCopy[i];
             for (; ++lastDest < destCh;)
                 if (lastDest < outputBlock.getNumChannels())
-                    juce::FloatVectorOperations::clear(outputBlock.getChannelPointer(lastDest), (int) outputBlock.getNumSamples());
+                    juce::FloatVectorOperations::clear (outputBlock.getChannelPointer (lastDest),
+                                                        (int) outputBlock.getNumSamples());
             lastDest = destCh;
         }
 
         for (int ch = routingCopy.getLast() + 1; ch < outputBlock.getNumChannels(); ++ch)
-            juce::FloatVectorOperations::clear(outputBlock.getChannelPointer(ch), (int) outputBlock.getNumSamples());
+            juce::FloatVectorOperations::clear (outputBlock.getChannelPointer (ch),
+                                                (int) outputBlock.getNumSamples());
     }
 
     const bool checkIfNewMatrixAvailable()
@@ -139,10 +152,12 @@ public:
 
             if (currentMatrix != nullptr)
             {
-                DBG ("MatrixTransformer: New matrix with name '" << currentMatrix->getName() << "' set.");
+                DBG ("MatrixTransformer: New matrix with name '" << currentMatrix->getName()
+                                                                 << "' set.");
                 const int cols = (int) currentMatrix->getMatrix().getNumColumns();
                 buffer.setSize (cols, buffer.getNumSamples());
-                DBG ("MatrixTransformer: buffer resized to " << buffer.getNumChannels() << "x" << buffer.getNumSamples());
+                DBG ("MatrixTransformer: buffer resized to " << buffer.getNumChannels() << "x"
+                                                             << buffer.getNumSamples());
             }
 
             return true;
@@ -158,20 +173,16 @@ public:
             checkIfNewMatrixAvailable();
     }
 
-    ReferenceCountedMatrix::Ptr getMatrix()
-    {
-        return currentMatrix;
-    }
+    ReferenceCountedMatrix::Ptr getMatrix() { return currentMatrix; }
 
 private:
     //==============================================================================
-    juce::dsp::ProcessSpec spec = {-1, 0, 0};
-    ReferenceCountedMatrix::Ptr currentMatrix {nullptr};
-    ReferenceCountedMatrix::Ptr newMatrix {nullptr};
+    juce::dsp::ProcessSpec spec = { -1, 0, 0 };
+    ReferenceCountedMatrix::Ptr currentMatrix { nullptr };
+    ReferenceCountedMatrix::Ptr newMatrix { nullptr };
 
     juce::AudioBuffer<float> buffer;
-    bool bufferPrepared {false};
+    bool bufferPrepared { false };
 
-    bool newMatrixAvailable {false};
-
+    bool newMatrixAvailable { false };
 };

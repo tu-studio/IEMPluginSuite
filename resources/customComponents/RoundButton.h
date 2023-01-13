@@ -27,16 +27,12 @@
 //==============================================================================
 /*
 */
-class RoundButton    : public juce::ToggleButton
+class RoundButton : public juce::ToggleButton
 {
 public:
-    RoundButton()
-    {
-    }
+    RoundButton() {}
 
-    ~RoundButton()
-    {
-    }
+    ~RoundButton() {}
 
     void paint (juce::Graphics& g) override
     {
@@ -44,12 +40,20 @@ public:
         juce::Rectangle<float> buttonArea;
         if (isCircularShape)
         {
-            const float boxSize = bounds.getWidth() >= bounds.getHeight() ? bounds.getHeight() * 0.8f : bounds.getWidth() * 0.8f;
-            buttonArea = juce::Rectangle<float> ((bounds.getWidth() - boxSize) * 0.5f, (bounds.getHeight() - boxSize) * 0.5f, boxSize, boxSize);
+            const float boxSize = bounds.getWidth() >= bounds.getHeight()
+                                      ? bounds.getHeight() * 0.8f
+                                      : bounds.getWidth() * 0.8f;
+            buttonArea = juce::Rectangle<float> ((bounds.getWidth() - boxSize) * 0.5f,
+                                                 (bounds.getHeight() - boxSize) * 0.5f,
+                                                 boxSize,
+                                                 boxSize);
         }
         else
         {
-            buttonArea = juce::Rectangle<float> (bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+            buttonArea = juce::Rectangle<float> (bounds.getX(),
+                                                 bounds.getY(),
+                                                 bounds.getWidth(),
+                                                 bounds.getHeight());
             buttonArea.reduce (0.5f, 0.4f);
         }
 
@@ -59,44 +63,45 @@ public:
         const bool ticked = getToggleState();
 
         if (isButtonDown)
-            buttonArea.reduce(0.8f, 0.8f);
+            buttonArea.reduce (0.8f, 0.8f);
         else if (isMouseOverButton)
-            buttonArea.reduce(0.4f, 0.4f);
+            buttonArea.reduce (0.4f, 0.4f);
 
-        g.setColour (findColour (juce::ToggleButton::tickColourId).withMultipliedAlpha (ticked ? 1.0f : isMouseOverButton ? 0.7f : 0.5f) );
+        g.setColour (findColour (juce::ToggleButton::tickColourId)
+                         .withMultipliedAlpha (ticked              ? 1.0f
+                                               : isMouseOverButton ? 0.7f
+                                                                   : 0.5f));
 
-        isCircularShape == true ? g.drawEllipse (buttonArea, 1.0f) : g.drawRoundedRectangle (buttonArea, 10.0f, 1.0f);
+        isCircularShape == true ? g.drawEllipse (buttonArea, 1.0f)
+                                : g.drawRoundedRectangle (buttonArea, 10.0f, 1.0f);
 
         buttonArea.reduce (1.5f, 1.5f);
-        g.setColour (findColour (juce::ToggleButton::tickColourId).withMultipliedAlpha (ticked ? 1.0f : isMouseOverButton ? 0.5f : 0.2f));
+        g.setColour (findColour (juce::ToggleButton::tickColourId)
+                         .withMultipliedAlpha (ticked              ? 1.0f
+                                               : isMouseOverButton ? 0.5f
+                                                                   : 0.2f));
 
-        isCircularShape == true ? g.fillEllipse (buttonArea) : g.fillRoundedRectangle (buttonArea, 10.0f);
-
+        isCircularShape == true ? g.fillEllipse (buttonArea)
+                                : g.fillRoundedRectangle (buttonArea, 10.0f);
 
         g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (13.0f, 1)));
         g.setFont (buttonArea.getHeight() * scaleFontSize);
         g.setColour (findColour (getToggleState() ? juce::TextButton::textColourOnId
-                                 : juce::TextButton::textColourOffId)
-                     .withMultipliedAlpha (isEnabled() ? 1.0f : 0.5f));
+                                                  : juce::TextButton::textColourOffId)
+                         .withMultipliedAlpha (isEnabled() ? 1.0f : 0.5f));
 
-        g.setColour (ticked ? findColour (juce::ResizableWindow::backgroundColourId) :  findColour (juce::ToggleButton::tickColourId).withMultipliedAlpha (isMouseOverButton ? 0.7f : 0.5f));
+        g.setColour (ticked ? findColour (juce::ResizableWindow::backgroundColourId)
+                            : findColour (juce::ToggleButton::tickColourId)
+                                  .withMultipliedAlpha (isMouseOverButton ? 0.7f : 0.5f));
 
-        g.drawText(getButtonText(), getLocalBounds(), juce::Justification::centred);
+        g.drawText (getButtonText(), getLocalBounds(), juce::Justification::centred);
     }
 
-    void resized() override
-    {
-    }
+    void resized() override {}
 
-    void setScaleFontSize (const float newScale)
-    {
-        scaleFontSize = newScale;
-    }
+    void setScaleFontSize (const float newScale) { scaleFontSize = newScale; }
 
-    void setCircularShape (bool shouldBeCircularShape)
-    {
-        isCircularShape = shouldBeCircularShape;
-    }
+    void setCircularShape (bool shouldBeCircularShape) { isCircularShape = shouldBeCircularShape; }
 
 private:
     bool isCircularShape = true;

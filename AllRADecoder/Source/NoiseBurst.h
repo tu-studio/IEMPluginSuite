@@ -22,18 +22,17 @@
 
 #pragma once
 
-
 class NoiseBurst
 {
 public:
     NoiseBurst()
     {
-        originalNoise.setSize(1, L);
+        originalNoise.setSize (1, L);
 
         // create noise
         juce::Random random;
         for (int i = 0; i < L; ++i)
-            originalNoise.setSample(0, i, random.nextFloat() * 2.0f - 1.0f);
+            originalNoise.setSample (0, i, random.nextFloat() * 2.0f - 1.0f);
 
         juce::dsp::ProcessSpec spec;
         spec.sampleRate = 44100.0f;
@@ -41,14 +40,16 @@ public:
         spec.numChannels = 1;
 
         juce::dsp::IIR::Filter<float> filter;
-        filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeHighPass (spec.sampleRate, 200.0f);
+        filter.coefficients =
+            juce::dsp::IIR::Coefficients<float>::makeHighPass (spec.sampleRate, 200.0f);
         juce::dsp::AudioBlock<float> ab (originalNoise);
-        juce::dsp::ProcessContextReplacing<float> context(ab);
+        juce::dsp::ProcessContextReplacing<float> context (ab);
 
         filter.prepare (spec);
         filter.process (context);
 
-        filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeFirstOrderLowPass (spec.sampleRate, 200.0f);
+        filter.coefficients =
+            juce::dsp::IIR::Coefficients<float>::makeFirstOrderLowPass (spec.sampleRate, 200.0f);
         filter.prepare (spec);
         filter.reset();
         filter.process (context);
@@ -88,7 +89,7 @@ public:
         resamplingSource.setResamplingRatio (factorReading);
         resamplingSource.prepareToPlay (L, 44100.0);
 
-        resampledNoise.setSize(1, resampledL);
+        resampledNoise.setSize (1, resampledL);
         juce::AudioSourceChannelInfo info;
         info.startSample = 0;
         info.numSamples = resampledL;
@@ -108,10 +109,7 @@ public:
             }
     }
 
-    const bool isActive()
-    {
-        return active.get();
-    }
+    const bool isActive() { return active.get(); }
 
     void processBuffer (juce::AudioBuffer<float> buffer)
     {
@@ -124,7 +122,10 @@ public:
                     const int bufferSize = buffer.getNumSamples();
                     const int copyL = juce::jmin (bufferSize, resampledL - currentPosition);
 
-                    juce::FloatVectorOperations::add (buffer.getWritePointer(activeChannel - 1), resampledNoise.getReadPointer(0, currentPosition), copyL);
+                    juce::FloatVectorOperations::add (
+                        buffer.getWritePointer (activeChannel - 1),
+                        resampledNoise.getReadPointer (0, currentPosition),
+                        copyL);
 
                     currentPosition += copyL;
                     if (currentPosition >= resampledL)
@@ -139,7 +140,6 @@ public:
                     activeChannel = -1;
                 }
             }
-
         }
     }
 

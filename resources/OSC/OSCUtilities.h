@@ -29,10 +29,7 @@
 class OSCReceiverPlus : public juce::OSCReceiver
 {
 public:
-    OSCReceiverPlus()
-    {
-        connected = false;
-    }
+    OSCReceiverPlus() { connected = false; }
 
     bool connect (int portNumber)
     {
@@ -64,30 +61,19 @@ public:
             return false;
     }
 
-    int getPortNumber() const
-    {
-        return port;
-    }
+    int getPortNumber() const { return port; }
 
-    bool isConnected() const
-    {
-        return connected.get();
-    }
-
+    bool isConnected() const { return connected.get(); }
 
 private:
     int port = -1;
     juce::Atomic<bool> connected;
 };
 
-
 class OSCSenderPlus : public juce::OSCSender
 {
 public:
-    OSCSenderPlus()
-    {
-        connected = false;
-    }
+    OSCSenderPlus() { connected = false; }
 
     bool connect (const juce::String& targetHostName, int portNumber)
     {
@@ -121,21 +107,11 @@ public:
             return false;
     }
 
-    int getPortNumber() const
-    {
-        return port;
-    }
+    int getPortNumber() const { return port; }
 
-    juce::String getHostName() const
-    {
-        return hostName;
-    }
+    juce::String getHostName() const { return hostName; }
 
-    bool isConnected() const
-    {
-        return connected.get();
-    }
-
+    bool isConnected() const { return connected.get(); }
 
 private:
     juce::String hostName;
@@ -143,17 +119,15 @@ private:
     juce::Atomic<bool> connected;
 };
 
-
 class OSCMessageInterceptor
 {
 public:
-
     virtual ~OSCMessageInterceptor() = default;
 
     /**
      This method is expected to return true, if the juce::OSCMessage is considered to have been consumed, and should not be passed on.
      */
-    virtual inline const bool interceptOSCMessage (juce::OSCMessage &message)
+    virtual inline const bool interceptOSCMessage (juce::OSCMessage& message)
     {
         ignoreUnused (message);
         return false; // not consumed
@@ -168,7 +142,6 @@ public:
         ignoreUnused (message);
         return false;
     }
-
 
     /**
      Use this method to send additional juce::OSCMessages during the OSCSender's send routine.

@@ -20,16 +20,14 @@
  ==============================================================================
  */
 
-
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "ReferenceCountedDecoder.h"
 #include "MatrixMultiplication.h"
-#include "ambisonicTools.h"
 #include "MaxRE.h"
+#include "ReferenceCountedDecoder.h"
+#include "ambisonicTools.h"
 #include "inPhase.h"
-
 
 class AmbisonicDecoder
 {
@@ -46,7 +44,6 @@ public:
 
         checkIfNewDecoderAvailable();
     }
-
 
     void setInputNormalization (ReferenceCountedDecoder::Normalization newNormalization)
     {
@@ -66,14 +63,18 @@ public:
 
         auto& T = retainedDecoder->getMatrix();
 
-        const int nInputChannels = juce::jmin (static_cast<int> (inputBlock.getNumChannels()), static_cast<int> (T.getNumColumns()));
+        const int nInputChannels = juce::jmin (static_cast<int> (inputBlock.getNumChannels()),
+                                               static_cast<int> (T.getNumColumns()));
         const int nSamples = static_cast<int> (inputBlock.getNumSamples());
 
         // copy input data to buffer
         for (int ch = 0; ch < nInputChannels; ++ch)
             buffer.copyFrom (ch, 0, inputBlock.getChannelPointer (ch), nSamples);
 
-        juce::dsp::AudioBlock<float> ab (buffer.getArrayOfWritePointers(), nInputChannels, 0, nSamples);
+        juce::dsp::AudioBlock<float> ab (buffer.getArrayOfWritePointers(),
+                                         nInputChannels,
+                                         0,
+                                         nSamples);
         processInternal (ab, outputBlock);
     }
 
@@ -106,10 +107,7 @@ public:
         newDecoderAvailable = true;
     }
 
-    ReferenceCountedDecoder::Ptr getCurrentDecoder()
-    {
-        return currentDecoder;
-    }
+    ReferenceCountedDecoder::Ptr getCurrentDecoder() { return currentDecoder; }
 
     /** Checks if a new decoder waiting to be used.
      */
@@ -119,7 +117,8 @@ private:
     /**
      Decodes the Ambisonic input signals to loudspeaker signals using the current decoder. Keep in mind that the input data will be changed!
      */
-    void processInternal (juce::dsp::AudioBlock<float> inputBlock, juce::dsp::AudioBlock<float> outputBlock)
+    void processInternal (juce::dsp::AudioBlock<float> inputBlock,
+                          juce::dsp::AudioBlock<float> outputBlock)
     {
         // you should call the processReplacing instead, it will buffer the input data
         // this is a weak check, as e.g. if number channels differ, it won't trigger
@@ -136,28 +135,39 @@ private:
             const int numSamples = static_cast<int> (inputBlock.getNumSamples());
 
             float weights[64];
-            const float correction = std::sqrt (std::sqrt ((static_cast<float> (retainedDecoder->getOrder()) + 1) / (static_cast<float> (order) + 1)));
-            juce::FloatVectorOperations::fill(weights, correction, chAmbi);
+            const float correction =
+                std::sqrt (std::sqrt ((static_cast<float> (retainedDecoder->getOrder()) + 1)
+                                      / (static_cast<float> (order) + 1)));
+            juce::FloatVectorOperations::fill (weights, correction, chAmbi);
 
             if (retainedDecoder->getSettings().weights == ReferenceCountedDecoder::Weights::maxrE)
             {
                 multiplyMaxRE (order, weights);
-                juce::FloatVectorOperations::multiply (weights, maxRECorrectionEnergy[order], chAmbi);
+                juce::FloatVectorOperations::multiply (weights,
+                                                       maxRECorrectionEnergy[order],
+                                                       chAmbi);
             }
-            else if (retainedDecoder->getSettings().weights == ReferenceCountedDecoder::Weights::inPhase)
+            else if (retainedDecoder->getSettings().weights
+                     == ReferenceCountedDecoder::Weights::inPhase)
             {
                 multiplyInPhase (order, weights);
-                juce::FloatVectorOperations::multiply (weights, inPhaseCorrectionEnergy[order], chAmbi);
+                juce::FloatVectorOperations::multiply (weights,
+                                                       inPhaseCorrectionEnergy[order],
+                                                       chAmbi);
             }
 
             if (retainedDecoder->getSettings().expectedNormalization != inputNormalization)
             {
-                const float* conversionPtr (inputNormalization == ReferenceCountedDecoder::Normalization::sn3d ? sn3d2n3d : n3d2sn3d);
-                juce::FloatVectorOperations::multiply(weights, conversionPtr, chAmbi);
+                const float* conversionPtr (
+                    inputNormalization == ReferenceCountedDecoder::Normalization::sn3d ? sn3d2n3d
+                                                                                       : n3d2sn3d);
+                juce::FloatVectorOperations::multiply (weights, conversionPtr, chAmbi);
             }
 
             for (int ch = 0; ch < chAmbi; ++ch)
-                juce::FloatVectorOperations::multiply (inputBlock.getChannelPointer (ch), weights[ch], numSamples);
+                juce::FloatVectorOperations::multiply (inputBlock.getChannelPointer (ch),
+                                                       weights[ch],
+                                                       numSamples);
         }
 
         matMult.processNonReplacing (inputBlock, outputBlock);
@@ -165,14 +175,16 @@ private:
 
 private:
     //==============================================================================
-    juce::dsp::ProcessSpec spec = {-1, 0, 0};
-    ReferenceCountedDecoder::Ptr currentDecoder {nullptr};
-    ReferenceCountedDecoder::Ptr newDecoder {nullptr};
-    bool newDecoderAvailable {false};
+    juce::dsp::ProcessSpec spec = { -1, 0, 0 };
+    ReferenceCountedDecoder::Ptr currentDecoder { nullptr };
+    ReferenceCountedDecoder::Ptr newDecoder { nullptr };
+    bool newDecoderAvailable { false };
 
     juce::AudioBuffer<float> buffer;
 
-    ReferenceCountedDecoder::Normalization inputNormalization {ReferenceCountedDecoder::Normalization:: sn3d};
+    ReferenceCountedDecoder::Normalization inputNormalization {
+        ReferenceCountedDecoder::Normalization::sn3d
+    };
 
     MatrixMultiplication matMult;
 };

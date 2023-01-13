@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
-#include "../../resources/lookAndFeel/IEM_LaF.h"
-#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/customComponents/FilterVisualizer.h"
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
-#include "../../resources/customComponents/FilterVisualizer.h"
+#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "PluginProcessor.h"
 #include "T60Visualizer.h"
 
 using namespace juce::dsp;
@@ -39,10 +39,10 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 
-class FdnReverbAudioProcessorEditor  : public juce::AudioProcessorEditor,
-                                        private juce::Timer,
-                                        private juce::Button::Listener,
-                                        private juce::Slider::Listener
+class FdnReverbAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                      private juce::Timer,
+                                      private juce::Button::Listener,
+                                      private juce::Slider::Listener
 {
 public:
     FdnReverbAudioProcessorEditor (FdnReverbAudioProcessor&, juce::AudioProcessorValueTreeState&);
@@ -67,20 +67,24 @@ private:
 
     void timerCallback() override;
 
-    SimpleLabel lbDelay, lbTime, lbDryWet, lbHighCutoff, lbHighQ, lbHighGain, lbLowCutoff, lbLowQ, lbLowGain;
+    SimpleLabel lbDelay, lbTime, lbDryWet, lbHighCutoff, lbHighQ, lbHighGain, lbLowCutoff, lbLowQ,
+        lbLowGain;
     SimpleLabel fdnLbTime, fdnSize;
     // Functional stuff (sliders, Indicators, OpenGL Voodoo magic, etc.)
     // Groups
     juce::GroupComponent delayGroup, filterGroup, t60Group;
 
     // juce::Sliders
-    ReverseSlider delayLengthSlider, revTimeSlider, fadeInSlider, dryWetSlider, highCutoffSlider, highQSlider, highGainSlider, lowCutoffSlider, lowQSlider, lowGainSlider;
+    ReverseSlider delayLengthSlider, revTimeSlider, fadeInSlider, dryWetSlider, highCutoffSlider,
+        highQSlider, highGainSlider, lowCutoffSlider, lowQSlider, lowGainSlider;
 
     // ComboBox
     juce::ComboBox cbFdnSize;
 
     // juce::Pointers for value tree state
-    std::unique_ptr<SliderAttachment> delayAttachment, feedbackAttachment, fadeInAttachment, dryWetAttachment, highCutoffAttachment, highQAttachment, highGainAttachment, lowCutoffAttachment, lowQAttachment, lowGainAttachment;
+    std::unique_ptr<SliderAttachment> delayAttachment, feedbackAttachment, fadeInAttachment,
+        dryWetAttachment, highCutoffAttachment, highQAttachment, highGainAttachment,
+        lowCutoffAttachment, lowQAttachment, lowGainAttachment;
     std::unique_ptr<ComboBoxAttachment> cbFdnSizeAttachment;
 
     // juce::Buttons

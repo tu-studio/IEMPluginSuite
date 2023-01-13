@@ -128,7 +128,7 @@ clang-format:
     GIT_SUBMODULE_STRATEGY: none
   script:
     - apk add clang-extra-tools git
-    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format -i {} \;
+    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -not -path "./JUCE/*" -exec clang-format -i {} \;
     - git diff --exit-code > clang-format.log
     # cleanup, if 'git diff' did not complain
     - rm clang-format.log
@@ -137,7 +137,6 @@ clang-format:
       if test -f clang-format.log; then
         echo "Check the clang-format.log artifact for differences..."
       fi
-  allow_failure: true
   artifacts:
     when: on_failure
     paths:

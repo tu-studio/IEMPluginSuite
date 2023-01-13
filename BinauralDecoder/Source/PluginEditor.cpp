@@ -20,49 +20,56 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "PluginProcessor.h"
 
 //==============================================================================
-BinauralDecoderAudioProcessorEditor::BinauralDecoderAudioProcessorEditor (BinauralDecoderAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
-    : juce::AudioProcessorEditor (&p), processor (p), valueTreeState(vts), footer (p.getOSCParameterInterface())
+BinauralDecoderAudioProcessorEditor::BinauralDecoderAudioProcessorEditor (
+    BinauralDecoderAudioProcessor& p,
+    juce::AudioProcessorValueTreeState& vts) :
+    juce::AudioProcessorEditor (&p),
+    processor (p),
+    valueTreeState (vts),
+    footer (p.getOSCParameterInterface())
 {
     // ============== BEGIN: essentials ======================
     // set GUI size and lookAndFeel
-    setSize(450, 140); // use this to create a fixed-size GUI
+    setSize (450, 140); // use this to create a fixed-size GUI
     //setResizeLimits(500, 300, 800, 500); // use this to create a resizable GUI
     setLookAndFeel (&globalLaF);
 
     // make title and footer visible, and set the PluginName
-    addAndMakeVisible(&title);
+    addAndMakeVisible (&title);
     title.setTitle ("Binaural", "Decoder");
-    title.setFont(globalLaF.robotoBold, globalLaF.robotoLight);
+    title.setFont (globalLaF.robotoBold, globalLaF.robotoLight);
     addAndMakeVisible (&footer);
     // ============= END: essentials ========================
 
-
     // create the connection between title component's comboBoxes and parameters
-    cbOrderSettingAttachment.reset (new ComboBoxAttachment (valueTreeState, "inputOrderSetting", *title.getInputWidgetPtr()->getOrderCbPointer()));
-    cbNormalizationSettingAttachment.reset (new ComboBoxAttachment (valueTreeState, "useSN3D", *title.getInputWidgetPtr()->getNormCbPointer()));
+    cbOrderSettingAttachment.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "inputOrderSetting",
+                                *title.getInputWidgetPtr()->getOrderCbPointer()));
+    cbNormalizationSettingAttachment.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "useSN3D",
+                                *title.getInputWidgetPtr()->getNormCbPointer()));
 
-    addAndMakeVisible(lbEq);
-    lbEq.setText("Headphone Equalization");
+    addAndMakeVisible (lbEq);
+    lbEq.setText ("Headphone Equalization");
 
-    addAndMakeVisible(cbEq);
-    cbEq.addItem("OFF", 1);
-    cbEq.addItemList(processor.headphoneEQs, 2);
+    addAndMakeVisible (cbEq);
+    cbEq.addItem ("OFF", 1);
+    cbEq.addItemList (processor.headphoneEQs, 2);
     cbEqAttachment.reset (new ComboBoxAttachment (valueTreeState, "applyHeadphoneEq", cbEq));
 
-
-
     // start timer after everything is set up properly
-    startTimer(20);
+    startTimer (20);
 }
 
 BinauralDecoderAudioProcessorEditor::~BinauralDecoderAudioProcessorEditor()
 {
-    setLookAndFeel(nullptr);
+    setLookAndFeel (nullptr);
 }
 
 //==============================================================================
@@ -79,21 +86,20 @@ void BinauralDecoderAudioProcessorEditor::resized()
     const int footerHeight = 25;
     auto area = getLocalBounds();
 
-    auto footerArea (area.removeFromBottom(footerHeight));
-    footer.setBounds(footerArea);
+    auto footerArea (area.removeFromBottom (footerHeight));
+    footer.setBounds (footerArea);
 
-    area.removeFromLeft(leftRightMargin);
-    area.removeFromRight(leftRightMargin);
-    auto headerArea = area.removeFromTop(headerHeight);
+    area.removeFromLeft (leftRightMargin);
+    area.removeFromRight (leftRightMargin);
+    auto headerArea = area.removeFromTop (headerHeight);
     title.setBounds (headerArea);
-    area.removeFromTop(10);
-    area.removeFromBottom(5);
+    area.removeFromTop (10);
+    area.removeFromBottom (5);
     // =========== END: header and footer =================
 
-
-    auto sliderRow = area.removeFromTop(20);
-    lbEq.setBounds(sliderRow.removeFromLeft(150));
-    cbEq.setBounds(sliderRow.removeFromLeft(120));
+    auto sliderRow = area.removeFromTop (20);
+    lbEq.setBounds (sliderRow.removeFromLeft (150));
+    cbEq.setBounds (sliderRow.removeFromLeft (120));
 }
 
 void BinauralDecoderAudioProcessorEditor::timerCallback()

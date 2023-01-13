@@ -25,10 +25,12 @@
 #include "../customComponents/SimpleLabel.h"
 #include "OSCParameterInterface.h"
 
-class OSCDialogWindow  : public juce::Component, private juce::Timer, private juce::Label::Listener
+class OSCDialogWindow : public juce::Component, private juce::Timer, private juce::Label::Listener
 {
 public:
-    OSCDialogWindow (OSCParameterInterface& oscInterface, OSCReceiverPlus& oscReceiver, OSCSenderPlus& oscSender);
+    OSCDialogWindow (OSCParameterInterface& oscInterface,
+                     OSCReceiverPlus& oscReceiver,
+                     OSCSenderPlus& oscSender);
 
     void timerCallback() override;
 
@@ -61,8 +63,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCDialogWindow)
 };
 
-
-
 //==============================================================================
 /*
  */
@@ -81,7 +81,6 @@ public:
 
     void paint (juce::Graphics& g) override;
 
-
 private:
     OSCParameterInterface& oscParameterInterface;
     OSCReceiverPlus& oscReceiver;
@@ -99,7 +98,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCStatus)
 };
-
-
-
-

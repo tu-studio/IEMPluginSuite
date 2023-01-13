@@ -22,14 +22,15 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
 #include "../../resources/Conversions.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define ProcessorClass CoordinateConverterAudioProcessor
 
 //==============================================================================
-class CoordinateConverterAudioProcessor  : public AudioProcessorBase<IOTypes::AudioChannels<64>, IOTypes::AudioChannels<64>>
+class CoordinateConverterAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<64>, IOTypes::AudioChannels<64>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -60,9 +61,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
-
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
@@ -70,7 +70,6 @@ public:
 
     void updateCartesianCoordinates();
     void updateSphericalCoordinates();
-
 
     juce::Atomic<bool> repaintSphere = true;
     juce::Atomic<bool> repaintPositionPlanes = true;

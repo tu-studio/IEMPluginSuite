@@ -22,31 +22,31 @@
 
 #pragma once
 
-
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
-#include "../../resources/customComponents/MailBox.h"
-#include "../../resources/NewtonApple/NewtonApple_hull3D.h"
-#include "tDesign5200.h"
-#include "../../resources/efficientSHvanilla.h"
-#include "../../resources/ReferenceCountedDecoder.h"
 #include "../../resources/AmbisonicDecoder.h"
+#include "../../resources/NewtonApple/NewtonApple_hull3D.h"
+#include "../../resources/ReferenceCountedDecoder.h"
+#include "../../resources/customComponents/MailBox.h"
+#include "../../resources/efficientSHvanilla.h"
+#include "tDesign5200.h"
 
 #define CONFIGURATIONHELPER_ENABLE_DECODER_METHODS 1
 #define CONFIGURATIONHELPER_ENABLE_LOUDSPEAKERLAYOUT_METHODS 1
 #include "../../resources/ConfigurationHelper.h"
-#include "../../resources/ambisonicTools.h"
 #include "../../resources/HammerAitov.h"
-#include "NoiseBurst.h"
+#include "../../resources/ambisonicTools.h"
 #include "AmbisonicNoiseBurst.h"
+#include "NoiseBurst.h"
 
 #define ProcessorClass AllRADecoderAudioProcessor
 
 //==============================================================================
 
-class AllRADecoderAudioProcessor  : public AudioProcessorBase<IOTypes::Ambisonics<7>, IOTypes::AudioChannels<64>>,
-                                        public juce::ValueTree::Listener
+class AllRADecoderAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<7>, IOTypes::AudioChannels<64>>,
+      public juce::ValueTree::Listener
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -67,7 +67,6 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
-
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -80,15 +79,21 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
 
     //==============================================================================
-    void valueTreePropertyChanged (juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &property) override;
-    void valueTreeChildAdded (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenAdded) override;
-    void valueTreeChildRemoved (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override;
-    void valueTreeChildOrderChanged (juce::ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override;
-    void valueTreeParentChanged (juce::ValueTree &treeWhoseParentHasChanged) override;
+    void valueTreePropertyChanged (juce::ValueTree& treeWhosePropertyHasChanged,
+                                   const juce::Identifier& property) override;
+    void valueTreeChildAdded (juce::ValueTree& parentTree,
+                              juce::ValueTree& childWhichHasBeenAdded) override;
+    void valueTreeChildRemoved (juce::ValueTree& parentTree,
+                                juce::ValueTree& childWhichHasBeenRemoved,
+                                int indexFromWhichChildWasRemoved) override;
+    void valueTreeChildOrderChanged (juce::ValueTree& parentTreeWhoseChildrenHaveMoved,
+                                     int oldIndex,
+                                     int newIndex) override;
+    void valueTreeParentChanged (juce::ValueTree& treeWhoseParentHasChanged) override;
 
     void playNoiseBurst (const int channel);
     void playAmbisonicNoiseBurst (const float azimuth, const float elevation);
@@ -111,7 +116,7 @@ public:
     juce::Atomic<bool> updateMessage = true;
     juce::Atomic<bool> updateChannelCount = true;
 
-    ReferenceCountedDecoder::Ptr getCurrentDecoder() {return decoderConfig;}
+    ReferenceCountedDecoder::Ptr getCurrentDecoder() { return decoderConfig; }
 
     std::vector<R3> points;
     std::vector<Tri> triangles;
@@ -123,7 +128,7 @@ public:
     juce::Result calculateDecoder();
 
     void setLastDir (juce::File newLastDir);
-    juce::File getLastDir() {return lastDir;};
+    juce::File getLastDir() { return lastDir; };
 
     juce::Image energyDistribution;
     juce::Image rEVector;
@@ -134,8 +139,8 @@ public:
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
 
     //==============================================================================
-    inline const bool interceptOSCMessage (juce::OSCMessage &message) override;
-    inline const bool processNotYetConsumedOSCMessage (const juce::OSCMessage &message) override;
+    inline const bool interceptOSCMessage (juce::OSCMessage& message) override;
+    inline const bool processNotYetConsumedOSCMessage (const juce::OSCMessage& message) override;
 
 private:
     //==============================================================================
@@ -147,10 +152,10 @@ private:
     std::atomic<float>* exportLayout;
     std::atomic<float>* weights;
 
-    juce::ValueTree loudspeakers {"Loudspeakers"};
+    juce::ValueTree loudspeakers { "Loudspeakers" };
 
     AmbisonicDecoder decoder;
-    ReferenceCountedDecoder::Ptr decoderConfig {nullptr};
+    ReferenceCountedDecoder::Ptr decoderConfig { nullptr };
 
     bool isLayoutReady = false;
 
@@ -169,8 +174,14 @@ private:
     float getKappa (float gIm, float gRe1, float gRe2, int N);
     juce::dsp::Matrix<float> getInverse (juce::dsp::Matrix<float> A);
 
-    juce::ValueTree createLoudspeakerFromCartesian (juce::Vector3D<float> cartesianCoordinates, int channel, bool isImaginary = false, float gain = 1.0f);
-    juce::ValueTree createLoudspeakerFromSpherical (juce::Vector3D<float> sphericalCoordinates, int channel, bool isImaginary = false, float gain = 1.0f);
+    juce::ValueTree createLoudspeakerFromCartesian (juce::Vector3D<float> cartesianCoordinates,
+                                                    int channel,
+                                                    bool isImaginary = false,
+                                                    float gain = 1.0f);
+    juce::ValueTree createLoudspeakerFromSpherical (juce::Vector3D<float> sphericalCoordinates,
+                                                    int channel,
+                                                    bool isImaginary = false,
+                                                    float gain = 1.0f);
     juce::Vector3D<float> cartesianToSpherical (juce::Vector3D<float> cartvect);
     juce::Vector3D<float> sphericalToCartesian (juce::Vector3D<float> sphervect);
     juce::Vector3D<float> sphericalInRadiansToCartesian (juce::Vector3D<float> sphervect);

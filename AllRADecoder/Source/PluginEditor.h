@@ -26,31 +26,33 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
+#include "../../resources/customComponents/MailBox.h"
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
-#include "../../resources/customComponents/MailBox.h"
-#include "LoudspeakerVisualizer.h"
 #include "EnergyDistributionVisualizer.h"
 #include "LoudspeakerTableComponent.h"
+#include "LoudspeakerVisualizer.h"
 #include "RotateWindow.h"
 
-
-
-typedef ReverseSlider::SliderAttachment SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
+typedef ReverseSlider::SliderAttachment
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class AllRADecoderAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, public juce::Button::Listener
+class AllRADecoderAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                         private juce::Timer,
+                                         public juce::Button::Listener
 {
 public:
-    AllRADecoderAudioProcessorEditor (AllRADecoderAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    AllRADecoderAudioProcessorEditor (AllRADecoderAudioProcessor&,
+                                      juce::AudioProcessorValueTreeState&);
     ~AllRADecoderAudioProcessorEditor();
 
     //==============================================================================
@@ -75,7 +77,6 @@ private:
     AllRADecoderAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
 
-
     /* title and footer component
      title component can hold different widgets for in- and output:
         - NoIOWidget (if there's no need for an input or output widget)
@@ -83,7 +84,7 @@ private:
         - AmbisonicIOWidget<maxOrder>
         - DirectivitiyIOWidget
      */
-    TitleBar<AmbisonicIOWidget<>, AudioChannelsIOWidget<0,false>> title;
+    TitleBar<AmbisonicIOWidget<>, AudioChannelsIOWidget<0, false>> title;
     OSCFooter footer;
     // =============== end essentials ============
 
@@ -99,7 +100,6 @@ private:
 
     juce::ToggleButton tbExportDecoder, tbExportLayout;
     std::unique_ptr<ButtonAttachment> tbExportDecoderAttachment, tbExportLayoutAttachment;
-
 
     juce::GroupComponent gcLayout, gcDecoder, gcExport;
     SimpleLabel lbDecoderOrder, lbDecoderWeights;

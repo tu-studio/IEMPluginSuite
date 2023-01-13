@@ -22,13 +22,14 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define ProcessorClass PluginTemplateAudioProcessor
 
 //==============================================================================
-class PluginTemplateAudioProcessor  :  public AudioProcessorBase<IOTypes::AudioChannels<10>, IOTypes::Ambisonics<7>>
+class PluginTemplateAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<10>, IOTypes::Ambisonics<7>>
 {
 public:
     constexpr static int numberOfInputChannels = 10;
@@ -47,7 +48,6 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
-
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -60,14 +60,12 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
-
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
     //==============================================================================
-
 
 private:
     //==============================================================================
@@ -77,7 +75,6 @@ private:
     std::atomic<float>* useSN3D;
     std::atomic<float>* param1;
     std::atomic<float>* param2;
-
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginTemplateAudioProcessor)

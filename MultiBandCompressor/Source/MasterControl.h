@@ -21,9 +21,8 @@
  */
 
 #pragma once
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/customComponents/ReverseSlider.h"
-
+#include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
 /**
@@ -34,24 +33,13 @@
 class MasterControl : public juce::Component
 {
 public:
-    MasterControl()
-    {
-    }
+    MasterControl() {}
 
-    ~MasterControl()
-    {
-    }
+    ~MasterControl() {}
 
+    void mouseEnter (const juce::MouseEvent& e) override { repaint(); }
 
-    void mouseEnter (const juce::MouseEvent& e) override
-    {
-        repaint();
-    }
-
-    void mouseExit (const juce::MouseEvent& e) override
-    {
-        repaint();
-    }
+    void mouseExit (const juce::MouseEvent& e) override { repaint(); }
 
     void mouseMove (const juce::MouseEvent& e) override
     {
@@ -88,7 +76,6 @@ public:
         }
     }
 
-
     void mouseWheelMove (const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
     {
         isDragging = true;
@@ -122,7 +109,7 @@ public:
         }
     }
 
-    void  mouseUp (const juce::MouseEvent & e) override
+    void mouseUp (const juce::MouseEvent& e) override
     {
         isDragging = false;
         dragDirection = 0;
@@ -134,17 +121,13 @@ public:
         }
     }
 
-
-
     void addSlave (juce::Component& newComponentToControl)
     {
         elements.add (&newComponentToControl);
     }
 
-
     void paint (juce::Graphics& g) override
     {
-
         g.setColour (juce::Colours::white);
 
         auto thickness = (! isDragging && isMouseOver()) ? 1.0f : 0.5f;
@@ -181,13 +164,16 @@ public:
 
         upperHalf.removeFromBottom (2);
         triangleUp.clear();
-        triangleUp.addTriangle (upperHalf.getBottomLeft(), upperHalf.getBottomRight(), {upperHalf.getCentreX(), upperHalf.getY()});
+        triangleUp.addTriangle (upperHalf.getBottomLeft(),
+                                upperHalf.getBottomRight(),
+                                { upperHalf.getCentreX(), upperHalf.getY() });
 
         lowerHalf.removeFromTop (2);
         triangleDown.clear();
-        triangleDown.addTriangle (lowerHalf.getTopLeft(), lowerHalf.getTopRight(), {lowerHalf.getCentreX(), lowerHalf.getBottom()});
+        triangleDown.addTriangle (lowerHalf.getTopLeft(),
+                                  lowerHalf.getTopRight(),
+                                  { lowerHalf.getCentreX(), lowerHalf.getBottom() });
     }
-
 
 private:
     juce::Array<Component*> elements;

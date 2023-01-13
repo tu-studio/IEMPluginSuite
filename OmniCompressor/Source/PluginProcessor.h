@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "../../resources/MaxRE.h"
-#include "../../resources/ambisonicTools.h"
 #include "../../resources/AudioProcessorBase.h"
 #include "../../resources/Compressor.h"
 #include "../../resources/Delay.h"
+#include "../../resources/MaxRE.h"
+#include "../../resources/ambisonicTools.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "LookAheadGainReduction.h"
 
 #define ProcessorClass OmniCompressorAudioProcessor
@@ -35,7 +35,8 @@
 //==============================================================================
 /**
 */
-class OmniCompressorAudioProcessor  :   public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes:: Ambisonics<>>
+class OmniCompressorAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Ambisonics<>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -47,7 +48,6 @@ public:
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
-
 
     void processBlock (juce::AudioSampleBuffer&, juce::MidiBuffer&) override;
 
@@ -65,7 +65,7 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();

@@ -27,18 +27,17 @@
 
 namespace MailBox
 {
-    struct Message { // could become a reference counted object and Display should check regularly if its the only one who holds this reference -> delete
-        juce::String headline = "No Message available";
-        juce::String text = "";
-        juce::Colour messageColour = juce::Colours::lightgrey;
-    };
+struct Message
+{ // could become a reference counted object and Display should check regularly if its the only one who holds this reference -> delete
+    juce::String headline = "No Message available";
+    juce::String text = "";
+    juce::Colour messageColour = juce::Colours::lightgrey;
+};
 
 class Display : public juce::Component
 {
 public:
-    Display() : juce::Component() {
-
-    }
+    Display() : juce::Component() {}
 
     ~Display() override {}
 
@@ -50,31 +49,28 @@ public:
 
         juce::Rectangle<int> background (getLocalBounds());
 
-
         g.setColour (messageColour);
         g.drawRect (background);
-        g.setColour (messageColour.withMultipliedAlpha(0.1f));
+        g.setColour (messageColour.withMultipliedAlpha (0.1f));
         g.fillRect (background);
 
         g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 0)));
         g.setFont (17.0f);
 
-        juce::Rectangle<int> textArea = background.reduced (4,2);
+        juce::Rectangle<int> textArea = background.reduced (4, 2);
         g.setColour (textColour);
         g.drawText (message.headline, textArea.removeFromTop (20), juce::Justification::topLeft);
 
         g.setFont (getLookAndFeel().getTypefaceForFont (juce::Font (12.0f, 2)));
         g.setFont (14.0f);
 
-        g.drawFittedText (message.text, textArea,
+        g.drawFittedText (message.text,
+                          textArea,
                           juce::Justification::topLeft,
                           juce::roundToInt (textArea.getHeight() / 13.0f));
     }
 
-    void resized () override
-    {
-
-    }
+    void resized() override {}
 
     void setMessage (Message messageToDisplay)
     {
@@ -82,10 +78,9 @@ public:
         repaint();
     }
 
-
 private:
     Message message;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Display)
 };
-}
+} // namespace MailBox

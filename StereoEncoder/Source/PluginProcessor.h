@@ -22,22 +22,22 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #include "../../resources/Quaternion.h"
-#include "../../resources/efficientSHvanilla.h"
 #include "../../resources/ambisonicTools.h"
+#include "../../resources/efficientSHvanilla.h"
 
 #include "../../resources/Conversions.h"
-
 
 #define ProcessorClass StereoEncoderAudioProcessor
 
 //==============================================================================
 /**
 */
-class StereoEncoderAudioProcessor  : public AudioProcessorBase<IOTypes::AudioChannels<2>, IOTypes::Ambisonics<>>
+class StereoEncoderAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<2>, IOTypes::Ambisonics<>>
 {
 public:
     constexpr static int numberOfInputChannels = 2;
@@ -56,7 +56,6 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
-
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -68,11 +67,10 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
-
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     // ====== OSC ==================================================================
-    const bool processNotYetConsumedOSCMessage (const juce::OSCMessage &message) override;
+    const bool processNotYetConsumedOSCMessage (const juce::OSCMessage& message) override;
     // =================
 
     //======= Parameters ===========================================================
