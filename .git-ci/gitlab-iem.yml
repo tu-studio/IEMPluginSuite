@@ -137,7 +137,6 @@ clang-format:
       if test -f clang-format.log; then
         echo "Check the clang-format.log artifact for differences..."
       fi
-  allow_failure: true
   artifacts:
     when: on_failure
     paths:
