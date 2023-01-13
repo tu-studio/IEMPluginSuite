@@ -11,7 +11,7 @@ variables:
   #PROJECTS: AllRADecoder BinauralDecoder CoordinateConverter DirectionalCompressor DirectivityShaper DistanceCompensator DualDelay EnergyVisualizer FdnReverb MatrixMultiplier MultiBandCompressor MultiEncoder MultiEQ OmniCompressor ProbeDecoder RoomEncoder SceneRotator SimpleDecoder StereoEncoder ToolBox
   GIT_SUBMODULE_STRATEGY: recursive
   CONFIG: Release
-  JUCEVERSION: 7.0.3
+  JUCEVERSION: 7.0.4
 
 ###################################################
 # cleanup after the job (e.g. rename files for the artifacts...)
