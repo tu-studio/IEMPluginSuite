@@ -15,7 +15,7 @@ For more information, installation guides and plug-in descriptions see:
 The IEM Plug-in Suite can be built using [CMake](https://cmake.org) (see commands below) and already comes with the JUCE dependency as a git submodule. The general system requirements are listed in the [JUCE Repository](https://github.com/juce-framework/JUCE/blob/7.0.3/README.md#minimum-system-requirements).
 
 ### Dependencies on Linux
-Before compiling on Linux, some dependencies must be met. For Ubuntu (and most likely the majority of Debian-based systems), those are listed in the [JUCE docs](https://github.com/juce-framework/JUCE/blob/7.0.3/docs/Linux%20Dependencies.md). Alternative, if [source code repositories](https://askubuntu.com/questions/158871/how-do-i-enable-the-source-code-repositories) are enabled, you can get them with
+Before compiling on Linux, some dependencies must be met. For Ubuntu (and most likely the majority of Debian-based systems), those are listed in the [JUCE docs](https://github.com/juce-framework/JUCE/blob/7.0.3/docs/Linux%20Dependencies.md). Alternatively, if [source code repositories](https://askubuntu.com/questions/158871/how-do-i-enable-the-source-code-repositories) are enabled, you can get them with
 ```sh
 apt-get build-dep iem-plugin-suite
 ```
