@@ -92,6 +92,8 @@ At the moment, it's not possible with in LV2 format to get the currently availab
 
 So in order to use the plug-ins correctly, you'll have to set the order manually in each plugin. This is missing feature in the LV2 standard and therefore out of our control. We already opened an [issue/feature request](https://gitlab.com/lv2/lv2/-/issues/63), but can't say if and when this will be supported.
 
+There was a bug with LV2 plug-ins in REAPER on macOS, which causes the DAW to crash when the plug-in is removed. This issue is fixed with REAPER 6.74.
+
 ## Related repositories
 - https://git.iem.at/pd/vstplugin/releases: to use the plug-ins in PD and SuperCollider
 - https://git.iem.at/ressi/iempluginosc: to control the plug-ins using the OSC interface but without an OSC connection
