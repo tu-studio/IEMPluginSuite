@@ -13,11 +13,11 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -DIEM_BUILD_VST2=ON -DVST2SDKPATH=src/VST_SD
 cmake --build .
 
 cd ..
-# mkdir VST3
-# cp -r build/*/*_artefacts/Release/VST3/*.vst3 VST3/
 mkdir VST
 cp -r build/*/*_artefacts/Release/VST/*.vst VST/
+# mkdir VST3
+# cp -r build/*/*_artefacts/Release/VST3/*.vst3 VST3/
 mkdir LV2
-cp -r build/*/*_artefacts/Release/VST3/*.lv2 LV2/
+cp -r build/*/*_artefacts/Release/LV2/*.lv2 LV2/
 mkdir Standalone
 cp -r build/*/*_artefacts/Release/Standalone/*.app Standalone/
