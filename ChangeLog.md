@@ -1,16 +1,15 @@
 This file only contains the major changes of the IEM Plug-in Suite.
 For a list of all changes and bugfixes see the git log.
 
-Please note, that breaking changes are marked with `!!BREAKING CHANGE!!`. They might lead to an unexpected behaviour and might not be compatible with your previous projects without making some adaptions. See the [Breaking changes article](https://plugins.iem.at/docs/breakingchanges/) for more information.
+Please note, that breaking changes are marked with `!!BREAKING CHANGE!!`. They might lead to an unexpected behavior and might not be compatible with your previous projects without making some adaptions. See the [Breaking changes article](https://plugins.iem.at/docs/breakingchanges/) for more information.
 
 ## v1.14.0
 - general changes
-    - moved to JUCE 7.0.3
-    - LV2 plug-ins for Linux and Windows
-    - Store settings of standalones in a dedicated `IEMAudioPlugins` subdirectory
+    - moved to JUCE 7.0.4
+    - LV2 plug-ins for macOS, Linux and Windows
     - remove deprecated *.jucer files
-    - clang-format
-    - smaller bug fixes
+    - `clang-format`ting the whole codebase
+    - smaller bug fixes and improvements
 - new plug-ins
     - **Granular**Encoder
         - Granular synthesizer and encoder
