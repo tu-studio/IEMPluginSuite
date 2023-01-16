@@ -3,7 +3,7 @@
 ## script for creating the release binaries on
 rm -rf build
 rm -rf VST
-rm -rf VST3
+# rm -rf VST3
 rm -rf LV2
 rm -rf Standalone
 
@@ -13,8 +13,8 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -DIEM_BUILD_VST2=ON -DVST2SDKPATH=src/VST_SD
 cmake --build .
 
 cd ..
-mkdir VST3
-cp -r build/*/*_artefacts/Release/VST3/*.vst3 VST3/
+# mkdir VST3
+# cp -r build/*/*_artefacts/Release/VST3/*.vst3 VST3/
 mkdir VST
 cp -r build/*/*_artefacts/Release/VST/*.vst VST/
 mkdir LV2
