@@ -131,21 +131,36 @@ clang-format:
   image: alpine:latest
   variables:
     GIT_SUBMODULE_STRATEGY: none
+    FORMAT_SCRIPT: clang-format -i
+  before_script:
+    - apk add clang-extra-tools
   script:
-    - apk add clang-extra-tools git
-    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -not -path "./JUCE/*" -exec clang-format -i {} \;
-    - git diff --exit-code > clang-format.log
+    - apk add git
+    - find * \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -not -path "JUCE/*" -exec ${FORMAT_SCRIPT} {} \;
+    - git status --porcelain
+    - git diff --exit-code > format.log
     # cleanup, if 'git diff' did not complain
-    - rm clang-format.log
+    - rm format.log
   after_script:
     - |
-      if test -f clang-format.log; then
-        echo "Check the clang-format.log artifact for differences..."
+      if test -f format.log; then
+        echo "Check the format.log artifact for differences..."
       fi
   artifacts:
     when: on_failure
     paths:
-      - clang-format.log
+      - format.log
+
+# check for consistent line-endings
+# git handles native line-endings nicely,
+# iff the files are committed from the proper systems
+# (CRLF-files from Windows; LF-files from un*x)
+linefeed-format:
+  extends: clang-format
+  variables:
+    FORMAT_SCRIPT: dos2unix -q
+  before_script:
+    - apk add dos2unix
 
 # some static code analysers
 # currently run in 'pre-check' stage, as the build stage takes so long
