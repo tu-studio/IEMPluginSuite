@@ -63,8 +63,8 @@ variables:
     - cd ..
 
 # collect binaries for artifacts
-    - mkdir VST3
-    - cp -r build/*/*_artefacts/Release/VST3/*.vst3 VST3/
+    # - mkdir VST3
+    # - cp -r build/*/*_artefacts/Release/VST3/*.vst3 VST3/
     - mkdir VST
     - cp -r build/*/*_artefacts/Release/VST/*.so VST/
     - mkdir LV2
@@ -89,8 +89,8 @@ variables:
     - make -j $(sysctl -n hw.ncpu)
     - cd ..
 # collect binaries for artifacts
-    - mkdir VST3
-    - cp -r build/*/*_artefacts/Release/VST3/*.vst3 VST3/
+    # - mkdir VST3
+    # - cp -r build/*/*_artefacts/Release/VST3/*.vst3 VST3/
     - mkdir VST
     - cp -r build/*/*_artefacts/Release/VST/*.vst VST/
     - mkdir LV2
