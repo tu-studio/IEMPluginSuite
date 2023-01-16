@@ -997,7 +997,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
 
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "shape",
-        "Shape",
+        "Grain Shape",
         juce::CharPointer_UTF8 (R"()"),
         juce::NormalisableRange<float> (-10.0f, 10.0f, 0.1f),
         0.0,
@@ -1043,7 +1043,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         nullptr));
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "deltaTimeMod",
-        "Delta Time Mod",
+        "Delta Time Modulation",
         juce::CharPointer_UTF8 (R"(%)"),
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         0.0f,
@@ -1060,7 +1060,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         nullptr));
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "grainLengthMod",
-        "Grain Length Mod",
+        "Grain Length Modulation",
         juce::CharPointer_UTF8 (R"(%)"),
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         0.0f,
@@ -1069,7 +1069,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
 
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "position",
-        "Position",
+        "Read Position in Buffer",
         juce::CharPointer_UTF8 (R"(s)"),
         juce::NormalisableRange<float> (0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f),
         0.0f,
@@ -1077,7 +1077,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         nullptr));
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "positionMod",
-        "Position Mod",
+        "ReadPosition Modulation",
         juce::CharPointer_UTF8 (R"(s)"),
         juce::NormalisableRange<float> (0.0f, CIRC_BUFFER_SECONDS / 2, 1e-6f, GUI_SKEW),
         0.05f,
@@ -1094,7 +1094,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         nullptr));
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "pitchMod",
-        "Pitch Mod",
+        "Pitch Modulation",
         juce::CharPointer_UTF8 (R"(st)"),
         juce::NormalisableRange<float> (0.0f, 12.0f, 0.001f, GUI_SKEW),
         0.0f,
@@ -1103,7 +1103,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
 
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "windowAttack",
-        "Window Attack",
+        "Grain Attack Time",
         juce::CharPointer_UTF8 (R"(%)"),
         juce::NormalisableRange<float> (0.0f, 50.0f, 0.1f),
         50.0f,
@@ -1111,7 +1111,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         nullptr));
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "windowAttackMod",
-        "Window Attack Mod",
+        "Attack Time Modulation",
         juce::CharPointer_UTF8 (R"(%)"),
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         0.0f,
@@ -1119,7 +1119,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         nullptr));
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "windowDecay",
-        "Window Decay",
+        "Grain Decay Time",
         juce::CharPointer_UTF8 (R"(%)"),
         juce::NormalisableRange<float> (0.0f, 50.0f, 0.1f),
         50.0f,
@@ -1127,7 +1127,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
         nullptr));
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "windowDecayMod",
-        "Window Decay Mod",
+        "Decay Time Modulation",
         juce::CharPointer_UTF8 (R"(%)"),
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         0.0f,
@@ -1167,7 +1167,7 @@ std::vector<std::unique_ptr<juce::RangedAudioParameter>>
 
     params.push_back (OSCParameterInterface::createParameterTheOldWay (
         "spatialize2D",
-        "2D",
+        "2D mode",
         "",
         juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
         0.0f,
