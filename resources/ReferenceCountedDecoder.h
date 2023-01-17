@@ -21,9 +21,9 @@
  */
 
 #pragma once
+#include "MaxRE.h"
 #include "ReferenceCountedMatrix.h"
 #include "ambisonicTools.h"
-#include "MaxRE.h"
 #include "inPhase.h"
 
 class ReferenceCountedDecoder : public ReferenceCountedMatrix
@@ -52,16 +52,21 @@ public:
         int subwooferChannel = -1;
     };
 
-
-    ReferenceCountedDecoder (const juce::String& nameToUse, const juce::String& descriptionToUse, int rows, int columns)
-    :   ReferenceCountedMatrix(nameToUse, descriptionToUse, rows, columns), order(isqrt(columns)-1)
-    {}
+    ReferenceCountedDecoder (const juce::String& nameToUse,
+                             const juce::String& descriptionToUse,
+                             int rows,
+                             int columns) :
+        ReferenceCountedMatrix (nameToUse, descriptionToUse, rows, columns),
+        order (isqrt (columns) - 1)
+    {
+    }
 
     ~ReferenceCountedDecoder() override = default;
 
     virtual juce::String getConstructorMessage() const override
     {
-        return "Decoder named '" + name + "' constructed. Size: " + juce::String (matrix.getNumRows()) + "x" + juce::String (matrix.getNumColumns());
+        return "Decoder named '" + name + "' constructed. Size: "
+               + juce::String (matrix.getNumRows()) + "x" + juce::String (matrix.getNumColumns());
     }
 
     virtual juce::String getDeconstructorMessage() const override
@@ -69,33 +74,24 @@ public:
         return "Decoder named '" + name + "' destroyed.";
     }
 
-    const juce::String getName()
-    {
-        return name;
-    }
+    const juce::String getName() { return name; }
 
-    const juce::String getDescription()
-    {
-        return description;
-    }
+    const juce::String getDescription() { return description; }
 
-    void setSettings (const Settings newSettings)
-    {
-        settings = newSettings;
-    }
+    void setSettings (const Settings newSettings) { settings = newSettings; }
 
-    const Settings getSettings()
-    {
-        return settings;
-    }
+    const Settings getSettings() { return settings; }
 
     const juce::String getWeightsString() const
     {
         switch (settings.weights)
         {
-            case Weights::maxrE: return "maxrE";
-            case Weights::inPhase: return "inPhase";
-            default: return "none";
+            case Weights::maxrE:
+                return "maxrE";
+            case Weights::inPhase:
+                return "inPhase";
+            default:
+                return "none";
         }
     }
 
@@ -111,19 +107,16 @@ public:
             if (settings.weights == Weights::maxrE)
                 for (int i = 0; i < nCols; ++i)
                     for (int j = 0; j < nRows; ++j)
-                        matrix(j,i) /= getMaxRELUT(order)[i];
+                        matrix (j, i) /= getMaxRELUT (order)[i];
             else if (settings.weights == Weights::inPhase)
                 for (int i = 0; i < nCols; ++i)
                     for (int j = 0; j < nRows; ++j)
-                        matrix(j,i) /= getInPhaseLUT(order)[i];
+                        matrix (j, i) /= getInPhaseLUT (order)[i];
             settings.weightsAlreadyApplied = false;
         }
     }
 
-    const int getOrder()
-    {
-        return order;
-    }
+    const int getOrder() { return order; }
 
 private:
     Settings settings;

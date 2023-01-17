@@ -20,22 +20,25 @@
  ==============================================================================
  */
 
-
 #include "OSCParameterInterface.h"
 #include "AudioProcessorBase.h"
 
-OSCParameterInterface::OSCParameterInterface (OSCMessageInterceptor &i, juce::AudioProcessorValueTreeState &valueTreeState) : interceptor (i), parameters (valueTreeState)
+OSCParameterInterface::OSCParameterInterface (OSCMessageInterceptor& i,
+                                              juce::AudioProcessorValueTreeState& valueTreeState) :
+    interceptor (i), parameters (valueTreeState)
 {
 #ifdef DEBUG_PARAMETERS_FOR_DOCUMENTATION
     auto& params = parameters.processor.getParameters();
     for (auto& item : params)
     {
-        if (auto* ptr = dynamic_cast<juce::AudioProcessorParameterWithID*> (item)) // that's maybe not the best solution, but it does the job for now
+        if (auto* ptr = dynamic_cast<juce::AudioProcessorParameterWithID*> (
+                item)) // that's maybe not the best solution, but it does the job for now
         {
             auto parameterID = ptr->paramID;
             auto parameterName = ptr->name;
             auto range = parameters.getParameterRange (parameterID);
-            DBG ("| " << parameterID << " | " << range.getRange().getStart() << " : " << range.getRange().getEnd() <<  " | " << parameterName <<" | |");
+            DBG ("| " << parameterID << " | " << range.getRange().getStart() << " : "
+                      << range.getRange().getEnd() << " | " << parameterName << " | |");
         }
     }
 #endif
@@ -49,24 +52,32 @@ OSCParameterInterface::OSCParameterInterface (OSCMessageInterceptor &i, juce::Au
     startTimer (100);
 }
 
-
-std::unique_ptr<juce::RangedAudioParameter> OSCParameterInterface::createParameterTheOldWay (const juce::String& parameterID,
-                                                             const juce::String& parameterName,
-                                                             const juce::String& labelText,
-                                                             juce::NormalisableRange<float> valueRange,
-                                                             float defaultValue,
-                                                             std::function<juce::String (float)> valueToTextFunction,
-                                                             std::function<float (const juce::String&)> textToValueFunction,
-                                                             bool isMetaParameter,
-                                                             bool isAutomatableParameter,
-                                                             bool isDiscrete,
-                                                             juce::AudioProcessorParameter::Category category,
-                                                             bool isBoolean)
+std::unique_ptr<juce::RangedAudioParameter> OSCParameterInterface::createParameterTheOldWay (
+    const juce::String& parameterID,
+    const juce::String& parameterName,
+    const juce::String& labelText,
+    juce::NormalisableRange<float> valueRange,
+    float defaultValue,
+    std::function<juce::String (float)> valueToTextFunction,
+    std::function<float (const juce::String&)> textToValueFunction,
+    bool isMetaParameter,
+    bool isAutomatableParameter,
+    bool isDiscrete,
+    juce::AudioProcessorParameter::Category category,
+    bool isBoolean)
 {
-    return std::make_unique<juce::AudioProcessorValueTreeState::Parameter> (parameterID, parameterName, labelText, valueRange, defaultValue,
-                                                                      valueToTextFunction, textToValueFunction,
-                                                                      isMetaParameter, isAutomatableParameter, isDiscrete,
-                                                                      category, isBoolean);
+    return std::make_unique<juce::AudioProcessorValueTreeState::Parameter> (parameterID,
+                                                                            parameterName,
+                                                                            labelText,
+                                                                            valueRange,
+                                                                            defaultValue,
+                                                                            valueToTextFunction,
+                                                                            textToValueFunction,
+                                                                            isMetaParameter,
+                                                                            isAutomatableParameter,
+                                                                            isDiscrete,
+                                                                            category,
+                                                                            isBoolean);
 }
 
 const bool OSCParameterInterface::processOSCMessage (juce::OSCMessage oscMessage)
@@ -77,7 +88,8 @@ const bool OSCParameterInterface::processOSCMessage (juce::OSCMessage oscMessage
         auto& params = parameters.processor.getParameters();
         for (auto& item : params)
         {
-            if (auto* ptr = dynamic_cast<juce::AudioProcessorParameterWithID*> (item)) // that's maybe not the best solution, but it does the job for now
+            if (auto* ptr = dynamic_cast<juce::AudioProcessorParameterWithID*> (
+                    item)) // that's maybe not the best solution, but it does the job for now
             {
                 auto paramAddress = ptr->paramID;
                 if (pattern.matches (juce::OSCAddress ("/" + paramAddress)))
@@ -100,7 +112,8 @@ const bool OSCParameterInterface::processOSCMessage (juce::OSCMessage oscMessage
         }
     }
 
-    juce::String paramAddress = oscMessage.getAddressPattern().toString().substring(1); // trimming forward slash
+    juce::String paramAddress =
+        oscMessage.getAddressPattern().toString().substring (1); // trimming forward slash
     if (auto parameter = parameters.getParameter (paramAddress))
     {
         if (oscMessage.size() > 0)
@@ -128,7 +141,6 @@ void OSCParameterInterface::setValue (juce::String paramID, float value)
     parameters.getParameter (paramID)->setValueNotifyingHost (range.convertTo0to1 (value));
 }
 
-
 void OSCParameterInterface::oscMessageReceived (const juce::OSCMessage& message)
 {
     juce::OSCMessage messageCopy (message);
@@ -138,7 +150,8 @@ void OSCParameterInterface::oscMessageReceived (const juce::OSCMessage& message)
         if (message.getAddressPattern().toString().startsWith (prefix))
         {
             juce::OSCMessage msg (message);
-            msg.setAddressPattern (message.getAddressPattern().toString().substring (juce::String (JucePlugin_Name).length() + 1));
+            msg.setAddressPattern (message.getAddressPattern().toString().substring (
+                juce::String (JucePlugin_Name).length() + 1));
 
             if (processOSCMessage (msg))
                 return;
@@ -148,7 +161,8 @@ void OSCParameterInterface::oscMessageReceived (const juce::OSCMessage& message)
             return;
 
         // open/change osc port
-        if (message.getAddressPattern().toString().equalsIgnoreCase ("/openOSCPort") && message.size() == 1)
+        if (message.getAddressPattern().toString().equalsIgnoreCase ("/openOSCPort")
+            && message.size() == 1)
         {
             int newPort = -1;
 
@@ -158,15 +172,16 @@ void OSCParameterInterface::oscMessageReceived (const juce::OSCMessage& message)
                 newPort = static_cast<int> (message[0].getFloat32());
 
             if (newPort > 0)
-                juce::MessageManager::callAsync ( [this, newPort]() { oscReceiver.connect (newPort); } );
+                juce::MessageManager::callAsync ([this, newPort]()
+                                                 { oscReceiver.connect (newPort); });
         }
 
-        if (message.getAddressPattern().toString().equalsIgnoreCase ("/flushParams") )
-            juce::MessageManager::callAsync ( [this]() { sendParameterChanges (true); });
+        if (message.getAddressPattern().toString().equalsIgnoreCase ("/flushParams"))
+            juce::MessageManager::callAsync ([this]() { sendParameterChanges (true); });
     }
 }
 
-void OSCParameterInterface::oscBundleReceived (const juce::OSCBundle &bundle)
+void OSCParameterInterface::oscBundleReceived (const juce::OSCBundle& bundle)
 {
     for (int i = 0; i < bundle.size(); ++i)
     {
@@ -177,7 +192,6 @@ void OSCParameterInterface::oscBundleReceived (const juce::OSCBundle &bundle)
             oscBundleReceived (elem.getBundle());
     }
 }
-
 
 void OSCParameterInterface::timerCallback()
 {
@@ -194,7 +208,8 @@ void OSCParameterInterface::sendParameterChanges (const bool forceSend)
     for (int i = 0; i < nParams; ++i)
     {
         auto item = params[i];
-        if (auto* ptr = dynamic_cast<juce::AudioProcessorParameterWithID*> (item)) // that's maybe not the best solution, but it does the job for now
+        if (auto* ptr = dynamic_cast<juce::AudioProcessorParameterWithID*> (
+                item)) // that's maybe not the best solution, but it does the job for now
         {
             const auto normValue = ptr->getValue();
 
@@ -210,7 +225,9 @@ void OSCParameterInterface::sendParameterChanges (const bool forceSend)
                     juce::OSCMessage message (address + paramID, range.convertFrom0to1 (normValue));
                     oscSender.send (message);
                 }
-                catch (...) {};
+                catch (...)
+                {
+                };
             }
         }
     }
@@ -239,7 +256,6 @@ void OSCParameterInterface::setOSCAddress (juce::String newAddress)
             address = "/" + newAddress + "/";
     }
 }
-
 
 juce::ValueTree OSCParameterInterface::getConfig() const
 {

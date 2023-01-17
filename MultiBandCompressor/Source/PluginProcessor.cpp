@@ -24,82 +24,88 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-MultiBandCompressorAudioProcessor::MultiBandCompressorAudioProcessor()
-     : AudioProcessorBase (
+MultiBandCompressorAudioProcessor::MultiBandCompressorAudioProcessor() :
+    AudioProcessorBase (
 #ifndef JucePlugin_PreferredChannelConfigurations
-                           BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-                           .withInput  ("Input",  juce::AudioChannelSet::discreteChannels (64), true)
+        BusesProperties()
+    #if ! JucePlugin_IsMidiEffect
+        #if ! JucePlugin_IsSynth
+            .withInput ("Input", juce::AudioChannelSet::discreteChannels (64), true)
+        #endif
+            .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
+    #endif
+            ,
 #endif
-                           .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
-#endif
-                           ,
-#endif
-                           createParameterLayout()),
-       maxNumFilters (ceil (64 / filterRegisterSize))
+        createParameterLayout()),
+    maxNumFilters (ceil (64 / IIRfloat_elements))
 {
     const juce::String inputSettingID = "orderSetting";
     orderSetting = parameters.getRawParameterValue (inputSettingID);
     parameters.addParameterListener (inputSettingID, this);
 
-
-    for (int i = 0; i < numFreqBands-1; ++i)
+    for (int filterBandIdx = 0; filterBandIdx < numFilterBands - 1; ++filterBandIdx)
     {
-        const juce::String crossoverID ("crossover" + juce::String (i));
+        const juce::String crossoverID ("crossover" + juce::String (filterBandIdx));
 
-        crossovers[i] = parameters.getRawParameterValue (crossoverID);
+        crossovers[filterBandIdx] = parameters.getRawParameterValue (crossoverID);
 
-        lowPassLRCoeffs[i] = IIR::Coefficients<double>::makeLowPass (lastSampleRate, *crossovers[i]);
-        highPassLRCoeffs[i] = IIR::Coefficients<double>::makeHighPass (lastSampleRate, *crossovers[i]);
+        lowPassLRCoeffs[filterBandIdx] =
+            IIR::Coefficients<double>::makeLowPass (lastSampleRate, *crossovers[filterBandIdx]);
+        highPassLRCoeffs[filterBandIdx] =
+            IIR::Coefficients<double>::makeHighPass (lastSampleRate, *crossovers[filterBandIdx]);
 
-        calculateCoefficients (i);
+        calculateCoefficients (filterBandIdx);
 
-        iirLPCoefficients[i] = IIR::Coefficients<float>::makeLowPass (lastSampleRate, *crossovers[i]);
-        iirHPCoefficients[i] = IIR::Coefficients<float>::makeHighPass (lastSampleRate, *crossovers[i]);
-        iirAPCoefficients[i] = IIR::Coefficients<float>::makeAllPass (lastSampleRate, *crossovers[i]);
+        iirLPCoefficients[filterBandIdx] =
+            IIR::Coefficients<float>::makeLowPass (lastSampleRate, *crossovers[filterBandIdx]);
+        iirHPCoefficients[filterBandIdx] =
+            IIR::Coefficients<float>::makeHighPass (lastSampleRate, *crossovers[filterBandIdx]);
+        iirAPCoefficients[filterBandIdx] =
+            IIR::Coefficients<float>::makeAllPass (lastSampleRate, *crossovers[filterBandIdx]);
 
         parameters.addParameterListener (crossoverID, this);
 
-        iirLP[i].clear();
-        iirLP2[i].clear();
-        iirHP[i].clear();
-        iirHP2[i].clear();
-        iirAP[i].clear();
+        iirLP[filterBandIdx].clear();
+        iirLP2[filterBandIdx].clear();
+        iirHP[filterBandIdx].clear();
+        iirHP2[filterBandIdx].clear();
+        iirAP[filterBandIdx].clear();
 
-        for (int ch = 0; ch < maxNumFilters; ++ch)
+        for (int simdFilterIdx = 0; simdFilterIdx < maxNumFilters; ++simdFilterIdx)
         {
-            iirLP[i].add (new IIR::Filter<filterFloatType> (iirLPCoefficients[i]));
-            iirLP2[i].add (new IIR::Filter<filterFloatType> (iirLPCoefficients[i]));
-            iirHP[i].add (new IIR::Filter<filterFloatType> (iirHPCoefficients[i]));
-            iirHP2[i].add (new IIR::Filter<filterFloatType> (iirHPCoefficients[i]));
-            iirAP[i].add (new IIR::Filter<filterFloatType> (iirAPCoefficients[i]));
+            iirLP[filterBandIdx].add (new IIR::Filter<IIRfloat> (iirLPCoefficients[filterBandIdx]));
+            iirLP2[filterBandIdx].add (
+                new IIR::Filter<IIRfloat> (iirLPCoefficients[filterBandIdx]));
+            iirHP[filterBandIdx].add (new IIR::Filter<IIRfloat> (iirHPCoefficients[filterBandIdx]));
+            iirHP2[filterBandIdx].add (
+                new IIR::Filter<IIRfloat> (iirHPCoefficients[filterBandIdx]));
+            iirAP[filterBandIdx].add (new IIR::Filter<IIRfloat> (iirAPCoefficients[filterBandIdx]));
         }
     }
 
-    for (int i = 0; i < numFreqBands; ++i)
+    for (int filterBandIdx = 0; filterBandIdx < numFilterBands; ++filterBandIdx)
     {
-        for (int ch = 0; ch < maxNumFilters; ++ch)
+        for (int simdFilterIdx = 0; simdFilterIdx < maxNumFilters; ++simdFilterIdx)
         {
-            freqBandsBlocks[i].push_back (juce::HeapBlock<char> ());
+            freqBandsBlocks[filterBandIdx].push_back (juce::HeapBlock<char>());
         }
 
-        const juce::String thresholdID ("threshold" + juce::String (i));
-        const juce::String kneeID ("knee" + juce::String (i));
-        const juce::String attackID ("attack" + juce::String (i));
-        const juce::String releaseID ("release" + juce::String (i));
-        const juce::String ratioID ("ratio" + juce::String (i));
-        const juce::String makeUpGainID ("makeUpGain" + juce::String (i));
-        const juce::String bypassID ("bypass" + juce::String (i));
-        const juce::String soloID ("solo" + juce::String (i));
+        const juce::String thresholdID ("threshold" + juce::String (filterBandIdx));
+        const juce::String kneeID ("knee" + juce::String (filterBandIdx));
+        const juce::String attackID ("attack" + juce::String (filterBandIdx));
+        const juce::String releaseID ("release" + juce::String (filterBandIdx));
+        const juce::String ratioID ("ratio" + juce::String (filterBandIdx));
+        const juce::String makeUpGainID ("makeUpGain" + juce::String (filterBandIdx));
+        const juce::String bypassID ("bypass" + juce::String (filterBandIdx));
+        const juce::String soloID ("solo" + juce::String (filterBandIdx));
 
-        threshold[i] = parameters.getRawParameterValue (thresholdID);
-        knee[i] = parameters.getRawParameterValue (kneeID);
-        attack[i] = parameters.getRawParameterValue (attackID);
-        release[i] = parameters.getRawParameterValue (releaseID);
-        ratio[i] = parameters.getRawParameterValue (ratioID);
-        makeUpGain[i] = parameters.getRawParameterValue (makeUpGainID);
-        bypass[i] = parameters.getRawParameterValue (bypassID);
+        threshold[filterBandIdx] = parameters.getRawParameterValue (thresholdID);
+        knee[filterBandIdx] = parameters.getRawParameterValue (kneeID);
+        attack[filterBandIdx] = parameters.getRawParameterValue (attackID);
+        release[filterBandIdx] = parameters.getRawParameterValue (releaseID);
+        ratio[filterBandIdx] = parameters.getRawParameterValue (ratioID);
+        makeUpGain[filterBandIdx] = parameters.getRawParameterValue (makeUpGainID);
+        bypass[filterBandIdx] = parameters.getRawParameterValue (bypassID);
 
         parameters.addParameterListener (thresholdID, this);
         parameters.addParameterListener (kneeID, this);
@@ -115,9 +121,9 @@ MultiBandCompressorAudioProcessor::MultiBandCompressorAudioProcessor()
 
     copyCoeffsToProcessor();
 
-    for (int ch = 0; ch < maxNumFilters; ++ch)
+    for (int simdFilterIdx = 0; simdFilterIdx < maxNumFilters; ++simdFilterIdx)
     {
-        interleavedBlockData.push_back (juce::HeapBlock<char> ());
+        interleavedBlockData.push_back (juce::HeapBlock<char>());
     }
 }
 
@@ -125,136 +131,173 @@ MultiBandCompressorAudioProcessor::~MultiBandCompressorAudioProcessor()
 {
 }
 
-std::vector<std::unique_ptr<juce::RangedAudioParameter>> MultiBandCompressorAudioProcessor::createParameterLayout()
+std::vector<std::unique_ptr<juce::RangedAudioParameter>>
+    MultiBandCompressorAudioProcessor::createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
-    const float crossoverPresets [numFreqBands-1] = { 80.0f, 440.0f, 2200.0f };
+    const float crossoverPresets[numFilterBands - 1] = { 80.0f, 440.0f, 2200.0f };
 
-    auto floatParam = std::make_unique<juce::AudioParameterFloat> ("orderSetting",
-                                                        "Ambisonics Order",
-                                                        juce::NormalisableRange<float>(0.0f, 8.0f, 1.0f), 0.0f,
-                                                        "",
-                                                        juce::AudioProcessorParameter::genericParameter,
-                                                        [](float value, int maximumStringLength)
-                                                        {
-                                                            if (value >= 0.5f && value < 1.5f) return "0th";
-                                                            else if (value >= 1.5f && value < 2.5f) return "1st";
-                                                            else if (value >= 2.5f && value < 3.5f) return "2nd";
-                                                            else if (value >= 3.5f && value < 4.5f) return "3rd";
-                                                            else if (value >= 4.5f && value < 5.5f) return "4th";
-                                                            else if (value >= 5.5f && value < 6.5f) return "5th";
-                                                            else if (value >= 6.5f && value < 7.5f) return "6th";
-                                                            else if (value >= 7.5f) return "7th";
-                                                            else return "Auto";
-                                                       }, nullptr);
+    auto floatParam = std::make_unique<juce::AudioParameterFloat> (
+        "orderSetting",
+        "Ambisonics Order",
+        juce::NormalisableRange<float> (0.0f, 8.0f, 1.0f),
+        0.0f,
+        "",
+        juce::AudioProcessorParameter::genericParameter,
+        [] (float value, int maximumStringLength)
+        {
+            if (value >= 0.5f && value < 1.5f)
+                return "0th";
+            else if (value >= 1.5f && value < 2.5f)
+                return "1st";
+            else if (value >= 2.5f && value < 3.5f)
+                return "2nd";
+            else if (value >= 3.5f && value < 4.5f)
+                return "3rd";
+            else if (value >= 4.5f && value < 5.5f)
+                return "4th";
+            else if (value >= 5.5f && value < 6.5f)
+                return "5th";
+            else if (value >= 6.5f && value < 7.5f)
+                return "6th";
+            else if (value >= 7.5f)
+                return "7th";
+            else
+                return "Auto";
+        },
+        nullptr);
     params.push_back (std::move (floatParam));
 
-    floatParam = std::make_unique<juce::AudioParameterFloat> ("useSN3D", "Normalization",
-                                                        juce::NormalisableRange<float>(0.0f, 1.0f, 1.0f), 1.0f,
-                                                        "",
-                                                        juce::AudioProcessorParameter::genericParameter,
-                                                        [](float value, int maximumStringLength)
-                                                        {
-                                                            if (value >= 0.5f) return "SN3D";
-                                                            else return "N3D";
-                                                        },
-                                                        nullptr);
+    floatParam = std::make_unique<juce::AudioParameterFloat> (
+        "useSN3D",
+        "Normalization",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        1.0f,
+        "",
+        juce::AudioProcessorParameter::genericParameter,
+        [] (float value, int maximumStringLength)
+        {
+            if (value >= 0.5f)
+                return "SN3D";
+            else
+                return "N3D";
+        },
+        nullptr);
     params.push_back (std::move (floatParam));
-
 
     // Crossovers
-    for (int i = 0; i < numFreqBands-1; ++i)
+    for (int i = 0; i < numFilterBands - 1; ++i)
     {
-        floatParam = std::make_unique<juce::AudioParameterFloat> ("crossover" + juce::String (i),
-                                                            "Crossover " + juce::String (i),
-                                                            juce::NormalisableRange<float> (20.0f, 20000.0f, 0.1f, 0.4f),
-                                                            crossoverPresets[i], "Hz",
-                                                            juce::AudioProcessorParameter::genericParameter,
-                                                            std::function <juce::String (float value, int maximumStringLength)> ([](float v, int m) {return juce::String (v, m);}),
-                                                            std::function< float (const juce::String &text)> ([](const juce::String &t){return t.getFloatValue();}));
+        floatParam = std::make_unique<juce::AudioParameterFloat> (
+            "crossover" + juce::String (i),
+            "Crossover " + juce::String (i),
+            juce::NormalisableRange<float> (20.0f, 20000.0f, 0.1f, 0.4f),
+            crossoverPresets[i],
+            "Hz",
+            juce::AudioProcessorParameter::genericParameter,
+            std::function<juce::String (float value, int maximumStringLength)> (
+                [] (float v, int m) { return juce::String (v, m); }),
+            std::function<float (const juce::String& text)> ([] (const juce::String& t)
+                                                             { return t.getFloatValue(); }));
         params.push_back (std::move (floatParam));
     }
 
-
-    for (int i = 0; i < numFreqBands; ++i)
+    for (int i = 0; i < numFilterBands; ++i)
     {
         // compressor threshold
-        floatParam = std::make_unique<juce::AudioParameterFloat>("threshold" + juce::String (i),
-                                                           "Threshold " + juce::String (i),
-                                                           juce::NormalisableRange<float> (-50.0f, 10.0f, 0.1f),
-                                                           -10.0f, "dB",
-                                                           juce::AudioProcessorParameter::genericParameter,
-                                                           std::function <juce::String (float value, int maximumStringLength)> ([](float v, int m){return juce::String (v, 1);}),
-                                                           std::function< float (const juce::String &text)> ([](const juce::String &t){return t.getFloatValue();})
-                                                          );
+        floatParam = std::make_unique<juce::AudioParameterFloat> (
+            "threshold" + juce::String (i),
+            "Threshold " + juce::String (i),
+            juce::NormalisableRange<float> (-50.0f, 10.0f, 0.1f),
+            -10.0f,
+            "dB",
+            juce::AudioProcessorParameter::genericParameter,
+            std::function<juce::String (float value, int maximumStringLength)> (
+                [] (float v, int m) { return juce::String (v, 1); }),
+            std::function<float (const juce::String& text)> ([] (const juce::String& t)
+                                                             { return t.getFloatValue(); }));
         params.push_back (std::move (floatParam));
 
         // knee
-        floatParam = std::make_unique<juce::AudioParameterFloat>("knee" + juce::String (i),
-                                                           "Knee Width " + juce::String (i),
-                                                           juce::NormalisableRange<float> (0.0f, 30.0f, 0.1f),
-                                                           0.0f, "dB",
-                                                           juce::AudioProcessorParameter::genericParameter,
-                                                           std::function <juce::String (float value, int maximumStringLength)> ([](float v, int m){return juce::String (v, 1);}),
-                                                           std::function< float (const juce::String &text)> ([](const juce::String &t){return t.getFloatValue();})
-                                                          );
+        floatParam = std::make_unique<juce::AudioParameterFloat> (
+            "knee" + juce::String (i),
+            "Knee Width " + juce::String (i),
+            juce::NormalisableRange<float> (0.0f, 30.0f, 0.1f),
+            0.0f,
+            "dB",
+            juce::AudioProcessorParameter::genericParameter,
+            std::function<juce::String (float value, int maximumStringLength)> (
+                [] (float v, int m) { return juce::String (v, 1); }),
+            std::function<float (const juce::String& text)> ([] (const juce::String& t)
+                                                             { return t.getFloatValue(); }));
         params.push_back (std::move (floatParam));
 
         // attack
-        floatParam = std::make_unique<juce::AudioParameterFloat>("attack" + juce::String (i),
-                                                           "Attack Time " + juce::String (i),
-                                                           juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
-                                                           30.0f, "ms",
-                                                           juce::AudioProcessorParameter::genericParameter,
-                                                           std::function <juce::String (float value, int maximumStringLength)> ([](float v, int m){return juce::String (v, 1);}),
-                                                           std::function< float (const juce::String &text)> ([](const juce::String &t){return t.getFloatValue();})
-                                                          );
+        floatParam = std::make_unique<juce::AudioParameterFloat> (
+            "attack" + juce::String (i),
+            "Attack Time " + juce::String (i),
+            juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
+            30.0f,
+            "ms",
+            juce::AudioProcessorParameter::genericParameter,
+            std::function<juce::String (float value, int maximumStringLength)> (
+                [] (float v, int m) { return juce::String (v, 1); }),
+            std::function<float (const juce::String& text)> ([] (const juce::String& t)
+                                                             { return t.getFloatValue(); }));
         params.push_back (std::move (floatParam));
 
         // release
-        floatParam = std::make_unique<juce::AudioParameterFloat>("release" + juce::String (i),
-                                                           "Release Time " + juce::String (i),
-                                                           juce::NormalisableRange<float> (0.0f, 500.0f, 0.1f),
-                                                           150.0f, "ms",
-                                                           juce::AudioProcessorParameter::genericParameter,
-                                                           std::function <juce::String (float value, int maximumStringLength)> ([](float v, int m){return juce::String (v, 1);}),
-                                                           std::function< float (const juce::String &text)> ([](const juce::String &t){return t.getFloatValue();})
-                                                          );
+        floatParam = std::make_unique<juce::AudioParameterFloat> (
+            "release" + juce::String (i),
+            "Release Time " + juce::String (i),
+            juce::NormalisableRange<float> (0.0f, 500.0f, 0.1f),
+            150.0f,
+            "ms",
+            juce::AudioProcessorParameter::genericParameter,
+            std::function<juce::String (float value, int maximumStringLength)> (
+                [] (float v, int m) { return juce::String (v, 1); }),
+            std::function<float (const juce::String& text)> ([] (const juce::String& t)
+                                                             { return t.getFloatValue(); }));
         params.push_back (std::move (floatParam));
 
         // ratio
-        floatParam = std::make_unique<juce::AudioParameterFloat>("ratio" + juce::String (i),
-                                                           "Ratio " + juce::String (i),
-                                                           juce::NormalisableRange<float> (1.0f, 16.0f, 0.1f),
-                                                           4.0f, " : 1",
-                                                           juce::AudioProcessorParameter::genericParameter,
-                                                           std::function <juce::String (float value, int maximumStringLength)> ([](float v, int m){
-                                                             return (v > 15.9f) ? juce::String ("inf") : juce::String (v, 1);}),
-                                                           std::function< float (const juce::String &text)> ([](const juce::String &t){return t.getFloatValue();})
-                                                          );
+        floatParam = std::make_unique<juce::AudioParameterFloat> (
+            "ratio" + juce::String (i),
+            "Ratio " + juce::String (i),
+            juce::NormalisableRange<float> (1.0f, 16.0f, 0.1f),
+            4.0f,
+            " : 1",
+            juce::AudioProcessorParameter::genericParameter,
+            std::function<juce::String (float value, int maximumStringLength)> (
+                [] (float v, int m)
+                { return (v > 15.9f) ? juce::String ("inf") : juce::String (v, 1); }),
+            std::function<float (const juce::String& text)> ([] (const juce::String& t)
+                                                             { return t.getFloatValue(); }));
         params.push_back (std::move (floatParam));
 
         // makeUpGain
-        floatParam = std::make_unique<juce::AudioParameterFloat>("makeUpGain" + juce::String (i),
-                                                           "MakUp Gain " + juce::String (i),
-                                                           juce::NormalisableRange<float> (-10.0f, 20.0f, 0.1f),
-                                                           0.0f, "dB",
-                                                           juce::AudioProcessorParameter::genericParameter,
-                                                           std::function <juce::String (float value, int maximumStringLength)> ([](float v, int m){return juce::String (v, 1);}),
-                                                           std::function< float (const juce::String &text)> ([](const juce::String &t){return t.getFloatValue();})
-                                                          );
+        floatParam = std::make_unique<juce::AudioParameterFloat> (
+            "makeUpGain" + juce::String (i),
+            "MakUp Gain " + juce::String (i),
+            juce::NormalisableRange<float> (-10.0f, 20.0f, 0.1f),
+            0.0f,
+            "dB",
+            juce::AudioProcessorParameter::genericParameter,
+            std::function<juce::String (float value, int maximumStringLength)> (
+                [] (float v, int m) { return juce::String (v, 1); }),
+            std::function<float (const juce::String& text)> ([] (const juce::String& t)
+                                                             { return t.getFloatValue(); }));
         params.push_back (std::move (floatParam));
 
-
-        auto boolParam = std::make_unique<juce::AudioParameterBool>("bypass" + juce::String (i),
-                                                           "Bypass compression on band " + juce::String (i),
-                                                           false);
+        auto boolParam = std::make_unique<juce::AudioParameterBool> ("bypass" + juce::String (i),
+                                                                     "Bypass compression on band "
+                                                                         + juce::String (i),
+                                                                     false);
         params.push_back (std::move (boolParam));
 
-
-        boolParam = std::make_unique<juce::AudioParameterBool>("solo" + juce::String (i),
-                                                           "Solo band " + juce::String (i),
-                                                           false);
+        boolParam = std::make_unique<juce::AudioParameterBool> ("solo" + juce::String (i),
+                                                                "Solo band " + juce::String (i),
+                                                                false);
         params.push_back (std::move (boolParam));
     }
 
@@ -265,7 +308,8 @@ void MultiBandCompressorAudioProcessor::calculateCoefficients (const int i)
 {
     jassert (lastSampleRate > 0.0);
 
-    const float crossoverFrequency = juce::jmin (static_cast<float> (0.5 * lastSampleRate), crossovers[i]->load());
+    const float crossoverFrequency =
+        juce::jmin (static_cast<float> (0.5 * lastSampleRate), crossovers[i]->load());
 
     double b0, b1, b2, a0, a1, a2;
     double K = std::tan (juce::MathConstants<double>::pi * (crossoverFrequency) / lastSampleRate);
@@ -273,43 +317,46 @@ void MultiBandCompressorAudioProcessor::calculateCoefficients (const int i)
 
     // calculate coeffs for 2nd order Butterworth
     a0 = 1.0;
-    a1 = (2*(pow (K,2.0) - 1)) / den;
-    a2 = (1 - juce::MathConstants<double>::sqrt2*K + pow (K,2.0)) / den;
+    a1 = (2 * (pow (K, 2.0) - 1)) / den;
+    a2 = (1 - juce::MathConstants<double>::sqrt2 * K + pow (K, 2.0)) / den;
 
     // HP
     b0 = 1.0 / den;
     b1 = -2.0 * b0;
     b2 = b0;
-    iirTempHPCoefficients[i] = new IIR::Coefficients<float>(b0, b1, b2, a0, a1, a2);
+    iirTempHPCoefficients[i] = new IIR::Coefficients<float> (b0, b1, b2, a0, a1, a2);
 
     // also calculate 4th order Linkwitz-Riley for GUI
-    IIR::Coefficients<double>::Ptr coeffs (new IIR::Coefficients<double>(b0, b1, b2, a0, a1, a2));
-    coeffs->coefficients = FilterVisualizerHelper<double>::cascadeSecondOrderCoefficients (coeffs->coefficients, coeffs->coefficients);
+    IIR::Coefficients<double>::Ptr coeffs (new IIR::Coefficients<double> (b0, b1, b2, a0, a1, a2));
+    coeffs->coefficients =
+        FilterVisualizerHelper<double>::cascadeSecondOrderCoefficients (coeffs->coefficients,
+                                                                        coeffs->coefficients);
     *highPassLRCoeffs[i] = *coeffs;
 
     // LP
-    b0 = pow (K,2.0) /   den;
+    b0 = pow (K, 2.0) / den;
     b1 = 2.0 * b0;
     b2 = b0;
-    iirTempLPCoefficients[i] = new IIR::Coefficients<float>(b0, b1, b2, a0, a1, a2);
+    iirTempLPCoefficients[i] = new IIR::Coefficients<float> (b0, b1, b2, a0, a1, a2);
 
     coeffs.reset();
-    coeffs = (new IIR::Coefficients<double>(b0, b1, b2, a0, a1, a2));
-    coeffs->coefficients = FilterVisualizerHelper<double>::cascadeSecondOrderCoefficients (coeffs->coefficients, coeffs->coefficients);
+    coeffs = (new IIR::Coefficients<double> (b0, b1, b2, a0, a1, a2));
+    coeffs->coefficients =
+        FilterVisualizerHelper<double>::cascadeSecondOrderCoefficients (coeffs->coefficients,
+                                                                        coeffs->coefficients);
     *lowPassLRCoeffs[i] = *coeffs;
 
     // Allpass equivalent to 4th order Linkwitz-Riley crossover
-    iirTempAPCoefficients[i] = new IIR::Coefficients<float>(a2, a1, a0, a0, a1, a2);
-
+    iirTempAPCoefficients[i] = new IIR::Coefficients<float> (a2, a1, a0, a0, a1, a2);
 }
 
 void MultiBandCompressorAudioProcessor::copyCoeffsToProcessor()
 {
-    for (int b = 0; b < numFreqBands-1; ++b)
+    for (int filterBandIdx = 0; filterBandIdx < numFilterBands - 1; ++filterBandIdx)
     {
-        *iirLPCoefficients[b] = *iirTempLPCoefficients[b]; // LP
-        *iirHPCoefficients[b] = *iirTempHPCoefficients[b]; // HP
-        *iirAPCoefficients[b] = *iirTempAPCoefficients[b]; // AP
+        *iirLPCoefficients[filterBandIdx] = *iirTempLPCoefficients[filterBandIdx]; // LP
+        *iirHPCoefficients[filterBandIdx] = *iirTempHPCoefficients[filterBandIdx]; // HP
+        *iirAPCoefficients[filterBandIdx] = *iirTempAPCoefficients[filterBandIdx]; // AP
     }
 
     userChangedFilterSettings = false;
@@ -318,8 +365,8 @@ void MultiBandCompressorAudioProcessor::copyCoeffsToProcessor()
 //==============================================================================
 int MultiBandCompressorAudioProcessor::getNumPrograms()
 {
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+        // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int MultiBandCompressorAudioProcessor::getCurrentProgram()
@@ -355,63 +402,68 @@ void MultiBandCompressorAudioProcessor::prepareToPlay (double sampleRate, int sa
     inputPeak = juce::Decibels::gainToDecibels (-INFINITY);
     outputPeak = juce::Decibels::gainToDecibels (-INFINITY);
 
-    for (int i = 0; i < numFreqBands-1; ++i)
+    for (int filterBandIdx = 0; filterBandIdx < numFilterBands - 1; ++filterBandIdx)
     {
-        calculateCoefficients (i);
+        calculateCoefficients (filterBandIdx);
     }
 
     copyCoeffsToProcessor();
 
-    interleaved.clear();
-    for (int ch = 0; ch < maxNumFilters; ++ch)
+    interleavedData.clear();
+    for (int simdFilterIdx = 0; simdFilterIdx < maxNumFilters; ++simdFilterIdx)
     {
-        interleaved.add (new juce::dsp::AudioBlock<filterFloatType> (interleavedBlockData[ch], 1, samplesPerBlock));
+        interleavedData.add (
+            new juce::dsp::AudioBlock<IIRfloat> (interleavedBlockData[simdFilterIdx],
+                                                 1,
+                                                 samplesPerBlock));
+        clear (*interleavedData.getLast());
     }
 
-    for (int i = 0; i < numFreqBands-1; ++i)
+    for (int filterBandIdx = 0; filterBandIdx < numFilterBands - 1; ++filterBandIdx)
     {
-        for (int ch = 0; ch < maxNumFilters; ++ch)
+        for (int simdFilterIdx = 0; simdFilterIdx < maxNumFilters; ++simdFilterIdx)
         {
-            iirLP[i][ch]->reset (filterFloatType (0.0f));
-            iirLP2[i][ch]->reset (filterFloatType (0.0f));
-            iirHP[i][ch]->reset (filterFloatType (0.0f));
-            iirHP2[i][ch]->reset (filterFloatType (0.0f));
-            iirAP[i][ch]->reset (filterFloatType (0.0f));
-            iirLP[i][ch]->prepare (monoSpec);
-            iirLP2[i][ch]->prepare (monoSpec);
-            iirHP[i][ch]->prepare (monoSpec);
-            iirHP2[i][ch]->prepare (monoSpec);
-            iirAP[i][ch]->prepare (monoSpec);
+            iirLP[filterBandIdx][simdFilterIdx]->reset (IIRfloat (0.0f));
+            iirLP2[filterBandIdx][simdFilterIdx]->reset (IIRfloat (0.0f));
+            iirHP[filterBandIdx][simdFilterIdx]->reset (IIRfloat (0.0f));
+            iirHP2[filterBandIdx][simdFilterIdx]->reset (IIRfloat (0.0f));
+            iirAP[filterBandIdx][simdFilterIdx]->reset (IIRfloat (0.0f));
+            iirLP[filterBandIdx][simdFilterIdx]->prepare (monoSpec);
+            iirLP2[filterBandIdx][simdFilterIdx]->prepare (monoSpec);
+            iirHP[filterBandIdx][simdFilterIdx]->prepare (monoSpec);
+            iirHP2[filterBandIdx][simdFilterIdx]->prepare (monoSpec);
+            iirAP[filterBandIdx][simdFilterIdx]->prepare (monoSpec);
         }
     }
 
-    for (int i = 0; i < numFreqBands; ++i)
+    for (int filterBandIdx = 0; filterBandIdx < numFilterBands; ++filterBandIdx)
     {
-        compressors[i].prepare (monoSpec);
-        compressors[i].setThreshold (*threshold[i]);
-        compressors[i].setKnee (*knee[i]);
-        compressors[i].setAttackTime (*attack[i] * 0.001f);
-        compressors[i].setReleaseTime (*release[i] * 0.001f);
-        compressors[i].setRatio (*ratio[i] > 15.9f ? INFINITY :  ratio[i]->load());
-        compressors[i].setMakeUpGain (*makeUpGain[i]);
+        compressors[filterBandIdx].prepare (monoSpec);
+        compressors[filterBandIdx].setThreshold (*threshold[filterBandIdx]);
+        compressors[filterBandIdx].setKnee (*knee[filterBandIdx]);
+        compressors[filterBandIdx].setAttackTime (*attack[filterBandIdx] * 0.001f);
+        compressors[filterBandIdx].setReleaseTime (*release[filterBandIdx] * 0.001f);
+        compressors[filterBandIdx].setRatio (
+            *ratio[filterBandIdx] > 15.9f ? INFINITY : ratio[filterBandIdx]->load());
+        compressors[filterBandIdx].setMakeUpGain (*makeUpGain[filterBandIdx]);
 
-        freqBands[i].clear();
-        for (int ch = 0; ch < maxNumFilters; ++ch)
+        freqBands[filterBandIdx].clear();
+        for (int simdFilterIdx = 0; simdFilterIdx < maxNumFilters; ++simdFilterIdx)
         {
-            freqBands[i].add (new juce::dsp::AudioBlock<filterFloatType> (freqBandsBlocks[i][ch], 1, samplesPerBlock));
+            freqBands[filterBandIdx].add (
+                new juce::dsp::AudioBlock<IIRfloat> (freqBandsBlocks[filterBandIdx][simdFilterIdx],
+                                                     1,
+                                                     samplesPerBlock));
         }
     }
 
-    zero = juce::dsp::AudioBlock<float> (zeroData, filterRegisterSize, samplesPerBlock);
+    zero = juce::dsp::AudioBlock<float> (zeroData, IIRfloat_elements, samplesPerBlock);
     zero.clear();
-
-    temp = juce::dsp::AudioBlock<float> (tempData, 64, samplesPerBlock);
-    temp.clear();
 
     gains = juce::dsp::AudioBlock<float> (gainData, 1, samplesPerBlock);
     gains.clear();
 
-    tempBuffer.setSize (64, samplesPerBlock);
+    tempBuffer.setSize (64, samplesPerBlock, false, true);
 
     repaintFilterVisualization = true;
 }
@@ -429,33 +481,22 @@ bool MultiBandCompressorAudioProcessor::isBusesLayoutSupported (const BusesLayou
 }
 #endif
 
-void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiMessages)
+void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer,
+                                                      juce::MidiBuffer& midiMessages)
 {
-    if (userChangedIOSettings)
-    {
-        checkInputAndOutput (this, *orderSetting, *orderSetting, false);
-    }
-
-    const int numChannels = juce::jmin (buffer.getNumChannels(), input.getNumberOfChannels());
-    if (numChannels == 0)
-        return;
-    
+    checkInputAndOutput (this, *orderSetting, *orderSetting, false);
     juce::ScopedNoDenormals noDenormals;
 
-    for (int i = numChannels; i < getTotalNumOutputChannels(); ++i)
-    {
-        buffer.clear (i, 0, buffer.getNumSamples());
-    }
+    const int maxNChIn = juce::jmin (buffer.getNumChannels(), input.getNumberOfChannels());
+    if (maxNChIn < 1)
+        return;
 
-    auto* inout = channelPointers.getData();
     const int L = buffer.getNumSamples();
-    const int numSimdFilters =  1 + (numChannels - 1) / filterRegisterSize;
+    const int nSIMDFilters = 1 + (maxNChIn - 1) / IIRfloat_elements;
     gainChannelPointer = gains.getChannelPointer (0);
 
-    tempBuffer.clear();
     gains.clear();
     zero.clear();
-    temp.clear();
 
     // update iir filter coefficients
     if (userChangedFilterSettings.get())
@@ -463,48 +504,59 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
 
     inputPeak = juce::Decibels::gainToDecibels (buffer.getMagnitude (0, 0, L));
 
-    // Interleave
-    int partial = numChannels % filterRegisterSize;
+    using Format = juce::AudioData::Format<juce::AudioData::Float32, juce::AudioData::NativeEndian>;
+
+    //interleave input data
+    int partial = maxNChIn % IIRfloat_elements;
     if (partial == 0)
     {
-        for (int i = 0; i < numSimdFilters; ++i)
+        for (int simdFilterIdx = 0; simdFilterIdx < nSIMDFilters; ++simdFilterIdx)
         {
-            // interleaved[i]->clear(); // broken with JUCE 5.4.5
-            clear (*interleaved[i]);
-            juce::AudioDataConverters::interleaveSamples (buffer.getArrayOfReadPointers() + i* filterRegisterSize,
-                                                    reinterpret_cast<float*> (interleaved[i]->getChannelPointer (0)),
-                                                    L, filterRegisterSize);
+            juce::AudioData::interleaveSamples (
+                juce::AudioData::NonInterleavedSource<Format> {
+                    buffer.getArrayOfReadPointers() + simdFilterIdx * IIRfloat_elements,
+                    IIRfloat_elements },
+                juce::AudioData::InterleavedDest<Format> {
+                    reinterpret_cast<float*> (
+                        interleavedData[simdFilterIdx]->getChannelPointer (0)),
+                    IIRfloat_elements },
+                L);
         }
     }
     else
     {
-        int i;
-        for (i = 0; i < numSimdFilters-1; ++i)
+        int simdFilterIdx;
+        for (simdFilterIdx = 0; simdFilterIdx < nSIMDFilters - 1; ++simdFilterIdx)
         {
-            // interleaved[i]->clear(); // broken with JUCE 5.4.5
-            clear (*interleaved[i]);
-            juce::AudioDataConverters::interleaveSamples (buffer.getArrayOfReadPointers() + i* filterRegisterSize,
-                                                    reinterpret_cast<float*> (interleaved[i]->getChannelPointer (0)),
-                                                    L, filterRegisterSize);
+            juce::AudioData::interleaveSamples (
+                juce::AudioData::NonInterleavedSource<Format> {
+                    buffer.getArrayOfReadPointers() + simdFilterIdx * IIRfloat_elements,
+                    IIRfloat_elements },
+                juce::AudioData::InterleavedDest<Format> {
+                    reinterpret_cast<float*> (
+                        interleavedData[simdFilterIdx]->getChannelPointer (0)),
+                    IIRfloat_elements },
+                L);
         }
 
-        const float* addr[filterRegisterSize];
-        int ch;
-        for (ch = 0; ch < partial; ++ch)
+        const float* addr[IIRfloat_elements];
+        int iirElementIdx;
+        for (iirElementIdx = 0; iirElementIdx < partial; ++iirElementIdx)
         {
-            addr[ch] = buffer.getReadPointer (i * filterRegisterSize + ch);
+            addr[iirElementIdx] =
+                buffer.getReadPointer (simdFilterIdx * IIRfloat_elements + iirElementIdx);
         }
-        for (; ch < filterRegisterSize; ++ch)
+        for (; iirElementIdx < IIRfloat_elements; ++iirElementIdx)
         {
-            addr[ch] = zero.getChannelPointer (ch);
+            addr[iirElementIdx] = zero.getChannelPointer (iirElementIdx);
         }
-        // interleaved[i]->clear(); // broken with JUCE 5.4.5
-        clear (*interleaved[i]);
-        juce::AudioDataConverters::interleaveSamples (addr,
-                                                reinterpret_cast<float*> (interleaved[i]->getChannelPointer (0)),
-                                                L, filterRegisterSize);
+        juce::AudioData::interleaveSamples (
+            juce::AudioData::NonInterleavedSource<Format> { addr, IIRfloat_elements },
+            juce::AudioData::InterleavedDest<Format> {
+                reinterpret_cast<float*> (interleavedData[simdFilterIdx]->getChannelPointer (0)),
+                IIRfloat_elements },
+            L);
     }
-
 
     //  filter block diagram
     //                                | ---> HP3 ---> |
@@ -514,127 +566,166 @@ void MultiBandCompressorAudioProcessor::processBlock (juce::AudioSampleBuffer& b
     //        |                       | ---> HP1 ---> |      |
     //        | ---> LP2 ---> AP3 --->|               + ---> |
     //                                | ---> LP1 ---> |
-    for (int i = 0; i < numSimdFilters; ++i)
+    for (int simdFilterIdx = 0; simdFilterIdx < nSIMDFilters; ++simdFilterIdx)
     {
-        const filterFloatType* chPtrInterleaved[1] = {interleaved[i]->getChannelPointer (0)};
-        juce::dsp::AudioBlock<filterFloatType> abInterleaved (const_cast<filterFloatType**> (chPtrInterleaved), 1, L);
+        const IIRfloat* chPtrinterleavedData[1] = {
+            interleavedData[simdFilterIdx]->getChannelPointer (0)
+        };
+        juce::dsp::AudioBlock<IIRfloat> abInterleaved (
+            const_cast<IIRfloat**> (chPtrinterleavedData),
+            1,
+            L);
 
-        const filterFloatType* chPtrLow[1] = {freqBands[FrequencyBands::Low][i]->getChannelPointer (0)};
-        juce::dsp::AudioBlock<filterFloatType> abLow (const_cast<filterFloatType**> (chPtrLow), 1, L);
+        const IIRfloat* chPtrLow[1] = {
+            freqBands[FrequencyBands::Low][simdFilterIdx]->getChannelPointer (0)
+        };
+        juce::dsp::AudioBlock<IIRfloat> abLow (const_cast<IIRfloat**> (chPtrLow), 1, L);
 
-        const filterFloatType* chPtrMidLow[1] = {freqBands[FrequencyBands::MidLow][i]->getChannelPointer (0)};
-        juce::dsp::AudioBlock<filterFloatType> abMidLow (const_cast<filterFloatType**> (chPtrMidLow), 1, L);
+        const IIRfloat* chPtrMidLow[1] = {
+            freqBands[FrequencyBands::MidLow][simdFilterIdx]->getChannelPointer (0)
+        };
+        juce::dsp::AudioBlock<IIRfloat> abMidLow (const_cast<IIRfloat**> (chPtrMidLow), 1, L);
 
-        const filterFloatType* chPtrMidHigh[1] = {freqBands[FrequencyBands::MidHigh][i]->getChannelPointer (0)};
-        juce::dsp::AudioBlock<filterFloatType> abMidHigh (const_cast<filterFloatType**> (chPtrMidHigh), 1, L);
+        const IIRfloat* chPtrMidHigh[1] = {
+            freqBands[FrequencyBands::MidHigh][simdFilterIdx]->getChannelPointer (0)
+        };
+        juce::dsp::AudioBlock<IIRfloat> abMidHigh (const_cast<IIRfloat**> (chPtrMidHigh), 1, L);
 
-        const filterFloatType* chPtrHigh[1] = {freqBands[FrequencyBands::High][i]->getChannelPointer (0)};
-        juce::dsp::AudioBlock<filterFloatType> abHigh (const_cast<filterFloatType**> (chPtrHigh), 1, L);
+        const IIRfloat* chPtrHigh[1] = {
+            freqBands[FrequencyBands::High][simdFilterIdx]->getChannelPointer (0)
+        };
+        juce::dsp::AudioBlock<IIRfloat> abHigh (const_cast<IIRfloat**> (chPtrHigh), 1, L);
 
+        iirLP[1][simdFilterIdx]->process (
+            juce::dsp::ProcessContextNonReplacing<IIRfloat> (abInterleaved, abLow));
+        iirHP[1][simdFilterIdx]->process (
+            juce::dsp::ProcessContextNonReplacing<IIRfloat> (abInterleaved, abHigh));
 
-        iirLP[1][i]->process (juce::dsp::ProcessContextNonReplacing<filterFloatType> (abInterleaved, abLow));
-        iirHP[1][i]->process (juce::dsp::ProcessContextNonReplacing<filterFloatType> (abInterleaved, abHigh));
+        iirLP2[1][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abLow));
+        iirHP2[1][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abHigh));
 
-        iirLP2[1][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abLow));
-        iirHP2[1][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abHigh));
+        iirAP[2][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abLow));
+        iirAP[0][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abHigh));
 
-        iirAP[2][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abLow));
-        iirAP[0][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abHigh));
+        iirHP[0][simdFilterIdx]->process (
+            juce::dsp::ProcessContextNonReplacing<IIRfloat> (abLow, abMidLow));
+        iirHP2[0][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abMidLow));
 
-        iirHP[0][i]->process (juce::dsp::ProcessContextNonReplacing<filterFloatType> (abLow, abMidLow));
-        iirHP2[0][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abMidLow));
+        iirLP[0][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abLow));
+        iirLP2[0][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abLow));
 
-        iirLP[0][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abLow));
-        iirLP2[0][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abLow));
+        iirLP[2][simdFilterIdx]->process (
+            juce::dsp::ProcessContextNonReplacing<IIRfloat> (abHigh, abMidHigh));
+        iirLP2[2][simdFilterIdx]->process (
+            juce::dsp::ProcessContextReplacing<IIRfloat> (abMidHigh));
 
-        iirLP[2][i]->process (juce::dsp::ProcessContextNonReplacing<filterFloatType> (abHigh, abMidHigh));
-        iirLP2[2][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abMidHigh));
-
-        iirHP[2][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abHigh));
-        iirHP2[2][i]->process (juce::dsp::ProcessContextReplacing<filterFloatType> (abHigh));
+        iirHP[2][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abHigh));
+        iirHP2[2][simdFilterIdx]->process (juce::dsp::ProcessContextReplacing<IIRfloat> (abHigh));
     }
 
+    buffer.clear();
 
-    for (int i = 0; i < numFreqBands; ++i)
+    for (int filterBandIdx = 0; filterBandIdx < numFilterBands; ++filterBandIdx)
     {
         if (! soloArray.isZero())
         {
-            if (! soloArray[i])
+            if (! soloArray[filterBandIdx])
             {
-                maxGR[i] = 0.0f;
-                maxPeak[i] = -INFINITY;
+                maxGR[filterBandIdx] = 0.0f;
+                maxPeak[filterBandIdx] = -INFINITY;
                 continue;
             }
         }
 
-        // Deinterleave
-        for (int j = 0; j < numChannels; ++j)
-        {
-            inout[j] = temp.getChannelPointer (j);
-        }
+        tempBuffer.clear();
 
+        // Deinterleave
         if (partial == 0)
         {
-            for (int n = 0; n < numSimdFilters; ++n)
+            for (int simdFilterIdx = 0; simdFilterIdx < nSIMDFilters; ++simdFilterIdx)
             {
-                  juce::AudioDataConverters::deinterleaveSamples (reinterpret_cast<float*>(freqBands[i][n]->getChannelPointer (0)),
-                                                           const_cast<float**>(inout + n*filterRegisterSize),
-                                                           L, filterRegisterSize);
+                juce::AudioData::deinterleaveSamples (
+                    juce::AudioData::InterleavedSource<Format> {
+                        reinterpret_cast<float*> (
+                            freqBands[filterBandIdx][simdFilterIdx]->getChannelPointer (0)),
+                        IIRfloat_elements },
+                    juce::AudioData::NonInterleavedDest<Format> {
+                        tempBuffer.getArrayOfWritePointers() + simdFilterIdx * IIRfloat_elements,
+                        IIRfloat_elements },
+                    L);
             }
         }
         else
         {
-            int n;
-            for (n = 0; n < numSimdFilters-1; ++n)
+            int simdFilterIdx;
+            for (simdFilterIdx = 0; simdFilterIdx < nSIMDFilters - 1; ++simdFilterIdx)
             {
-                juce::AudioDataConverters::deinterleaveSamples (reinterpret_cast<float*> (freqBands[i][n]->getChannelPointer (0)),
-                                                          const_cast<float**>(inout + n*filterRegisterSize),
-                                                          L, filterRegisterSize);
+                juce::AudioData::deinterleaveSamples (
+                    juce::AudioData::InterleavedSource<Format> {
+                        reinterpret_cast<float*> (
+                            freqBands[filterBandIdx][simdFilterIdx]->getChannelPointer (0)),
+                        IIRfloat_elements },
+                    juce::AudioData::NonInterleavedDest<Format> {
+                        tempBuffer.getArrayOfWritePointers() + simdFilterIdx * IIRfloat_elements,
+                        IIRfloat_elements },
+                    L);
             }
 
-            float* addr[filterRegisterSize];
-            int ch;
-            for (ch = 0; ch < partial; ++ch)
+            float* addr[IIRfloat_elements];
+            int iirElementIdx;
+            for (iirElementIdx = 0; iirElementIdx < partial; ++iirElementIdx)
             {
-                addr[ch] = const_cast<float*> (inout[n*filterRegisterSize + ch]);
+                addr[iirElementIdx] =
+                    tempBuffer.getWritePointer (simdFilterIdx * IIRfloat_elements + iirElementIdx);
             }
-            for (; ch < filterRegisterSize; ++ch)
+            for (; iirElementIdx < IIRfloat_elements; ++iirElementIdx)
             {
-                addr[ch] = zero.getChannelPointer (ch);
+                addr[iirElementIdx] = zero.getChannelPointer (iirElementIdx);
             }
-            juce::AudioDataConverters::deinterleaveSamples (reinterpret_cast<float*> (freqBands[i][n]->getChannelPointer (0)), addr, L, filterRegisterSize);
+            juce::AudioData::deinterleaveSamples (
+                juce::AudioData::InterleavedSource<Format> {
+                    reinterpret_cast<float*> (
+                        freqBands[filterBandIdx][simdFilterIdx]->getChannelPointer (0)),
+                    IIRfloat_elements },
+                juce::AudioData::NonInterleavedDest<Format> { addr, IIRfloat_elements },
+                L);
             zero.clear();
         }
 
         // Compress
-        if (*bypass[i] < 0.5f)
+        if (*bypass[filterBandIdx] < 0.5f)
         {
-            compressors[i].getGainFromSidechainSignal (inout[0], gainChannelPointer, L);
-            maxGR[i] = juce::Decibels::gainToDecibels (juce::FloatVectorOperations::findMinimum (gainChannelPointer, L)) - *makeUpGain[i];
-            maxPeak[i] = compressors[i].getMaxLevelInDecibels();
+            compressors[filterBandIdx].getGainFromSidechainSignal (tempBuffer.getReadPointer (0),
+                                                                   gainChannelPointer,
+                                                                   L);
+            maxGR[filterBandIdx] =
+                juce::Decibels::gainToDecibels (
+                    juce::FloatVectorOperations::findMinimum (gainChannelPointer, L))
+                - *makeUpGain[filterBandIdx];
+            maxPeak[filterBandIdx] = compressors[filterBandIdx].getMaxLevelInDecibels();
 
-            for (int ch = 0; ch < numChannels; ++ch)
+            for (int ch = 0; ch < maxNChIn; ++ch)
             {
-                juce::FloatVectorOperations::addWithMultiply (tempBuffer.getWritePointer (ch), inout[ch], gainChannelPointer, L);
+                juce::FloatVectorOperations::addWithMultiply (buffer.getWritePointer (ch),
+                                                              tempBuffer.getReadPointer (ch),
+                                                              gainChannelPointer,
+                                                              L);
             }
         }
         else
         {
-            for (int ch = 0; ch < numChannels; ++ch)
+            for (int ch = 0; ch < maxNChIn; ++ch)
             {
-                juce::FloatVectorOperations::add (tempBuffer.getWritePointer (ch), inout[ch], L);
+                juce::FloatVectorOperations::add (buffer.getWritePointer (ch),
+                                                  tempBuffer.getReadPointer (ch),
+                                                  L);
             }
-            maxGR[i] = 0.0f;
-            maxPeak[i] = juce::Decibels::gainToDecibels (-INFINITY);
+            maxGR[filterBandIdx] = 0.0f;
+            maxPeak[filterBandIdx] = juce::Decibels::gainToDecibels (-INFINITY);
         }
     }
 
-    outputPeak = juce::Decibels::gainToDecibels (tempBuffer.getMagnitude (0, 0, L));
-
-    for (int ch = 0; ch < numChannels; ++ch)
-    {
-        buffer.copyFrom (ch, 0, tempBuffer, ch, 0, L);
-    }
+    outputPeak = juce::Decibels::gainToDecibels (buffer.getMagnitude (0, 0, L));
 }
 
 //==============================================================================
@@ -651,15 +742,14 @@ juce::AudioProcessorEditor* MultiBandCompressorAudioProcessor::createEditor()
 //==============================================================================
 void MultiBandCompressorAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-  auto state = parameters.copyState();
+    auto state = parameters.copyState();
 
-  auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
-  oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
+    auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
+    oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
 
-  std::unique_ptr<juce::XmlElement> xml (state.createXml());
-  copyXmlToBinary (*xml, destData);
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
-
 
 void MultiBandCompressorAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
@@ -670,7 +760,8 @@ void MultiBandCompressorAudioProcessor::setStateInformation (const void* data, i
             parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
             if (parameters.state.hasProperty ("OSCPort")) // legacy
             {
-                oscParameterInterface.getOSCReceiver().connect (parameters.state.getProperty ("OSCPort", juce::var (-1)));
+                oscParameterInterface.getOSCReceiver().connect (
+                    parameters.state.getProperty ("OSCPort", juce::var (-1)));
                 parameters.state.removeProperty ("OSCPort", nullptr);
             }
 
@@ -681,7 +772,8 @@ void MultiBandCompressorAudioProcessor::setStateInformation (const void* data, i
 }
 
 //==============================================================================
-void MultiBandCompressorAudioProcessor::parameterChanged (const juce::String &parameterID, float newValue)
+void MultiBandCompressorAudioProcessor::parameterChanged (const juce::String& parameterID,
+                                                          float newValue)
 {
     DBG ("Parameter with ID " << parameterID << " has changed. New value: " << newValue);
 
@@ -705,11 +797,13 @@ void MultiBandCompressorAudioProcessor::parameterChanged (const juce::String &pa
     }
     else if (parameterID.startsWith ("attack"))
     {
-        compressors[parameterID.getLastCharacters (1).getIntValue()].setAttackTime (newValue * 0.001f);
+        compressors[parameterID.getLastCharacters (1).getIntValue()].setAttackTime (newValue
+                                                                                    * 0.001f);
     }
     else if (parameterID.startsWith ("release"))
     {
-        compressors[parameterID.getLastCharacters (1).getIntValue()].setReleaseTime (newValue * 0.001f);
+        compressors[parameterID.getLastCharacters (1).getIntValue()].setReleaseTime (newValue
+                                                                                     * 0.001f);
     }
     else if (parameterID.startsWith ("ratio"))
     {
@@ -738,7 +832,6 @@ void MultiBandCompressorAudioProcessor::parameterChanged (const juce::String &pa
     {
         userChangedIOSettings = true;
     }
-
 }
 
 void MultiBandCompressorAudioProcessor::updateBuffers()
@@ -754,11 +847,12 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new MultiBandCompressorAudioProcessor();
 }
 
-inline void MultiBandCompressorAudioProcessor::clear (juce::dsp::AudioBlock<filterFloatType>& ab)
+inline void MultiBandCompressorAudioProcessor::clear (juce::dsp::AudioBlock<IIRfloat>& ab)
 {
-    const int N = static_cast<int> (ab.getNumSamples()) * filterRegisterSize;
+    const int N = static_cast<int> (ab.getNumSamples()) * IIRfloat_elements;
     const int nCh = static_cast<int> (ab.getNumChannels());
 
     for (int ch = 0; ch < nCh; ++ch)
-        juce::FloatVectorOperations::clear (reinterpret_cast<float*> (ab.getChannelPointer (ch)), N);
+        juce::FloatVectorOperations::clear (reinterpret_cast<float*> (ab.getChannelPointer (ch)),
+                                            N);
 }

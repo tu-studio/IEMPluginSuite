@@ -26,16 +26,15 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
+#include "../../resources/customComponents/HammerAitovGrid.h"
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
-#include "../../resources/customComponents/HammerAitovGrid.h"
-#include "VisualizerComponent.h"
 #include "VisualizerColormap.h"
-
+#include "VisualizerComponent.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -44,10 +43,13 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class EnergyVisualizerAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, juce::Slider::Listener
+class EnergyVisualizerAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                             private juce::Timer,
+                                             juce::Slider::Listener
 {
 public:
-    EnergyVisualizerAudioProcessorEditor (EnergyVisualizerAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    EnergyVisualizerAudioProcessorEditor (EnergyVisualizerAudioProcessor&,
+                                          juce::AudioProcessorValueTreeState&);
     ~EnergyVisualizerAudioProcessorEditor();
 
     //==============================================================================
@@ -63,20 +65,22 @@ private:
     VisualizerComponent visualizer;
     VisualizerColormap colormap;
 
-    void sliderValueChanged (juce::Slider *slider) override;
+    void sliderValueChanged (juce::Slider* slider) override;
     void timerCallback() override;
 
     TitleBar<AmbisonicIOWidget<>, NoIOWidget> title;
     OSCFooter footer;
 
-    ReverseSlider slPeakLevel;
-    ReverseSlider slDynamicRange;
-    SimpleLabel lbPeakLevel;
-    SimpleLabel lbDynamicRange;
-    std::unique_ptr<SliderAttachment> slPeakLevelAttachment, slDynamicRangeAttachment;
+    ReverseSlider slPeakLevel, slDynamicRange, slRMStimeConstant;
+    juce::ToggleButton tbHoldMax;
+
+    SimpleLabel lbPeakLevel, lbDynamicRange, lbRMStimeConstant;
+    std::unique_ptr<SliderAttachment> slPeakLevelAttachment, slDynamicRangeAttachment,
+        slRMStimeConstantAttachment;
 
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;
+    std::unique_ptr<ButtonAttachment> tbHoldMaxAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnergyVisualizerAudioProcessorEditor)
 };

@@ -23,13 +23,12 @@
 #pragma once
 #include "../../resources/Conversions.h"
 
-
 class AmbisonicNoiseBurst
 {
 public:
     AmbisonicNoiseBurst()
     {
-        originalNoise.setSize(1, L);
+        originalNoise.setSize (1, L);
 
         // create noise
         juce::Random random;
@@ -42,17 +41,19 @@ public:
         spec.numChannels = 1;
 
         juce::dsp::IIR::Filter<float> filter;
-        filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeHighPass (spec.sampleRate, 200.0f);
+        filter.coefficients =
+            juce::dsp::IIR::Coefficients<float>::makeHighPass (spec.sampleRate, 200.0f);
         juce::dsp::AudioBlock<float> ab (originalNoise);
-        juce::dsp::ProcessContextReplacing<float> context(ab);
+        juce::dsp::ProcessContextReplacing<float> context (ab);
 
-        filter.prepare(spec);
-        filter.process(context);
+        filter.prepare (spec);
+        filter.process (context);
 
-        filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeFirstOrderLowPass (spec.sampleRate, 200.0f);
-        filter.prepare(spec);
+        filter.coefficients =
+            juce::dsp::IIR::Coefficients<float>::makeFirstOrderLowPass (spec.sampleRate, 200.0f);
+        filter.prepare (spec);
         filter.reset();
-        filter.process(context);
+        filter.process (context);
 
         // fade-in/-out
         originalNoise.applyGainRamp (0, 0, 1000, 0.0f, 1.0f);
@@ -97,30 +98,26 @@ public:
         resamplingSource.getNextAudioBlock (info);
     }
 
-    void setOrder (int order)
-    {
-        ambisonicOrder = juce::jmin (order, 7);
-    }
+    void setOrder (int order) { ambisonicOrder = juce::jmin (order, 7); }
 
-    void setNormalization (bool useSN3D)
-    {
-        this->useSN3D = useSN3D;
-    }
+    void setNormalization (bool useSN3D) { this->useSN3D = useSN3D; }
 
     void play (float azimuthInDegrees, float elevationInDegrees)
     {
         if (! active.get())
         {
-            Conversions<float>::sphericalToCartesian (juce::degreesToRadians (azimuthInDegrees), juce::degreesToRadians (elevationInDegrees), 1.0f, x, y, z);
+            Conversions<float>::sphericalToCartesian (juce::degreesToRadians (azimuthInDegrees),
+                                                      juce::degreesToRadians (elevationInDegrees),
+                                                      1.0f,
+                                                      x,
+                                                      y,
+                                                      z);
             currentPosition = 0;
             active = true;
         }
     }
 
-    const bool isActive()
-    {
-        return active.get();
-    }
+    const bool isActive() { return active.get(); }
 
     void processBuffer (juce::AudioBuffer<float> buffer)
     {
@@ -131,13 +128,13 @@ public:
             const int nCh = juce::jmin (buffer.getNumChannels(), juce::square (ambisonicOrder + 1));
 
             float SH[64];
-            SHEval(ambisonicOrder, x, y, z, SH);
+            SHEval (ambisonicOrder, x, y, z, SH);
 
             if (useSN3D)
-                juce::FloatVectorOperations::multiply(SH, n3d2sn3d, nCh);
+                juce::FloatVectorOperations::multiply (SH, n3d2sn3d, nCh);
 
             for (int ch = 0; ch < nCh; ++ch)
-                buffer.addFrom(ch, 0, resampledNoise, 0, currentPosition, copyL, SH[ch]);
+                buffer.addFrom (ch, 0, resampledNoise, 0, currentPosition, copyL, SH[ch]);
 
             currentPosition += copyL;
             if (currentPosition >= resampledL)

@@ -20,51 +20,55 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "PluginProcessor.h"
 
 //==============================================================================
-MatrixMultiplierAudioProcessorEditor::MatrixMultiplierAudioProcessorEditor (MatrixMultiplierAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
-    : juce::AudioProcessorEditor (&p), processor (p), valueTreeState(vts), footer (p.getOSCParameterInterface())
+MatrixMultiplierAudioProcessorEditor::MatrixMultiplierAudioProcessorEditor (
+    MatrixMultiplierAudioProcessor& p,
+    juce::AudioProcessorValueTreeState& vts) :
+    juce::AudioProcessorEditor (&p),
+    processor (p),
+    valueTreeState (vts),
+    footer (p.getOSCParameterInterface())
 {
     // ============== BEGIN: essentials ======================
     // set GUI size and lookAndFeel
-    setResizeLimits(500, 200, 800, 500); // use this to create a resizable GUI
+    setResizeLimits (500, 200, 800, 500); // use this to create a resizable GUI
     setLookAndFeel (&globalLaF);
 
     // make title and footer visible, and set the PluginName
-    addAndMakeVisible(&title);
-    title.setTitle(juce::String("Matrix"),juce::String("Multiplier"));
-    title.setFont(globalLaF.robotoBold, globalLaF.robotoLight);
+    addAndMakeVisible (&title);
+    title.setTitle (juce::String ("Matrix"), juce::String ("Multiplier"));
+    title.setFont (globalLaF.robotoBold, globalLaF.robotoLight);
     addAndMakeVisible (&footer);
     // ============= END: essentials ========================
 
-
     // create the connection between title component's comboBoxes and parameters
-//    cbInputChannelsSettingAttachment = new ComboBoxAttachment(valueTreeState, "inputChannelsSetting", *title.getInputWidgetPtr()->getChannelsCbPointer());
-//    cbOutputChannelsSettingAttachment = new ComboBoxAttachment(valueTreeState, "outputChannelsSetting", *title.getOutputWidgetPtr()->getChannelsCbPointer());
+    //    cbInputChannelsSettingAttachment = new ComboBoxAttachment(valueTreeState, "inputChannelsSetting", *title.getInputWidgetPtr()->getChannelsCbPointer());
+    //    cbOutputChannelsSettingAttachment = new ComboBoxAttachment(valueTreeState, "outputChannelsSetting", *title.getOutputWidgetPtr()->getChannelsCbPointer());
 
-    addAndMakeVisible(btLoadFile);
-    btLoadFile.setButtonText("Load configuration");
-    btLoadFile.setColour(juce::TextButton::buttonColourId, juce::Colours::cornflowerblue);
-    btLoadFile.addListener(this);
+    addAndMakeVisible (btLoadFile);
+    btLoadFile.setButtonText ("Load configuration");
+    btLoadFile.setColour (juce::TextButton::buttonColourId, juce::Colours::cornflowerblue);
+    btLoadFile.addListener (this);
 
-    addAndMakeVisible(edOutput);
-    edOutput.setMultiLine(true);
-    edOutput.setReadOnly(true);
-    edOutput.setTabKeyUsedAsCharacter(true);
+    addAndMakeVisible (edOutput);
+    edOutput.setMultiLine (true);
+    edOutput.setReadOnly (true);
+    edOutput.setTabKeyUsedAsCharacter (true);
     edOutput.clear();
-    edOutput.setText(processor.getMessageForEditor());
-    edOutput.setColour(juce::TextEditor::backgroundColourId, juce::Colours::cornflowerblue.withMultipliedAlpha(0.2f));
+    edOutput.setText (processor.getMessageForEditor());
+    edOutput.setColour (juce::TextEditor::backgroundColourId,
+                        juce::Colours::cornflowerblue.withMultipliedAlpha (0.2f));
 
     // start timer after everything is set up properly
-    startTimer(20);
+    startTimer (20);
 }
 
 MatrixMultiplierAudioProcessorEditor::~MatrixMultiplierAudioProcessorEditor()
 {
-    setLookAndFeel(nullptr);
+    setLookAndFeel (nullptr);
 }
 
 //==============================================================================
@@ -81,24 +85,22 @@ void MatrixMultiplierAudioProcessorEditor::resized()
     const int footerHeight = 25;
     juce::Rectangle<int> area (getLocalBounds());
 
-    juce::Rectangle<int> footerArea (area.removeFromBottom(footerHeight));
-    footer.setBounds(footerArea);
+    juce::Rectangle<int> footerArea (area.removeFromBottom (footerHeight));
+    footer.setBounds (footerArea);
 
-    area.removeFromLeft(leftRightMargin);
-    area.removeFromRight(leftRightMargin);
-    juce::Rectangle<int> headerArea = area.removeFromTop(headerHeight);
+    area.removeFromLeft (leftRightMargin);
+    area.removeFromRight (leftRightMargin);
+    juce::Rectangle<int> headerArea = area.removeFromTop (headerHeight);
     title.setBounds (headerArea);
-    area.removeFromTop(10);
-    area.removeFromBottom(5);
+    area.removeFromTop (10);
+    area.removeFromBottom (5);
     // =========== END: header and footer =================
 
+    juce::Rectangle<int> sliderRow = area.removeFromRight (120);
+    btLoadFile.setBounds (sliderRow.removeFromTop (30));
 
-
-    juce::Rectangle<int> sliderRow = area.removeFromRight(120);
-    btLoadFile.setBounds(sliderRow.removeFromTop(30));
-
-    area.removeFromRight(10);
-    edOutput.setBounds(area);
+    area.removeFromRight (10);
+    edOutput.setBounds (area);
 }
 
 void MatrixMultiplierAudioProcessorEditor::timerCallback()
@@ -110,15 +112,15 @@ void MatrixMultiplierAudioProcessorEditor::timerCallback()
     if (processor.messageChanged)
     {
         edOutput.clear();
-        edOutput.setText(processor.getMessageForEditor());
+        edOutput.setText (processor.getMessageForEditor());
         processor.messageChanged = false;
     }
 
     ReferenceCountedMatrix::Ptr currentMatrix = processor.getCurrentMatrix();
     if (currentMatrix != nullptr)
     {
-        title.getOutputWidgetPtr()->setSizeIfUnselectable(currentMatrix->getNumOutputChannels());
-        title.getInputWidgetPtr()->setSizeIfUnselectable(currentMatrix->getNumInputChannels());
+        title.getOutputWidgetPtr()->setSizeIfUnselectable (currentMatrix->getNumOutputChannels());
+        title.getInputWidgetPtr()->setSizeIfUnselectable (currentMatrix->getNumInputChannels());
     }
     else
     {
@@ -127,7 +129,7 @@ void MatrixMultiplierAudioProcessorEditor::timerCallback()
     }
 }
 
-void MatrixMultiplierAudioProcessorEditor::buttonClicked(juce::Button* button)
+void MatrixMultiplierAudioProcessorEditor::buttonClicked (juce::Button* button)
 {
     if (button == &btLoadFile)
     {
@@ -135,23 +137,24 @@ void MatrixMultiplierAudioProcessorEditor::buttonClicked(juce::Button* button)
     }
 }
 
-void MatrixMultiplierAudioProcessorEditor::buttonStateChanged(juce::Button *button)
+void MatrixMultiplierAudioProcessorEditor::buttonStateChanged (juce::Button* button)
 {
-
 }
 
 void MatrixMultiplierAudioProcessorEditor::loadConfigurationFile()
 {
     juce::FileChooser myChooser ("Please select the configuration you want to load...",
-                           processor.getLastDir().exists() ? processor.getLastDir() : juce::File::getSpecialLocation (juce::File::userHomeDirectory),
-                           "*.json");
+                                 processor.getLastDir().exists() ? processor.getLastDir()
+                                                                 : juce::File::getSpecialLocation (
+                                                                     juce::File::userHomeDirectory),
+                                 "*.json");
     if (myChooser.browseForFileToOpen())
     {
         juce::File configurationFile (myChooser.getResult());
-        processor.setLastDir(configurationFile.getParentDirectory());
+        processor.setLastDir (configurationFile.getParentDirectory());
         processor.loadConfiguration (configurationFile);
 
         edOutput.clear();
-        edOutput.setText(processor.getMessageForEditor());
+        edOutput.setText (processor.getMessageForEditor());
     }
 }

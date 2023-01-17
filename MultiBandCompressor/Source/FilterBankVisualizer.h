@@ -20,7 +20,6 @@
  ==============================================================================
  */
 
-
 #pragma once
 #include <set>
 
@@ -28,11 +27,11 @@
 
 struct Settings
 {
-    float fMin = 20.0f;    // minimum displayed frequency
+    float fMin = 20.0f; // minimum displayed frequency
     float fMax = 20000.0f; // maximum displayed frequency
-    float dbMin = -15.0f;  // min displayed dB
-    float dbMax = 15.0f;   // max displayed dB
-    float gridDiv = 5.0f;  // how many dB per divisions (between grid lines)
+    float dbMin = -15.0f; // min displayed dB
+    float dbMax = 15.0f; // max displayed dB
+    float gridDiv = 5.0f; // how many dB per divisions (between grid lines)
 
     double& sampleRate;
 
@@ -58,15 +57,9 @@ struct Settings
     const float mB = 15.0f;
     const float OH = 3.0f;
 
-    void setHeight (int newHeight)
-    {
-        height = static_cast<float> (newHeight) - mT - mB;
-    }
+    void setHeight (int newHeight) { height = static_cast<float> (newHeight) - mT - mB; }
 
-    void setWidth (int newWidth)
-    {
-        width = static_cast<float> (newWidth) - mL - mR;
-    }
+    void setWidth (int newWidth) { width = static_cast<float> (newWidth) - mL - mR; }
 
     int dbToY (const float dB)
     {
@@ -76,7 +69,8 @@ struct Settings
 
     float dbToYFloat (const float dB)
     {
-        if (height <= 0.0f) return 0.0f;
+        if (height <= 0.0f)
+            return 0.0f;
         float temp;
         if (dB < 0.0f)
             temp = zero + std::tanh (dB / dyn * -2.0f);
@@ -91,9 +85,9 @@ struct Settings
         float temp = (y - mT) / height / scale - zero;
         float dB;
         if (temp > 0.0f)
-            dB =  std::atanh (temp) * dyn * -0.5f;
+            dB = std::atanh (temp) * dyn * -0.5f;
         else
-            dB = - 0.5f * temp * dyn;
+            dB = -0.5f * temp * dyn;
         return std::isnan (dB) ? dbMin : dB;
     }
 
@@ -103,22 +97,15 @@ struct Settings
         return xpos;
     }
 
-    float xToHz (int x)
-    {
-        return fMin * pow ((fMax / fMin), ((x - mL) / width));
-    }
+    float xToHz (int x) { return fMin * pow ((fMax / fMin), ((x - mL) / width)); }
 };
-
 
 // ============================
 
 class FilterBackdrop : public juce::Component
 {
 public:
-    FilterBackdrop (Settings& settings) : s (settings)
-    {
-        setBufferedToImage (true);
-    };
+    FilterBackdrop (Settings& settings) : s (settings) { setBufferedToImage (true); };
 
     ~FilterBackdrop() {};
 
@@ -140,12 +127,13 @@ public:
         for (int i = 0; i < numgridlines; ++i)
         {
             float db_val = s.dbMax - i * s.gridDiv;
-            lastTextDrawPos = drawLevelMark (g, 0, 20, db_val, juce::String (db_val, 0), lastTextDrawPos);
+            lastTextDrawPos =
+                drawLevelMark (g, 0, 20, db_val, juce::String (db_val, 0), lastTextDrawPos);
         }
 
-
         // frequency labels
-        for (float f = s.fMin; f <= s.fMax; f += pow (10, floor (log10 (f)))) {
+        for (float f = s.fMin; f <= s.fMax; f += pow (10, floor (log10 (f))))
+        {
             int xpos = s.hzToX (f);
 
             juce::String axislabel;
@@ -165,9 +153,14 @@ public:
             else
                 continue;
 
-            g.drawText (axislabel, xpos - 10, s.dbToY (s.dbMin) + s.OH + 0.0f, 20, 12, juce::Justification::centred, false);
+            g.drawText (axislabel,
+                        xpos - 10,
+                        s.dbToY (s.dbMin) + s.OH + 0.0f,
+                        20,
+                        12,
+                        juce::Justification::centred,
+                        false);
         }
-
 
         g.setColour (juce::Colours::steelblue.withMultipliedAlpha (0.8f));
         g.strokePath (dbGridPath, juce::PathStrokeType (0.5f));
@@ -203,12 +196,13 @@ public:
         {
             int xpos = s.hzToX (f);
 
-            if ((f == 20) || (f == 50) || (f == 100) || (f == 500) || (f == 1000) || (f == 5000) || (f == 10000) || (f == 20000))
+            if ((f == 20) || (f == 50) || (f == 100) || (f == 500) || (f == 1000) || (f == 5000)
+                || (f == 10000) || (f == 20000))
             {
                 hzGridPathBold.startNewSubPath (xpos, s.dbToY (s.dbMax) - s.OH);
                 hzGridPathBold.lineTo (xpos, s.dbToY (s.dbMin) + s.OH);
-
-            } else
+            }
+            else
             {
                 hzGridPath.startNewSubPath (xpos, s.dbToY (s.dbMax) - s.OH);
                 hzGridPath.lineTo (xpos, s.dbToY (s.dbMin) + s.OH);
@@ -216,7 +210,12 @@ public:
         }
     }
 
-    int inline drawLevelMark (juce::Graphics& g, int x, int width, const int level, const juce::String& label, int lastTextDrawPos = -1)
+    int inline drawLevelMark (juce::Graphics& g,
+                              int x,
+                              int width,
+                              const int level,
+                              const juce::String& label,
+                              int lastTextDrawPos = -1)
     {
         float yPos = s.dbToYFloat (level);
         x = x + 1.0f;
@@ -231,7 +230,6 @@ public:
     }
 
 private:
-
     Settings& s;
 
     juce::Path dbGridPath;
@@ -239,23 +237,24 @@ private:
     juce::Path hzGridPathBold;
 };
 
-
 // ============================
 
 template <typename coeffType>
-class FrequencyBand    : public juce::Component
+class FrequencyBand : public juce::Component
 {
 public:
-    FrequencyBand (Settings& settings) : s (settings)
-    {
-    };
+    FrequencyBand (Settings& settings) : s (settings) {};
 
-    FrequencyBand (Settings& settings, typename juce::dsp::IIR::Coefficients<coeffType>::Ptr coeffs1, typename juce::dsp::IIR::Coefficients<coeffType>::Ptr coeffs2, juce::Colour newColour) : s (settings), colour (newColour)
+    FrequencyBand (Settings& settings,
+                   typename juce::dsp::IIR::Coefficients<coeffType>::Ptr coeffs1,
+                   typename juce::dsp::IIR::Coefficients<coeffType>::Ptr coeffs2,
+                   juce::Colour newColour) :
+        s (settings), colour (newColour)
     {
         addCoeffs (coeffs1, coeffs2);
     };
 
-    ~FrequencyBand () {};
+    ~FrequencyBand() {};
 
     void paint (juce::Graphics& g) override
     {
@@ -292,8 +291,7 @@ public:
         }
     }
 
-
-    void updateFilterResponse ()
+    void updateFilterResponse()
     {
         juce::Array<double> tempMagnitude;
         tempMagnitude.resize (s.numPixels);
@@ -303,14 +301,21 @@ public:
             juce::Array<double> filterMagnitude;
             filterMagnitude.resize (s.numPixels);
             if (coeffs[i] != nullptr)
-                coeffs[i]->getMagnitudeForFrequencyArray (s.frequencies.getRawDataPointer(), filterMagnitude.getRawDataPointer(), s.numPixels, s.sampleRate);
-            juce::FloatVectorOperations::multiply (tempMagnitude.getRawDataPointer(), filterMagnitude.getRawDataPointer(), s.numPixels);
+                coeffs[i]->getMagnitudeForFrequencyArray (s.frequencies.getRawDataPointer(),
+                                                          filterMagnitude.getRawDataPointer(),
+                                                          s.numPixels,
+                                                          s.sampleRate);
+            juce::FloatVectorOperations::multiply (tempMagnitude.getRawDataPointer(),
+                                                   filterMagnitude.getRawDataPointer(),
+                                                   s.numPixels);
         }
-        juce::FloatVectorOperations::copy (magnitudes.getRawDataPointer(), tempMagnitude.getRawDataPointer(), s.numPixels);
+        juce::FloatVectorOperations::copy (magnitudes.getRawDataPointer(),
+                                           tempMagnitude.getRawDataPointer(),
+                                           s.numPixels);
         updatePath();
     }
 
-    void updatePath ()
+    void updatePath()
     {
         path.clear();
         closedPath.clear();
@@ -325,14 +330,19 @@ public:
         }
 
         float db = juce::Decibels::gainToDecibels (magnitudes[0]) + gain1 + gain2;
-        magnitudesIncludingGains.set (0, juce::Decibels::decibelsToGain (db) );
-        path.startNewSubPath (s.xMin, juce::jlimit (static_cast<float> (s.yMin), static_cast<float> (s.yMax) + s.OH + 1.0f, s.dbToYFloat (db)));
+        magnitudesIncludingGains.set (0, juce::Decibels::decibelsToGain (db));
+        path.startNewSubPath (s.xMin,
+                              juce::jlimit (static_cast<float> (s.yMin),
+                                            static_cast<float> (s.yMax) + s.OH + 1.0f,
+                                            s.dbToYFloat (db)));
 
         for (int i = 1; i < s.numPixels; ++i)
         {
             db = juce::Decibels::gainToDecibels (magnitudes[i]) + gain1 + gain2;
-            magnitudesIncludingGains.set (i, juce::Decibels::decibelsToGain (db) );
-            float y = juce::jlimit (static_cast<float> (s.yMin), static_cast<float> (s.yMax) + s.OH + 1.0f, s.dbToYFloat (db));
+            magnitudesIncludingGains.set (i, juce::Decibels::decibelsToGain (db));
+            float y = juce::jlimit (static_cast<float> (s.yMin),
+                                    static_cast<float> (s.yMax) + s.OH + 1.0f,
+                                    s.dbToYFloat (db));
             path.lineTo (s.xMin + i, y);
         }
 
@@ -344,20 +354,11 @@ public:
         repaint();
     }
 
-    double* getMagnitudeIncludingGains ()
-    {
-        return magnitudesIncludingGains.getRawDataPointer();
-    }
+    double* getMagnitudeIncludingGains() { return magnitudesIncludingGains.getRawDataPointer(); }
 
-    juce::Array<double> getMagnitudeIncludingGainsArray () const
-    {
-        return magnitudesIncludingGains;
-    }
+    juce::Array<double> getMagnitudeIncludingGainsArray() const { return magnitudesIncludingGains; }
 
-    void setColour (const juce::Colour newColour)
-    {
-        colour = newColour;
-    }
+    void setColour (const juce::Colour newColour) { colour = newColour; }
 
     void setBypassed (bool newBypassed)
     {
@@ -365,7 +366,8 @@ public:
         updatePath();
     }
 
-    void addCoeffs (typename juce::dsp::IIR::Coefficients<coeffType>::Ptr coeffs1, typename juce::dsp::IIR::Coefficients<coeffType>::Ptr coeffs2)
+    void addCoeffs (typename juce::dsp::IIR::Coefficients<coeffType>::Ptr coeffs1,
+                    typename juce::dsp::IIR::Coefficients<coeffType>::Ptr coeffs2)
     {
         coeffs.add (coeffs1);
         coeffs.add (coeffs2);
@@ -376,7 +378,7 @@ private:
     juce::Array<typename juce::dsp::IIR::Coefficients<coeffType>::Ptr> coeffs;
 
     juce::Colour colour;
-    bool bypassed {false};
+    bool bypassed { false };
 
     float makeUp = 0.0f, gainReduction = 0.0f;
 
@@ -389,14 +391,13 @@ private:
 // ============================
 
 template <typename coefficientType>
-class OverallMagnitude  : public juce::Component
+class OverallMagnitude : public juce::Component
 {
 public:
-    OverallMagnitude (Settings& settings, int numFreqBands) : s (settings), numBands (numFreqBands), overallGain (0.0f)
-    {
-    };
+    OverallMagnitude (Settings& settings, int numFreqBands) :
+        s (settings), numBands (numFreqBands), overallGain (0.0f) {};
 
-    ~OverallMagnitude () {};
+    ~OverallMagnitude() {};
 
     void paint (juce::Graphics& g) override
     {
@@ -413,35 +414,38 @@ public:
         overallMagnitude.fill (overallGain);
     }
 
-    void setOverallGain (const float newGain)
-    {
-        overallGain = newGain;
-    }
+    void setOverallGain (const float newGain) { overallGain = newGain; }
 
-    void updateOverallMagnitude ()
+    void updateOverallMagnitude()
     {
         overallMagnitude.fill (overallGain);
         for (int i = 0; i < (*freqBands).size(); ++i)
         {
-            juce::FloatVectorOperations::add (overallMagnitude.getRawDataPointer(), (*freqBands)[i]->getMagnitudeIncludingGains (), s.numPixels);
+            juce::FloatVectorOperations::add (overallMagnitude.getRawDataPointer(),
+                                              (*freqBands)[i]->getMagnitudeIncludingGains(),
+                                              s.numPixels);
         }
 
         updatePath();
     }
 
-
-    void updatePath ()
+    void updatePath()
     {
         path.clear();
         closedPath.clear();
 
         float db = juce::Decibels::gainToDecibels (overallMagnitude[0]);
-        path.startNewSubPath (s.xMin, juce::jlimit (static_cast<float> (s.yMin), static_cast<float> (s.yMax) + s.OH + 1.0f, s.dbToYFloat (db)));
+        path.startNewSubPath (s.xMin,
+                              juce::jlimit (static_cast<float> (s.yMin),
+                                            static_cast<float> (s.yMax) + s.OH + 1.0f,
+                                            s.dbToYFloat (db)));
 
         for (int i = 1; i < s.numPixels; ++i)
         {
             db = juce::Decibels::gainToDecibels (overallMagnitude[i]);
-            float y = juce::jlimit (static_cast<float> (s.yMin), static_cast<float> (s.yMax) + s.OH + 1.0f, s.dbToYFloat (db));
+            float y = juce::jlimit (static_cast<float> (s.yMin),
+                                    static_cast<float> (s.yMax) + s.OH + 1.0f,
+                                    s.dbToYFloat (db));
             path.lineTo (s.xMin + i, y);
         }
         closedPath = path;
@@ -469,21 +473,32 @@ private:
     float overallGain;
 };
 
-
 // ============================
 
 template <typename T>
 class FilterBankVisualizer : public juce::Component
 {
 public:
-    FilterBankVisualizer (float fMin, float fMax, float dbMin, float dbMax, float gridDiv, double& sampleRate, int numBands, bool overallMagnitude=false) : s {fMin, fMax, dbMin, dbMax, gridDiv, sampleRate}, filterBackdrop (s), overallMagnitude (s, numBands), numFreqBands (numBands), displayOverallMagnitude (overallMagnitude)
+    FilterBankVisualizer (float fMin,
+                          float fMax,
+                          float dbMin,
+                          float dbMax,
+                          float gridDiv,
+                          double& sampleRate,
+                          int numBands,
+                          bool overallMagnitude = false) :
+        s { fMin, fMax, dbMin, dbMax, gridDiv, sampleRate },
+        filterBackdrop (s),
+        overallMagnitude (s, numBands),
+        numFreqBands (numBands),
+        displayOverallMagnitude (overallMagnitude)
     {
         init();
     };
 
     ~FilterBankVisualizer() {};
 
-    void init ()
+    void init()
     {
         updateSettings();
 
@@ -497,12 +512,12 @@ public:
         }
 
         if (displayOverallMagnitude)
-            activateOverallMagnitude ();
+            activateOverallMagnitude();
 
         freqBandColours.resize (numFreqBands);
     }
 
-    void updateSettings ()
+    void updateSettings()
     {
         s.setWidth (getWidth());
         s.setHeight (getHeight());
@@ -520,20 +535,20 @@ public:
             s.frequencies.set (i, s.xToHz (s.xMin + i));
     }
 
-    void paint (juce::Graphics& g) override
-    {
-    }
+    void paint (juce::Graphics& g) override {}
 
     void paintOverChildren (juce::Graphics& g) override
     {
-        g.excludeClipRegion (juce::Rectangle<int> (0.0f, s.yMax + s.OH, s.width, s.height - s.yMax - s.OH));
+        g.excludeClipRegion (
+            juce::Rectangle<int> (0.0f, s.yMax + s.OH, s.width, s.height - s.yMax - s.OH));
 
         // draw crossovers separators and knobs
         float yPos = s.dbToYFloat (0.0f);
         float prevXPos = s.xMin;
         for (int i = 0; i < crossoverSliders.size(); ++i)
         {
-            float xPos = crossoverSliders[i] == nullptr ? s.xMin : s.hzToX (crossoverSliders[i]->getValue());
+            float xPos =
+                crossoverSliders[i] == nullptr ? s.xMin : s.hzToX (crossoverSliders[i]->getValue());
             juce::Line<float> freqBandSeparator;
             freqBandSeparator.setStart (xPos, s.yMin);
             freqBandSeparator.setEnd (xPos, s.yMax + s.yMin);
@@ -542,16 +557,15 @@ public:
             prevXPos = xPos;
 
             g.setColour (juce::Colours::black);
-            g.drawEllipse (xPos - 5.0f, yPos - 5.0f , 10.0f, 10.0f, 3.0f);
+            g.drawEllipse (xPos - 5.0f, yPos - 5.0f, 10.0f, 10.0f, 3.0f);
             g.setColour (activeElem == i ? colour.brighter() : colour);
-            g.fillEllipse (xPos - 5.0f, yPos - 5.0f , 10.0f, 10.0f);
-
+            g.fillEllipse (xPos - 5.0f, yPos - 5.0f, 10.0f, 10.0f);
         }
     }
 
     void resized() override
     {
-        updateSettings ();
+        updateSettings();
 
         juce::Rectangle<int> area = getLocalBounds();
         filterBackdrop.setBounds (area);
@@ -566,15 +580,11 @@ public:
             overallMagnitude.setBounds (area);
             overallMagnitude.updateOverallMagnitude();
         }
-
     }
 
-    void setNumFreqBands (const int newValue)
-    {
-        numFreqBands = newValue;
-    }
+    void setNumFreqBands (const int newValue) { numFreqBands = newValue; }
 
-    void mouseDrag (const juce::MouseEvent &event) override
+    void mouseDrag (const juce::MouseEvent& event) override
     {
         juce::Point<int> pos = event.getPosition();
         float frequency = s.xToHz (pos.x);
@@ -586,11 +596,10 @@ public:
                 crossoverSliders[activeElem]->setValue (frequency);
                 repaint();
             }
-
         }
     }
 
-    void mouseMove (const juce::MouseEvent &event) override
+    void mouseMove (const juce::MouseEvent& event) override
     {
         juce::Point<int> pos = event.getPosition();
         int oldActiveElem = activeElem;
@@ -598,7 +607,8 @@ public:
 
         for (int i = 0; i < crossoverSliders.size(); ++i)
         {
-            int x = crossoverSliders[i] == nullptr ? s.hzToX (s.fMin) : s.hzToX (crossoverSliders[i]->getValue());
+            int x = crossoverSliders[i] == nullptr ? s.hzToX (s.fMin)
+                                                   : s.hzToX (crossoverSliders[i]->getValue());
             float y = s.dbToYFloat (0.0f);
             juce::Point<int> filterPos (x, y);
 
@@ -618,7 +628,6 @@ public:
         freqBands[freqBand]->updateMakeUpGain (newMakeUp);
     }
 
-
     void updateGainReduction (const int freqBand, const float newGainReduction)
     {
         freqBands[freqBand]->updateGainReduction (newGainReduction);
@@ -629,21 +638,15 @@ public:
         freqBands[freqBand]->updateFilterResponse();
     }
 
-    void updateFreqBandResponses ()
+    void updateFreqBandResponses()
     {
         for (int i = 0; i < numFreqBands; ++i)
             freqBands[i]->updateFilterResponse();
     }
 
-    void updateOverallMagnitude ()
-    {
-        overallMagnitude.updateOverallMagnitude();
-    }
+    void updateOverallMagnitude() { overallMagnitude.updateOverallMagnitude(); }
 
-    void setBypassed (const int i, const bool bypassed)
-    {
-        freqBands[i]->setBypassed (bypassed);
-    }
+    void setBypassed (const int i, const bool bypassed) { freqBands[i]->setBypassed (bypassed); }
 
     void setSolo (const int i, const bool soloed)
     {
@@ -651,7 +654,6 @@ public:
             soloSet.insert (i);
         else
             soloSet.erase (i);
-
 
         for (int i = 0; i < numFreqBands; ++i)
         {
@@ -664,11 +666,14 @@ public:
             }
 
             freqBands[i]->setColour (colour);
-            freqBands[i]->repaint ();
+            freqBands[i]->repaint();
         }
     }
 
-    void setFrequencyBand (const int i, typename juce::dsp::IIR::Coefficients<T>::Ptr coeffs1, typename  juce::dsp::IIR::Coefficients<T>::Ptr coeffs2, juce::Colour colour)
+    void setFrequencyBand (const int i,
+                           typename juce::dsp::IIR::Coefficients<T>::Ptr coeffs1,
+                           typename juce::dsp::IIR::Coefficients<T>::Ptr coeffs2,
+                           juce::Colour colour)
     {
         freqBands[i]->addCoeffs (coeffs1, coeffs2);
         freqBands[i]->setColour (colour);
@@ -677,7 +682,9 @@ public:
         freqBandColours.set (i, colour);
     }
 
-    void addFrequencyBand (typename juce::dsp::IIR::Coefficients<T>::Ptr coeffs1, typename juce::dsp::IIR::Coefficients<T>::Ptr coeffs2, juce::Colour colour)
+    void addFrequencyBand (typename juce::dsp::IIR::Coefficients<T>::Ptr coeffs1,
+                           typename juce::dsp::IIR::Coefficients<T>::Ptr coeffs2,
+                           juce::Colour colour)
     {
         freqBands.add (new FrequencyBand<T> (s, coeffs1, coeffs2, colour));
         addAndMakeVisible (freqBands.getLast());
@@ -685,18 +692,18 @@ public:
         freqBandColours.add (colour);
     }
 
-    void activateOverallMagnitude (const float gain=0.0f)
+    void activateOverallMagnitude (const float gain = 0.0f)
     {
         displayOverallMagnitude = true;
         overallMagnitude.setFreqBands (&freqBands);
         overallMagnitude.setOverallGain (gain);
         addAndMakeVisible (&overallMagnitude);
-        overallMagnitude.setBounds (getLocalBounds ());
+        overallMagnitude.setBounds (getLocalBounds());
         overallMagnitude.resized();
         overallMagnitude.addMouseListener (this, true);
     }
 
-    void deactivateOverallMagnitude ()
+    void deactivateOverallMagnitude()
     {
         displayOverallMagnitude = false;
         overallMagnitude.removeMouseListener (this);
@@ -705,16 +712,12 @@ public:
         displayOverallMagnitude = false;
     }
 
-    void setOverallGain (const float gain=0.0f)
-    {
-        overallMagnitude.setOverallGain (gain);
-    }
+    void setOverallGain (const float gain = 0.0f) { overallMagnitude.setOverallGain (gain); }
 
     void addCrossover (juce::Slider* crossoverSlider = nullptr)
     {
         crossoverSliders.add (crossoverSlider);
     }
-
 
 private:
     Settings s;
@@ -725,10 +728,10 @@ private:
 
     juce::Array<juce::Slider*> crossoverSliders;
 
-    int numFreqBands, activeElem {-1};
-    bool displayOverallMagnitude {false};
+    int numFreqBands, activeElem { -1 };
+    bool displayOverallMagnitude { false };
 
-    juce::Colour colour {0xFFD8D8D8};
+    juce::Colour colour { 0xFFD8D8D8 };
     juce::Array<juce::Colour> freqBandColours;
 
     std::set<int> soloSet;

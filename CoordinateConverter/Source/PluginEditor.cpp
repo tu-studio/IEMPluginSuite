@@ -20,17 +20,27 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "PluginProcessor.h"
 
 //==============================================================================
-CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor (CoordinateConverterAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
-    : juce::AudioProcessorEditor (&p), processor (p), valueTreeState (vts), footer (p.getOSCParameterInterface()),
-      panner (*valueTreeState.getParameter("azimuth"), valueTreeState.getParameterRange("azimuth"), *valueTreeState.getParameter("elevation"), valueTreeState.getParameterRange("elevation")),
-      xyzPanner (*valueTreeState.getParameter("xPos"), valueTreeState.getParameterRange("xPos"),
-              *valueTreeState.getParameter("yPos"), valueTreeState.getParameterRange("yPos"),
-              *valueTreeState.getParameter("zPos"), valueTreeState.getParameterRange("zPos"))
+CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor (
+    CoordinateConverterAudioProcessor& p,
+    juce::AudioProcessorValueTreeState& vts) :
+    juce::AudioProcessorEditor (&p),
+    processor (p),
+    valueTreeState (vts),
+    footer (p.getOSCParameterInterface()),
+    panner (*valueTreeState.getParameter ("azimuth"),
+            valueTreeState.getParameterRange ("azimuth"),
+            *valueTreeState.getParameter ("elevation"),
+            valueTreeState.getParameterRange ("elevation")),
+    xyzPanner (*valueTreeState.getParameter ("xPos"),
+               valueTreeState.getParameterRange ("xPos"),
+               *valueTreeState.getParameter ("yPos"),
+               valueTreeState.getParameterRange ("yPos"),
+               *valueTreeState.getParameter ("zPos"),
+               valueTreeState.getParameterRange ("zPos"))
 {
     // ============== BEGIN: essentials ======================
     // set GUI size and lookAndFeel
@@ -45,7 +55,6 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     addAndMakeVisible (&footer);
     // ============= END: essentials ========================
 
-
     addAndMakeVisible (gcSpherical);
     gcSpherical.setText ("Spherical Coordinates");
 
@@ -53,7 +62,7 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     gcCartesian.setText ("Cartesian Coordinates");
 
     addAndMakeVisible (gcRange);
-    gcRange.setText ("Normalization / juce::Range Settings");
+    gcRange.setText ("Normalization / Range Settings");
 
     addAndMakeVisible (gcReference);
     gcReference.setText ("Reference Position");
@@ -70,24 +79,28 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     slAzimuth.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slAzimuth.setReverse (true);
     slAzimuth.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
-    slAzimuth.setRotaryParameters (juce::MathConstants<float>::pi, 3 * juce::MathConstants<float>::pi, false);
+    slAzimuth.setRotaryParameters (juce::MathConstants<float>::pi,
+                                   3 * juce::MathConstants<float>::pi,
+                                   false);
     slAzimuth.setTooltip ("Azimuth angle");
 
     addAndMakeVisible (slElevation);
-    slElevationAttachment.reset (new SliderAttachment(valueTreeState, "elevation", slElevation));
+    slElevationAttachment.reset (new SliderAttachment (valueTreeState, "elevation", slElevation));
     slElevation.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     slElevation.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slElevation.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
-    slElevation.setRotaryParameters (0.5 * juce::MathConstants<float>::pi, 2.5 * juce::MathConstants<float>::pi, false);
-    slElevation.setTooltip( "Elevation angle");
+    slElevation.setRotaryParameters (0.5 * juce::MathConstants<float>::pi,
+                                     2.5 * juce::MathConstants<float>::pi,
+                                     false);
+    slElevation.setTooltip ("Elevation angle");
 
     addAndMakeVisible (slRadius);
     slRadiusAttachment.reset (new SliderAttachment (valueTreeState, "radius", slRadius));
     slRadius.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     slRadius.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slRadius.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
-    slRadius.setReverse(false);
-    slRadius.setTooltip("Radius (normalized)");
+    slRadius.setReverse (false);
+    slRadius.setTooltip ("Radius (normalized)");
 
     addAndMakeVisible (lbAzimuth);
     lbAzimuth.setText ("Azimuth");
@@ -99,57 +112,61 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     lbRadius.setText ("Radius");
 
     addAndMakeVisible (tbAzimuthFlip);
-    tbAzimuthFlipAttachment.reset (new ButtonAttachment (valueTreeState, "azimuthFlip", tbAzimuthFlip));
-    tbAzimuthFlip.setColour (juce::ToggleButton::ColourIds::tickColourId, globalLaF.ClWidgetColours[0]);
+    tbAzimuthFlipAttachment.reset (
+        new ButtonAttachment (valueTreeState, "azimuthFlip", tbAzimuthFlip));
+    tbAzimuthFlip.setColour (juce::ToggleButton::ColourIds::tickColourId,
+                             globalLaF.ClWidgetColours[0]);
     tbAzimuthFlip.setButtonText ("Flip");
 
     addAndMakeVisible (tbElevationFlip);
-    tbElevationFlipAttachment.reset (new ButtonAttachment (valueTreeState, "elevationFlip", tbElevationFlip));
-    tbElevationFlip.setColour (juce::ToggleButton::ColourIds::tickColourId, globalLaF.ClWidgetColours[1]);
+    tbElevationFlipAttachment.reset (
+        new ButtonAttachment (valueTreeState, "elevationFlip", tbElevationFlip));
+    tbElevationFlip.setColour (juce::ToggleButton::ColourIds::tickColourId,
+                               globalLaF.ClWidgetColours[1]);
     tbElevationFlip.setButtonText ("Flip");
 
     addAndMakeVisible (tbRadiusFlip);
-    tbRadiusFlipAttachment.reset (new ButtonAttachment (valueTreeState, "radiusFlip", tbRadiusFlip));
-    tbRadiusFlip.setColour (juce::ToggleButton::ColourIds::tickColourId, globalLaF.ClWidgetColours[2]);
+    tbRadiusFlipAttachment.reset (
+        new ButtonAttachment (valueTreeState, "radiusFlip", tbRadiusFlip));
+    tbRadiusFlip.setColour (juce::ToggleButton::ColourIds::tickColourId,
+                            globalLaF.ClWidgetColours[2]);
     tbRadiusFlip.setButtonText ("Flip");
 
     // ============== END: SPHERICAL COORDINATES ============
 
     // ============== BEGIN: CARTESIAN COORDINATES ============
 
-
     addAndMakeVisible (&xyPlane);
     xyPlane.addElement (&xyzPanner);
     xyPlane.useAutoScale (true);
-    xyPlane.setDimensions ({2.0f, 2.0f, 2.0f});
+    xyPlane.setDimensions ({ 2.0f, 2.0f, 2.0f });
 
     addAndMakeVisible (&zyPlane);
     zyPlane.setPlane (PositionPlane::Planes::zy);
     zyPlane.addElement (&xyzPanner);
     zyPlane.useAutoScale (true);
-    zyPlane.setDimensions ({2.0f, 2.0f, 2.0f});
+    zyPlane.setDimensions ({ 2.0f, 2.0f, 2.0f });
 
     addAndMakeVisible (slXPos);
-    slXPosAttachment.reset (new SliderAttachment(valueTreeState, "xPos", slXPos));
+    slXPosAttachment.reset (new SliderAttachment (valueTreeState, "xPos", slXPos));
     slXPos.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     slXPos.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slXPos.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
     slXPos.setTooltip ("x coordinate (normalized)");
 
     addAndMakeVisible (slYPos);
-    slYPosAttachment.reset (new SliderAttachment(valueTreeState, "yPos", slYPos));
+    slYPosAttachment.reset (new SliderAttachment (valueTreeState, "yPos", slYPos));
     slYPos.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     slYPos.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slYPos.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
     slYPos.setTooltip ("y coordinate (normalized)");
 
     addAndMakeVisible (slZPos);
-    slZPosAttachment.reset (new SliderAttachment(valueTreeState, "zPos", slZPos));
+    slZPosAttachment.reset (new SliderAttachment (valueTreeState, "zPos", slZPos));
     slZPos.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     slZPos.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     slZPos.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
     slZPos.setTooltip ("z coordinate (normalized)");
-
 
     addAndMakeVisible (lbXPos);
     lbXPos.setText ("X");
@@ -198,7 +215,6 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     slZReference.setEditable (true);
     slZReferenceAttachment.reset (new LabelAttachment (valueTreeState, "zReference", slZReference));
 
-
     addAndMakeVisible (lbXReference);
     lbXReference.setText ("x Ref");
 
@@ -208,7 +224,6 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     addAndMakeVisible (lbZReference);
     lbZReference.setText ("z Ref");
 
-
     // ============== END: CARTESIAN COORDINATES ============
 
     // ============== BEGIN: RANGE SETTINGS ============
@@ -216,7 +231,8 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     addAndMakeVisible (slRadiusRange);
     slRadiusRange.setJustificationType (juce::Justification::centred);
     slRadiusRange.setEditable (true);
-    slRadiusRangeAttachment.reset (new LabelAttachment (valueTreeState, "radiusRange", slRadiusRange));
+    slRadiusRangeAttachment.reset (
+        new LabelAttachment (valueTreeState, "radiusRange", slRadiusRange));
 
     addAndMakeVisible (lbRadiusRange);
     lbRadiusRange.setText ("Radius");
@@ -245,7 +261,6 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
     addAndMakeVisible (lbZRange);
     lbZRange.setText ("+/- Z");
 
-
     // ============== END: RANGE SETTINGS ============
 
     // start timer after everything is set up properly
@@ -254,7 +269,7 @@ CoordinateConverterAudioProcessorEditor::CoordinateConverterAudioProcessorEditor
 
 CoordinateConverterAudioProcessorEditor::~CoordinateConverterAudioProcessorEditor()
 {
-    setLookAndFeel(nullptr);
+    setLookAndFeel (nullptr);
 }
 
 //==============================================================================
@@ -308,7 +323,6 @@ void CoordinateConverterAudioProcessorEditor::resized()
         sliderRow.removeFromLeft (5);
         slZRange.setBounds (sliderRow.removeFromLeft (50));
 
-
         sliderRow = rangeArea.removeFromTop (18);
 
         lbRadiusRange.setBounds (sliderRow.removeFromLeft (50));
@@ -349,18 +363,18 @@ void CoordinateConverterAudioProcessorEditor::resized()
 
     // ===== SPHERICAL
 
-
     auto sphericalArea = area.removeFromLeft (sphericalWidth);
     gcSpherical.setBounds (sphericalArea);
     sphericalArea.removeFromTop (25);
 
-    auto sliderArea = sphericalArea.removeFromBottom (rotSliderHeight + 12 + 5 + 20); // slider + spacing + label
+    auto sliderArea =
+        sphericalArea.removeFromBottom (rotSliderHeight + 12 + 5 + 20); // slider + spacing + label
     const int w = sphericalArea.getWidth();
     const int leftMargin = 0.5f * (w - 3 * rotSliderWidth - 2 * rotSliderSpacing);
     auto sliderRow = sliderArea.removeFromTop (rotSliderHeight);
     sliderRow.removeFromLeft (leftMargin);
     slAzimuth.setBounds (sliderRow.removeFromLeft (rotSliderWidth));
-    sliderRow.removeFromLeft(rotSliderSpacing);
+    sliderRow.removeFromLeft (rotSliderSpacing);
     slElevation.setBounds (sliderRow.removeFromLeft (rotSliderWidth));
     sliderRow.removeFromLeft (rotSliderSpacing);
     slRadius.setBounds (sliderRow.removeFromLeft (rotSliderWidth));
@@ -385,7 +399,6 @@ void CoordinateConverterAudioProcessorEditor::resized()
 
     sphere.setBounds (sphericalArea);
 
-
     area.removeFromLeft (20);
 
     // ==== CARTESIAN
@@ -395,7 +408,8 @@ void CoordinateConverterAudioProcessorEditor::resized()
     cartesianArea.removeFromTop (25);
 
     {
-        auto sliderArea = cartesianArea.removeFromBottom (rotSliderHeight + 12 + 5 + 20); // slider + spacing + label
+        auto sliderArea = cartesianArea.removeFromBottom (rotSliderHeight + 12 + 5
+                                                          + 20); // slider + spacing + label
         const int w = cartesianArea.getWidth();
         const int leftMargin = 0.5f * (w - 3 * rotSliderWidth - 2 * rotSliderSpacing);
 
@@ -423,8 +437,6 @@ void CoordinateConverterAudioProcessorEditor::resized()
         sliderRow.removeFromLeft (rotSliderSpacing);
         tbZFlip.setBounds (sliderRow.removeFromLeft (rotSliderWidth));
 
-
-
         const int sphereHeight = sphere.getHeight();
         const int planeHeight = (sphereHeight - 11) / 2;
 
@@ -432,7 +444,6 @@ void CoordinateConverterAudioProcessorEditor::resized()
         xyPlane.setBounds (planeArea.removeFromTop (planeHeight));
         planeArea.removeFromTop (6); // 5 left
         zyPlane.setBounds (planeArea.removeFromTop (planeHeight));
-
     }
 }
 

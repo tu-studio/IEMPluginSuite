@@ -22,14 +22,14 @@
 
 #pragma once
 
+#include "../../resources/customComponents/CompressorVisualizer.h"
+#include "../../resources/customComponents/LevelMeter.h"
+#include "../../resources/customComponents/ReverseSlider.h"
+#include "../../resources/customComponents/SimpleLabel.h"
+#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-#include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/lookAndFeel/IEM_LaF.h"
-#include "../../resources/customComponents/TitleBar.h"
-#include "../../resources/customComponents/SimpleLabel.h"
-#include "../../resources/customComponents/LevelMeter.h"
-#include "../../resources/customComponents/CompressorVisualizer.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -38,11 +38,11 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class OmniCompressorAudioProcessorEditor  : public juce::AudioProcessorEditor,
-private juce::Timer
+class OmniCompressorAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
-    OmniCompressorAudioProcessorEditor (OmniCompressorAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    OmniCompressorAudioProcessorEditor (OmniCompressorAudioProcessor&,
+                                        juce::AudioProcessorValueTreeState&);
     ~OmniCompressorAudioProcessorEditor();
 
     //==============================================================================
@@ -58,10 +58,10 @@ private:
     TitleBar<AmbisonicIOWidget<>, NoIOWidget> title;
     OSCFooter footer;
 
-
     void timerCallback() override;
 
-    ReverseSlider sliderKnee, sliderThreshold, sliderRatio, sliderAttackTime, sliderReleaseTime, sliderMakeupGain;
+    ReverseSlider sliderKnee, sliderThreshold, sliderRatio, sliderAttackTime, sliderReleaseTime,
+        sliderMakeupGain;
 
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;

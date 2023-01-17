@@ -26,31 +26,31 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
 
-
-typedef ReverseSlider::SliderAttachment SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
+typedef ReverseSlider::SliderAttachment
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class BinauralDecoderAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer
+class BinauralDecoderAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
-    BinauralDecoderAudioProcessorEditor (BinauralDecoderAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    BinauralDecoderAudioProcessorEditor (BinauralDecoderAudioProcessor&,
+                                         juce::AudioProcessorValueTreeState&);
     ~BinauralDecoderAudioProcessorEditor();
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
-
 
     void timerCallback() override;
 
@@ -62,7 +62,6 @@ private:
     // stored references to the AudioProcessor and juce::ValueTreeState holding all the parameters
     BinauralDecoderAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
-
 
     /* title and footer component
      title component can hold different widgets for in- and output:
@@ -83,7 +82,6 @@ private:
     SimpleLabel lbEq;
     juce::ComboBox cbEq;
     std::unique_ptr<ComboBoxAttachment> cbEqAttachment;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BinauralDecoderAudioProcessorEditor)
 };

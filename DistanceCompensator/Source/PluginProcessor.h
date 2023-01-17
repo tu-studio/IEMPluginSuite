@@ -32,13 +32,14 @@ using namespace juce::dsp;
 #include "../../resources/ConfigurationHelper.h"
 
 #include "../../resources/Conversions.h"
-#include "../../resources/MultiChannelGain.h"
 #include "../../resources/MultiChannelDelay.h"
+#include "../../resources/MultiChannelGain.h"
 
 #define ProcessorClass DistanceCompensatorAudioProcessor
 
 //==============================================================================
-class DistanceCompensatorAudioProcessor  : public AudioProcessorBase<IOTypes::AudioChannels<64>, IOTypes::AudioChannels<64>>
+class DistanceCompensatorAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<64>, IOTypes::AudioChannels<64>>
 {
     struct PositionAndChannel
     {
@@ -75,21 +76,18 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
-
-
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
 
     //==============================================================================
-    inline const bool processNotYetConsumedOSCMessage (const juce::OSCMessage &message) override;
-
+    inline const bool processNotYetConsumedOSCMessage (const juce::OSCMessage& message) override;
 
     //==============================================================================
     void setLastDir (juce::File newLastDir);
-    juce::File getLastDir() {return lastDir;};
+    juce::File getLastDir() { return lastDir; };
 
     void loadConfiguration (const juce::File& presetFile);
 

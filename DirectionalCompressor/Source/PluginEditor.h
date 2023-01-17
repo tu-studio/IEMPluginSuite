@@ -25,12 +25,12 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 
-#include "../../resources/lookAndFeel/IEM_LaF.h"
-#include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/customComponents/TitleBar.h"
 #include "../../resources/customComponents/LevelMeter.h"
+#include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
 #include "../../resources/customComponents/SpherePanner.h"
+#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -39,11 +39,13 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class DirectionalCompressorAudioProcessorEditor  : public juce::AudioProcessorEditor,
-private juce::Timer, private juce::Button::Listener
+class DirectionalCompressorAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                                  private juce::Timer,
+                                                  private juce::Button::Listener
 {
 public:
-    DirectionalCompressorAudioProcessorEditor (DirectionalCompressorAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    DirectionalCompressorAudioProcessorEditor (DirectionalCompressorAudioProcessor&,
+                                               juce::AudioProcessorValueTreeState&);
     ~DirectionalCompressorAudioProcessorEditor();
 
     //==============================================================================
@@ -86,11 +88,16 @@ private:
     juce::ComboBox cbC2Driving, cbC2Apply;
     juce::ComboBox cbListen;
 
-    std::unique_ptr<SliderAttachment> slPreGainAttachment, slAzimuthAttachment, slElevationAttachment, slWidthAttachment;
-    std::unique_ptr<SliderAttachment> slC1ThresholdAttachment, slC1KneeAttachment, slC1RatioAttachment;
-    std::unique_ptr<SliderAttachment> slC1AttackAttachment, slC1ReleaseAttachment, slC1MakeupAttachment;
-    std::unique_ptr<SliderAttachment> slC2ThresholdAttachment, slC2KneeAttachment, slC2RatioAttachment;
-    std::unique_ptr<SliderAttachment> slC2AttackAttachment, slC2ReleaseAttachment, slC2MakeupAttachment;
+    std::unique_ptr<SliderAttachment> slPreGainAttachment, slAzimuthAttachment,
+        slElevationAttachment, slWidthAttachment;
+    std::unique_ptr<SliderAttachment> slC1ThresholdAttachment, slC1KneeAttachment,
+        slC1RatioAttachment;
+    std::unique_ptr<SliderAttachment> slC1AttackAttachment, slC1ReleaseAttachment,
+        slC1MakeupAttachment;
+    std::unique_ptr<SliderAttachment> slC2ThresholdAttachment, slC2KneeAttachment,
+        slC2RatioAttachment;
+    std::unique_ptr<SliderAttachment> slC2AttackAttachment, slC2ReleaseAttachment,
+        slC2MakeupAttachment;
 
     std::unique_ptr<ComboBoxAttachment> cbC1DrivingAttachment, cbC1ApplyAttachment;
     std::unique_ptr<ComboBoxAttachment> cbC2DrivingAttachment, cbC2ApplyAttachment;
@@ -104,7 +111,6 @@ private:
     SimpleLabel lbPreGain, lbAzimuth, lbElevation, lbWidth;
     SimpleLabel lbC1Threshold, lbC1Knee, lbC1Ratio, lbC1Attack, lbC1Release, lbC1Makeup;
     SimpleLabel lbC2Threshold, lbC2Knee, lbC2Ratio, lbC2Attack, lbC2Release, lbC2Makeup;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectionalCompressorAudioProcessorEditor)
 };

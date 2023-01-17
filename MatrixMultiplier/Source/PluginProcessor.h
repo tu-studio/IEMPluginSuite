@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
 #include "../../resources/MatrixMultiplication.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define CONFIGURATIONHELPER_ENABLE_MATRIX_METHODS 1
 #include "../../resources/ConfigurationHelper.h"
@@ -32,7 +32,8 @@
 #define ProcessorClass MatrixMultiplierAudioProcessor
 
 //==============================================================================
-class MatrixMultiplierAudioProcessor  : public AudioProcessorBase<IOTypes::AudioChannels<64>, IOTypes::AudioChannels<64>>
+class MatrixMultiplierAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<64>, IOTypes::AudioChannels<64>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -63,40 +64,40 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
 
     //==============================================================================
-    const bool processNotYetConsumedOSCMessage (const juce::OSCMessage &message) override;
+    const bool processNotYetConsumedOSCMessage (const juce::OSCMessage& message) override;
 
     //==============================================================================
     void setMatrix (ReferenceCountedMatrix::Ptr newMatrixToUse)
     {
-        matTrans.setMatrix(newMatrixToUse);
+        matTrans.setMatrix (newMatrixToUse);
     }
 
-    juce::File getLastDir() {return lastDir;}
-    void setLastDir(juce::File newLastDir);
-    void loadConfiguration(const juce::File& configurationFile);
+    juce::File getLastDir() { return lastDir; }
+    void setLastDir (juce::File newLastDir);
+    void loadConfiguration (const juce::File& configurationFile);
 
-    bool messageChanged {true};
-    juce::String getMessageForEditor() {return messageForEditor;}
+    bool messageChanged { true };
+    juce::String getMessageForEditor() { return messageForEditor; }
 
-    ReferenceCountedMatrix::Ptr getCurrentMatrix() {return currentMatrix;}
+    ReferenceCountedMatrix::Ptr getCurrentMatrix() { return currentMatrix; }
 
 private:
     //==============================================================================
     MatrixMultiplication matTrans;
-    ReferenceCountedMatrix::Ptr currentMatrix {nullptr};
+    ReferenceCountedMatrix::Ptr currentMatrix { nullptr };
 
     juce::File lastDir;
     juce::File lastFile;
     std::unique_ptr<juce::PropertiesFile> properties;
 
-    juce::String messageForEditor {"Please load a configuration."};
+    juce::String messageForEditor { "Please load a configuration." };
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MatrixMultiplierAudioProcessor)
 };

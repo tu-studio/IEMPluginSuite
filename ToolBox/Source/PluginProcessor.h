@@ -22,16 +22,17 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../../resources/MaxRE.h"
 #include "../../resources/ambisonicTools.h"
 #include "../../resources/inPhase.h"
-#include "../../resources/MaxRE.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define ProcessorClass ToolBoxAudioProcessor
 
 //==============================================================================
-class ToolBoxAudioProcessor  :  public AudioProcessorBase<IOTypes::Ambisonics<7>, IOTypes::Ambisonics<7>>
+class ToolBoxAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<7>, IOTypes::Ambisonics<7>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -62,12 +63,11 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
     void updateBuffers() override; // use this to implement a buffer update method
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
-
 
 private:
     //==============================================================================

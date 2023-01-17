@@ -20,68 +20,94 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "PluginProcessor.h"
 
 //==============================================================================
-EnergyVisualizerAudioProcessorEditor::EnergyVisualizerAudioProcessorEditor (EnergyVisualizerAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
-    : juce::AudioProcessorEditor (&p), processor (p), valueTreeState(vts), footer (p.getOSCParameterInterface())
+EnergyVisualizerAudioProcessorEditor::EnergyVisualizerAudioProcessorEditor (
+    EnergyVisualizerAudioProcessor& p,
+    juce::AudioProcessorValueTreeState& vts) :
+    juce::AudioProcessorEditor (&p),
+    processor (p),
+    valueTreeState (vts),
+    footer (p.getOSCParameterInterface())
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
-    setResizeLimits(705, 400, 1500, 1200);
+    setResizeLimits (710, 410, 1500, 1200);
     setLookAndFeel (&globalLaF);
 
-
-    addAndMakeVisible(&title);
-    title.setTitle(juce::String("Energy"),juce::String("Visualizer"));
-    title.setFont(globalLaF.robotoBold,globalLaF.robotoLight);
+    addAndMakeVisible (&title);
+    title.setTitle (juce::String ("Energy"), juce::String ("Visualizer"));
+    title.setFont (globalLaF.robotoBold, globalLaF.robotoLight);
     addAndMakeVisible (&footer);
 
-    cbNormalizationAtachement.reset (new ComboBoxAttachment (valueTreeState,"useSN3D", *title.getInputWidgetPtr()->getNormCbPointer()));
-    cbOrderAtachement.reset (new ComboBoxAttachment (valueTreeState,"orderSetting", *title.getInputWidgetPtr()->getOrderCbPointer()));
+    cbNormalizationAtachement.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "useSN3D",
+                                *title.getInputWidgetPtr()->getNormCbPointer()));
+    cbOrderAtachement.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "orderSetting",
+                                *title.getInputWidgetPtr()->getOrderCbPointer()));
 
-
-
-
-    addAndMakeVisible(&slPeakLevel);
+    addAndMakeVisible (&slPeakLevel);
     slPeakLevelAttachment.reset (new SliderAttachment (valueTreeState, "peakLevel", slPeakLevel));
-    slPeakLevel.setSliderStyle(juce::Slider::LinearVertical);
-    slPeakLevel.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 12);
-    slPeakLevel.setTextValueSuffix(" dB");
+    slPeakLevel.setSliderStyle (juce::Slider::LinearVertical);
+    slPeakLevel.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 100, 12);
+    slPeakLevel.setTextValueSuffix (" dB");
     slPeakLevel.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
-    slPeakLevel.setReverse(false);
-    slPeakLevel.addListener(this);
+    slPeakLevel.setReverse (false);
+    slPeakLevel.addListener (this);
 
-    addAndMakeVisible(&slDynamicRange);
-    slDynamicRangeAttachment.reset (new SliderAttachment (valueTreeState, "dynamicRange", slDynamicRange));
-    slDynamicRange.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    slDynamicRange.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 12);
-    slDynamicRange.setTextValueSuffix(" dB");
-    slDynamicRange.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
-    slDynamicRange.setReverse(false);
+    addAndMakeVisible (&slDynamicRange);
+    slDynamicRangeAttachment.reset (
+        new SliderAttachment (valueTreeState, "dynamicRange", slDynamicRange));
+    slDynamicRange.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    slDynamicRange.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 100, 12);
+    slDynamicRange.setTextValueSuffix (" dB");
+    slDynamicRange.setColour (juce::Slider::rotarySliderOutlineColourId,
+                              globalLaF.ClWidgetColours[0]);
+    slDynamicRange.setReverse (false);
     slDynamicRange.addListener (this);
 
+    addAndMakeVisible (&slRMStimeConstant);
+    slRMStimeConstantAttachment.reset (
+        new SliderAttachment (valueTreeState, "RMStimeConstant", slRMStimeConstant));
+    slRMStimeConstant.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    slRMStimeConstant.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 100, 12);
+    slRMStimeConstant.setTextValueSuffix (" ms");
+    slRMStimeConstant.setColour (juce::Slider::rotarySliderOutlineColourId,
+                                 globalLaF.ClWidgetColours[2]);
+    slRMStimeConstant.setReverse (false);
+    slRMStimeConstant.addListener (this);
 
-    addAndMakeVisible(&lbPeakLevel);
-    lbPeakLevel.setText("Peak level");
+    addAndMakeVisible (tbHoldMax);
+    tbHoldMaxAttachment.reset (new ButtonAttachment (valueTreeState, "holdMax", tbHoldMax));
+    tbHoldMax.setButtonText ("Hold max");
+    tbHoldMax.setColour (juce::ToggleButton::tickColourId, globalLaF.ClWidgetColours[2]);
+
+    addAndMakeVisible (&lbPeakLevel);
+    lbPeakLevel.setText ("Peak level");
 
     addAndMakeVisible (&lbDynamicRange);
-    lbDynamicRange.setText("Range");
+    lbDynamicRange.setText ("Range");
 
-    addAndMakeVisible(&visualizer);
+    addAndMakeVisible (&lbRMStimeConstant);
+    lbRMStimeConstant.setText ("Time Constant");
+
+    addAndMakeVisible (&visualizer);
     visualizer.setRmsDataPtr (p.rms.data());
 
-    addAndMakeVisible(&colormap);
+    addAndMakeVisible (&colormap);
 
-    startTimer(20);
+    startTimer (20);
 }
 
 EnergyVisualizerAudioProcessorEditor::~EnergyVisualizerAudioProcessorEditor()
 {
-    setLookAndFeel(nullptr);
+    setLookAndFeel (nullptr);
 }
 
 //==============================================================================
@@ -100,24 +126,22 @@ void EnergyVisualizerAudioProcessorEditor::resized()
     juce::Rectangle<int> area (getLocalBounds());
 
     juce::Rectangle<int> footerArea (area.removeFromBottom (footerHeight));
-    footer.setBounds(footerArea);
+    footer.setBounds (footerArea);
 
-
-    area.removeFromLeft(leftRightMargin);
-    area.removeFromRight(leftRightMargin);
-    juce::Rectangle<int> headerArea = area.removeFromTop    (headerHeight);
+    area.removeFromLeft (leftRightMargin);
+    area.removeFromRight (leftRightMargin);
+    juce::Rectangle<int> headerArea = area.removeFromTop (headerHeight);
     title.setBounds (headerArea);
-    area.removeFromTop(10);
-    area.removeFromBottom(5);
+    area.removeFromTop (10);
+    area.removeFromBottom (5);
 
-
-    juce::Rectangle<int> UIarea = area.removeFromRight(105);
+    juce::Rectangle<int> UIarea = area.removeFromRight (106);
     const juce::Point<int> UIareaCentre = UIarea.getCentre();
-    UIarea.setHeight(240);
-    UIarea.setCentre(UIareaCentre);
+    UIarea.setHeight (320);
+    UIarea.setCentre (UIareaCentre);
 
-
-    juce::Rectangle<int> sliderCol = UIarea.removeFromRight(50);
+    juce::Rectangle<int> dynamicsArea = UIarea.removeFromTop (210);
+    juce::Rectangle<int> sliderCol = dynamicsArea.removeFromRight (50);
 
     lbDynamicRange.setBounds (sliderCol.removeFromBottom (12));
     slDynamicRange.setBounds (sliderCol.removeFromBottom (50));
@@ -127,23 +151,33 @@ void EnergyVisualizerAudioProcessorEditor::resized()
     lbPeakLevel.setBounds (sliderCol.removeFromBottom (12));
     slPeakLevel.setBounds (sliderCol);
 
+    dynamicsArea.removeFromRight (6);
+    sliderCol = dynamicsArea.removeFromRight (50);
+    colormap.setBounds (sliderCol);
+    colormap.setMaxLevel (processor.getPeakLevelSetting());
+    colormap.setRange (processor.getDynamicRange());
 
-    UIarea.removeFromRight(5);
-    sliderCol = UIarea.removeFromRight(50);
-    colormap.setBounds(sliderCol);
+    UIarea.removeFromTop (20);
+    juce::Rectangle<int> sliderArea = UIarea.removeFromTop (45);
+    sliderArea.removeFromRight (28);
+    sliderArea.removeFromLeft (28);
+    slRMStimeConstant.setBounds (sliderArea);
+    lbRMStimeConstant.setBounds (UIarea.removeFromTop (12));
 
+    UIarea.removeFromTop (10);
+    UIarea.removeFromLeft (15);
 
-    area.removeFromRight(5);
-    visualizer.setBounds(area);
+    tbHoldMax.setBounds (UIarea.removeFromTop (20));
 
+    area.removeFromRight (5);
+    visualizer.setBounds (area);
 }
-void EnergyVisualizerAudioProcessorEditor::sliderValueChanged (juce::Slider *slider)
+void EnergyVisualizerAudioProcessorEditor::sliderValueChanged (juce::Slider* slider)
 {
     if (slider == &slPeakLevel)
-        colormap.setMaxLevel((float) slider->getValue());
+        colormap.setMaxLevel ((float) slider->getValue());
     else if (slider == &slDynamicRange)
         colormap.setRange ((float) slider->getValue());
-
 }
 
 void EnergyVisualizerAudioProcessorEditor::timerCallback()
@@ -155,6 +189,7 @@ void EnergyVisualizerAudioProcessorEditor::timerCallback()
     visualizer.setColormap (colormap.getColormap());
     visualizer.setPeakLevel (processor.getPeakLevelSetting());
     visualizer.setDynamicRange (processor.getDynamicRange());
+    visualizer.setHoldMax (processor.getHoldRMSSetting());
 
     processor.lastEditorTime = juce::Time::getCurrentTime();
 }

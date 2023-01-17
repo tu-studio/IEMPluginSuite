@@ -27,7 +27,7 @@
 
 #if defined(_MSC_VER)
     #include <BaseTsd.h>
-    typedef SSIZE_T ssize_t;
+typedef SSIZE_T ssize_t;
 #endif
 
 //#define DEBUG_PARAMETERS_FOR_DOCUMENTATION
@@ -36,25 +36,28 @@
  This class can be used to add parameters to a AudioProcessorValueTree and make them controllable via OSC. The used parameterID will be saved in a juce::StringArray. If the OSCPattern of the forwarded OSCMessages matches one of the parameterIDs, that Parameter will be controlled.
  */
 
-
-class OSCParameterInterface : public juce::OSCReceiver::Listener<juce::OSCReceiver::RealtimeCallback>, private juce::Timer
+class OSCParameterInterface
+    : public juce::OSCReceiver::Listener<juce::OSCReceiver::RealtimeCallback>,
+      private juce::Timer
 {
 public:
-    OSCParameterInterface (OSCMessageInterceptor& interceptor, juce::AudioProcessorValueTreeState &valueTreeState);
+    OSCParameterInterface (OSCMessageInterceptor& interceptor,
+                           juce::AudioProcessorValueTreeState& valueTreeState);
 
-    static std::unique_ptr<juce::RangedAudioParameter> createParameterTheOldWay (const juce::String& parameterID,
-                                                                 const juce::String& parameterName,
-                                                                           const juce::String& labelText,
-                                                                           juce::NormalisableRange<float> valueRange,
-                                                                 float defaultValue,
-                                                                 std::function<juce::String (float)> valueToTextFunction = nullptr,
-                                                                           std::function<float (const juce::String&)> textToValueFunction = nullptr,
-                                                                 bool isMetaParameter = false,
-                                                                 bool isAutomatableParameter = true,
-                                                                 bool isDiscrete = false,
-                                                                           juce::AudioProcessorParameter::Category category
-                                                                 = juce::AudioProcessorParameter::genericParameter,
-                                                                           bool isBoolean = false);
+    static std::unique_ptr<juce::RangedAudioParameter> createParameterTheOldWay (
+        const juce::String& parameterID,
+        const juce::String& parameterName,
+        const juce::String& labelText,
+        juce::NormalisableRange<float> valueRange,
+        float defaultValue,
+        std::function<juce::String (float)> valueToTextFunction = nullptr,
+        std::function<float (const juce::String&)> textToValueFunction = nullptr,
+        bool isMetaParameter = false,
+        bool isAutomatableParameter = true,
+        bool isDiscrete = false,
+        juce::AudioProcessorParameter::Category category =
+            juce::AudioProcessorParameter::genericParameter,
+        bool isBoolean = false);
 
     /**
      Checks whether the OSCAdressPattern of the OSCMessage matches one of the ParameterID's and changes the parameter on success. Returns true, if there is a match. Make sure the plugin-name-prefix was trimmed.
@@ -71,7 +74,6 @@ public:
 
     void oscMessageReceived (const juce::OSCMessage& message) override;
     void oscBundleReceived (const juce::OSCBundle& bundle) override;
-
 
     void timerCallback() override;
 

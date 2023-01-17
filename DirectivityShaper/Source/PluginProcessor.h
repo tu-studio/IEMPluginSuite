@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/AudioProcessorBase.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
-#include "../../resources/efficientSHvanilla.h"
 #include "../../resources/Quaternion.h"
 #include "../../resources/Weights.h"
+#include "../../resources/efficientSHvanilla.h"
 
 #define ProcessorClass DirectivityShaperAudioProcessor
 
@@ -37,7 +37,8 @@ using namespace juce::dsp;
 //==============================================================================
 /**
 */
-class DirectivityShaperAudioProcessor  : public AudioProcessorBase<IOTypes::AudioChannels<1>, IOTypes::Ambisonics<>>
+class DirectivityShaperAudioProcessor
+    : public AudioProcessorBase<IOTypes::AudioChannels<1>, IOTypes::Ambisonics<>>
 {
 public:
     constexpr static int numberOfInputChannels = 1;
@@ -68,16 +69,16 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
     //==============================================================================
 
-
     float weights[numberOfBands][8];
 
-    inline juce::dsp::IIR::Coefficients<float>::Ptr createFilterCoefficients(int type, double sampleRate, double frequency, double Q);
+    inline juce::dsp::IIR::Coefficients<float>::Ptr
+        createFilterCoefficients (int type, double sampleRate, double frequency, double Q);
 
     IIR::Filter<float> filter[numberOfBands];
 

@@ -22,18 +22,19 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "../../resources/efficientSHvanilla.h"
-#include "../../resources/ambisonicTools.h"
 #include "../../resources/AudioProcessorBase.h"
 #include "../../resources/Conversions.h"
+#include "../../resources/ambisonicTools.h"
+#include "../../resources/efficientSHvanilla.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 #define ProcessorClass ProbeDecoderAudioProcessor
 
 //==============================================================================
 /**
 */
-class ProbeDecoderAudioProcessor  : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::AudioChannels<1>>
+class ProbeDecoderAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::AudioChannels<1>>
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -63,7 +64,7 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
@@ -72,7 +73,7 @@ public:
     std::atomic<float>* orderSetting;
     std::atomic<float>* useSN3D;
 
-    juce::Atomic<bool> updatedPositionData {true};
+    juce::Atomic<bool> updatedPositionData { true };
 
 private:
     //==============================================================================

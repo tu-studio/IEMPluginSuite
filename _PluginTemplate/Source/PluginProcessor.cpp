@@ -23,21 +23,20 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-
 //==============================================================================
-PluginTemplateAudioProcessor::PluginTemplateAudioProcessor()
-: AudioProcessorBase (
-                      #ifndef JucePlugin_PreferredChannelConfigurations
-                      BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-                      .withInput ("Input",  juce::AudioChannelSet::discreteChannels (10), true)
+PluginTemplateAudioProcessor::PluginTemplateAudioProcessor() :
+    AudioProcessorBase (
+#ifndef JucePlugin_PreferredChannelConfigurations
+        BusesProperties()
+    #if ! JucePlugin_IsMidiEffect
+        #if ! JucePlugin_IsSynth
+            .withInput ("Input", juce::AudioChannelSet::discreteChannels (10), true)
+        #endif
+            .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
+    #endif
+            ,
 #endif
-                      .withOutput ("Output", juce::AudioChannelSet::discreteChannels (64), true)
-#endif
-                       ,
-#endif
-                       createParameterLayout())
+        createParameterLayout())
 {
     // get pointers to the parameters
     inputChannelsSetting = parameters.getRawParameterValue ("inputChannelsSetting");
@@ -45,7 +44,6 @@ PluginTemplateAudioProcessor::PluginTemplateAudioProcessor()
     useSN3D = parameters.getRawParameterValue ("useSN3D");
     param1 = parameters.getRawParameterValue ("param1");
     param2 = parameters.getRawParameterValue ("param2");
-
 
     // add listeners to parameter changes
     parameters.addParameterListener ("inputChannelsSetting", this);
@@ -62,8 +60,8 @@ PluginTemplateAudioProcessor::~PluginTemplateAudioProcessor()
 //==============================================================================
 int PluginTemplateAudioProcessor::getNumPrograms()
 {
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+        // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int PluginTemplateAudioProcessor::getCurrentProgram()
@@ -90,7 +88,10 @@ void PluginTemplateAudioProcessor::changeProgramName (int index, const juce::Str
 //==============================================================================
 void PluginTemplateAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    checkInputAndOutput (this, static_cast<int> (*inputChannelsSetting), static_cast<int> (*outputOrderSetting), true);
+    checkInputAndOutput (this,
+                         static_cast<int> (*inputChannelsSetting),
+                         static_cast<int> (*outputOrderSetting),
+                         true);
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     juce::ignoreUnused (sampleRate, samplesPerBlock);
@@ -104,10 +105,13 @@ void PluginTemplateAudioProcessor::releaseResources()
 
 void PluginTemplateAudioProcessor::processBlock (juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 {
-    checkInputAndOutput (this, static_cast<int> (*inputChannelsSetting), static_cast<int> (*outputOrderSetting), false);
+    checkInputAndOutput (this,
+                         static_cast<int> (*inputChannelsSetting),
+                         static_cast<int> (*outputOrderSetting),
+                         false);
     juce::ScopedNoDenormals noDenormals;
 
-    const int totalNumInputChannels  = getTotalNumInputChannels();
+    const int totalNumInputChannels = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
 
     // In case we have more outputs than inputs, this code clears any output
@@ -143,15 +147,14 @@ juce::AudioProcessorEditor* PluginTemplateAudioProcessor::createEditor()
 //==============================================================================
 void PluginTemplateAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-  auto state = parameters.copyState();
+    auto state = parameters.copyState();
 
-  auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
-  oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
+    auto oscConfig = state.getOrCreateChildWithName ("OSCConfig", nullptr);
+    oscConfig.copyPropertiesFrom (oscParameterInterface.getConfig(), nullptr);
 
-  std::unique_ptr<juce::XmlElement> xml (state.createXml());
-  copyXmlToBinary (*xml, destData);
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
-
 
 void PluginTemplateAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
@@ -164,7 +167,8 @@ void PluginTemplateAudioProcessor::setStateInformation (const void* data, int si
             parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
             if (parameters.state.hasProperty ("OSCPort")) // legacy
             {
-                oscParameterInterface.getOSCReceiver().connect (parameters.state.getProperty ("OSCPort", juce::var (-1)));
+                oscParameterInterface.getOSCReceiver().connect (
+                    parameters.state.getProperty ("OSCPort", juce::var (-1)));
                 parameters.state.removeProperty ("OSCPort", nullptr);
             }
 
@@ -175,11 +179,12 @@ void PluginTemplateAudioProcessor::setStateInformation (const void* data, int si
 }
 
 //==============================================================================
-void PluginTemplateAudioProcessor::parameterChanged (const juce::String &parameterID, float newValue)
+void PluginTemplateAudioProcessor::parameterChanged (const juce::String& parameterID,
+                                                     float newValue)
 {
     DBG ("Parameter with ID " << parameterID << " has changed. New value: " << newValue);
 
-    if (parameterID == "inputChannelsSetting" || parameterID == "outputOrderSetting" )
+    if (parameterID == "inputChannelsSetting" || parameterID == "outputOrderSetting")
         userChangedIOSettings = true;
 }
 
@@ -189,49 +194,86 @@ void PluginTemplateAudioProcessor::updateBuffers()
     DBG ("IOHelper: output size: " << output.getSize());
 }
 
-
 //==============================================================================
-std::vector<std::unique_ptr<juce::RangedAudioParameter>> PluginTemplateAudioProcessor::createParameterLayout()
+std::vector<std::unique_ptr<juce::RangedAudioParameter>>
+    PluginTemplateAudioProcessor::createParameterLayout()
 {
     // add your audio parameters here
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("inputChannelsSetting", "Number of input channels ", "",
-                                                       juce::NormalisableRange<float> (0.0f, 10.0f, 1.0f), 0.0f,
-                                                       [](float value) {return value < 0.5f ? "Auto" : juce::String (value);}, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "inputChannelsSetting",
+        "Number of input channels ",
+        "",
+        juce::NormalisableRange<float> (0.0f, 10.0f, 1.0f),
+        0.0f,
+        [] (float value) { return value < 0.5f ? "Auto" : juce::String (value); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("outputOrderSetting", "Ambisonic Order", "",
-                                                       juce::NormalisableRange<float> (0.0f, 8.0f, 1.0f), 0.0f,
-                                                       [](float value) {
-                                                           if (value >= 0.5f && value < 1.5f) return "0th";
-                                                           else if (value >= 1.5f && value < 2.5f) return "1st";
-                                                           else if (value >= 2.5f && value < 3.5f) return "2nd";
-                                                           else if (value >= 3.5f && value < 4.5f) return "3rd";
-                                                           else if (value >= 4.5f && value < 5.5f) return "4th";
-                                                           else if (value >= 5.5f && value < 6.5f) return "5th";
-                                                           else if (value >= 6.5f && value < 7.5f) return "6th";
-                                                           else if (value >= 7.5f) return "7th";
-                                                           else return "Auto";},
-                                                       nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "outputOrderSetting",
+        "Ambisonic Order",
+        "",
+        juce::NormalisableRange<float> (0.0f, 8.0f, 1.0f),
+        0.0f,
+        [] (float value)
+        {
+            if (value >= 0.5f && value < 1.5f)
+                return "0th";
+            else if (value >= 1.5f && value < 2.5f)
+                return "1st";
+            else if (value >= 2.5f && value < 3.5f)
+                return "2nd";
+            else if (value >= 3.5f && value < 4.5f)
+                return "3rd";
+            else if (value >= 4.5f && value < 5.5f)
+                return "4th";
+            else if (value >= 5.5f && value < 6.5f)
+                return "5th";
+            else if (value >= 6.5f && value < 7.5f)
+                return "6th";
+            else if (value >= 7.5f)
+                return "7th";
+            else
+                return "Auto";
+        },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("useSN3D", "Normalization", "",
-                                                       juce::NormalisableRange<float>(0.0f, 1.0f, 1.0f), 1.0f,
-                                                       [](float value) {
-                                                           if (value >= 0.5f) return "SN3D";
-                                                           else return "N3D";
-                                                       }, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "useSN3D",
+        "Normalization",
+        "",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 1.0f),
+        1.0f,
+        [] (float value)
+        {
+            if (value >= 0.5f)
+                return "SN3D";
+            else
+                return "N3D";
+        },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("param1", "Parameter 1", "",
-                                                       juce::NormalisableRange<float> (-10.0f, 10.0f, 0.1f), 0.0,
-                                                       [](float value) {return juce::String (value);}, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "param1",
+        "Parameter 1",
+        "",
+        juce::NormalisableRange<float> (-10.0f, 10.0f, 0.1f),
+        0.0,
+        [] (float value) { return juce::String (value); },
+        nullptr));
 
-    params.push_back (OSCParameterInterface::createParameterTheOldWay ("param2", "Parameter 2", "dB",
-                                                       juce::NormalisableRange<float> (-50.0f, 0.0f, 0.1f), -10.0,
-                                                       [](float value) {return juce::String (value, 1);}, nullptr));
+    params.push_back (OSCParameterInterface::createParameterTheOldWay (
+        "param2",
+        "Parameter 2",
+        "dB",
+        juce::NormalisableRange<float> (-50.0f, 0.0f, 0.1f),
+        -10.0,
+        [] (float value) { return juce::String (value, 1); },
+        nullptr));
 
     return params;
 }
-
 
 //==============================================================================
 // This creates new instances of the plugin..

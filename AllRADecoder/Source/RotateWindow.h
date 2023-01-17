@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "../../resources/customComponents/SimpleLabel.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
 /*
 */
-class RotateWindow    : public juce::Component
+class RotateWindow : public juce::Component
 {
 public:
     RotateWindow (AllRADecoderAudioProcessor& p) : processor (p)
@@ -44,38 +44,34 @@ public:
         addAndMakeVisible (tbRotate);
         tbRotate.setButtonText ("ROTATE");
         tbRotate.setColour (juce::TextButton::buttonColourId, juce::Colours::cornflowerblue);
-        tbRotate.onClick =  [this] () { checkAndTriggerRotation(); };
+        tbRotate.onClick = [this]() { checkAndTriggerRotation(); };
     }
 
-    ~RotateWindow()
-    {
-    }
+    ~RotateWindow() {}
 
-    void paint (juce::Graphics& g) override
-    {
-    }
+    void paint (juce::Graphics& g) override {}
 
     void checkAndTriggerRotation()
     {
         auto val = lbValue.getTextValue();
         float v = val.getValue();
-        if (v <= 360.0f && v >= - 360.0f)
+        if (v <= 360.0f && v >= -360.0f)
             processor.rotate (v);
     }
 
     void resized() override
     {
         auto bounds = getLocalBounds();
-        headline.setBounds (bounds.removeFromTop(12));
+        headline.setBounds (bounds.removeFromTop (12));
 
         bounds.removeFromTop (2);
 
-        auto row = bounds.removeFromTop(20);
+        auto row = bounds.removeFromTop (20);
 
-        tbRotate.setBounds (row.removeFromRight(60));
+        tbRotate.setBounds (row.removeFromRight (60));
 
         bounds.removeFromRight (5);
-        lbValue.setBounds(row);
+        lbValue.setBounds (row);
     }
 
 private:

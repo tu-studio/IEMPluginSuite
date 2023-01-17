@@ -20,13 +20,17 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "PluginProcessor.h"
 
 //==============================================================================
-PluginTemplateAudioProcessorEditor::PluginTemplateAudioProcessorEditor (PluginTemplateAudioProcessor& p, juce::AudioProcessorValueTreeState& vts)
-    : juce::AudioProcessorEditor (&p), audioProcessor (p), valueTreeState (vts), footer (p.getOSCParameterInterface())
+PluginTemplateAudioProcessorEditor::PluginTemplateAudioProcessorEditor (
+    PluginTemplateAudioProcessor& p,
+    juce::AudioProcessorValueTreeState& vts) :
+    juce::AudioProcessorEditor (&p),
+    audioProcessor (p),
+    valueTreeState (vts),
+    footer (p.getOSCParameterInterface())
 {
     // ============== BEGIN: essentials ======================
     // set GUI size and lookAndFeel
@@ -41,17 +45,24 @@ PluginTemplateAudioProcessorEditor::PluginTemplateAudioProcessorEditor (PluginTe
     addAndMakeVisible (&footer);
     // ============= END: essentials ========================
 
-
     // create the connection between title component's comboBoxes and parameters
-    cbInputChannelsSettingAttachment.reset (new ComboBoxAttachment (valueTreeState, "inputChannelsSetting", *title.getInputWidgetPtr()->getChannelsCbPointer()));
-    cbNormalizationSettingAttachment.reset (new ComboBoxAttachment (valueTreeState, "useSN3D", *title.getOutputWidgetPtr()->getNormCbPointer()));
-    cbOrderSettingAttachment.reset (new ComboBoxAttachment (valueTreeState, "outputOrderSetting", *title.getOutputWidgetPtr()->getOrderCbPointer()));
+    cbInputChannelsSettingAttachment.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "inputChannelsSetting",
+                                *title.getInputWidgetPtr()->getChannelsCbPointer()));
+    cbNormalizationSettingAttachment.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "useSN3D",
+                                *title.getOutputWidgetPtr()->getNormCbPointer()));
+    cbOrderSettingAttachment.reset (
+        new ComboBoxAttachment (valueTreeState,
+                                "outputOrderSetting",
+                                *title.getOutputWidgetPtr()->getOrderCbPointer()));
 
     addAndMakeVisible (slParam1);
     slParam1Attachment.reset (new SliderAttachment (valueTreeState, "param1", slParam1));
     addAndMakeVisible (slParam2);
     slParam2Attachment.reset (new SliderAttachment (valueTreeState, "param2", slParam2));
-
 
     // start timer after everything is set up properly
     startTimer (20);
@@ -87,7 +98,6 @@ void PluginTemplateAudioProcessorEditor::resized()
     area.removeFromBottom (5);
     // =========== END: header and footer =================
 
-
     // try to not use explicit coordinates to position your GUI components
     // the removeFrom...() methods are quite handy to create scalable areas
     // best practice would be the use of flexBoxes...
@@ -95,7 +105,6 @@ void PluginTemplateAudioProcessorEditor::resized()
     juce::Rectangle<int> sliderRow = area.removeFromTop (50);
     slParam1.setBounds (sliderRow.removeFromLeft (150));
     slParam2.setBounds (sliderRow.removeFromRight (150));
-
 }
 
 void PluginTemplateAudioProcessorEditor::timerCallback()

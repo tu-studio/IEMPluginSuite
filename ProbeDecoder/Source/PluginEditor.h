@@ -22,13 +22,13 @@
 
 #pragma once
 
+#include "../../resources/customComponents/ReverseSlider.h"
+#include "../../resources/customComponents/SimpleLabel.h"
+#include "../../resources/customComponents/SpherePanner.h"
+#include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-#include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/lookAndFeel/IEM_LaF.h"
-#include "../../resources/customComponents/TitleBar.h"
-#include "../../resources/customComponents/SpherePanner.h"
-#include "../../resources/customComponents/SimpleLabel.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -36,12 +36,11 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 //==============================================================================
 /**
 */
-class ProbeDecoderAudioProcessorEditor  : public juce::AudioProcessorEditor,
-private juce::Timer
+class ProbeDecoderAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
-
-    ProbeDecoderAudioProcessorEditor (ProbeDecoderAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    ProbeDecoderAudioProcessorEditor (ProbeDecoderAudioProcessor&,
+                                      juce::AudioProcessorValueTreeState&);
     ~ProbeDecoderAudioProcessorEditor();
 
     //==============================================================================
@@ -51,7 +50,7 @@ public:
 private:
     LaF globalLaF;
 
-    TitleBar<AmbisonicIOWidget<>, AudioChannelsIOWidget<1,false>> title;
+    TitleBar<AmbisonicIOWidget<>, AudioChannelsIOWidget<1, false>> title;
     OSCFooter footer;
 
     void timerCallback() override;

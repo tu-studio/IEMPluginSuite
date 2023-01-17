@@ -22,20 +22,21 @@
 
 #pragma once
 
-
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "../hammerAitovSample.h"
-#include "../../resources/efficientSHvanilla.h"
-#include "../../resources/ambisonicTools.h"
 #include "../../resources/AudioProcessorBase.h"
 #include "../../resources/MaxRE.h"
+#include "../../resources/ambisonicTools.h"
+#include "../../resources/efficientSHvanilla.h"
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "../hammerAitovSample.h"
 
 #define ProcessorClass EnergyVisualizerAudioProcessor
 
 //==============================================================================
 /**
 */
-class EnergyVisualizerAudioProcessor  : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Nothing>, private juce::Timer
+class EnergyVisualizerAudioProcessor
+    : public AudioProcessorBase<IOTypes::Ambisonics<>, IOTypes::Nothing>,
+      private juce::Timer
 {
 public:
     constexpr static int numberOfInputChannels = 64;
@@ -66,15 +67,21 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
-
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     //======= Parameters ===========================================================
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> createParameterLayout();
     //==============================================================================
 
-    const float getPeakLevelSetting() { return *peakLevel; }
-    const float getDynamicRange() { return *dynamicRange; }
+    float getPeakLevelSetting() const { return peakLevel->load (std::memory_order_relaxed); }
+    float getDynamicRange() const { return dynamicRange->load (std::memory_order_relaxed); }
+    bool getHoldRMSSetting() const
+    {
+        if (holdMax->load (std::memory_order_relaxed) >= 0.5f)
+            return true;
+        else
+            return false;
+    }
 
     std::vector<float> rms;
     juce::Atomic<juce::Time> lastEditorTime;
@@ -86,6 +93,8 @@ private:
     std::atomic<float>* useSN3D;
     std::atomic<float>* peakLevel;
     std::atomic<float>* dynamicRange;
+    std::atomic<float>* holdMax;
+    std::atomic<float>* RMStimeConstant;
 
     float timeConstant;
 
@@ -96,7 +105,8 @@ private:
     std::vector<float> sampledSignal;
 
     void timerCallback() override;
-    void sendAdditionalOSCMessages (juce::OSCSender& oscSender, const juce::OSCAddressPattern& address) override;
+    void sendAdditionalOSCMessages (juce::OSCSender& oscSender,
+                                    const juce::OSCAddressPattern& address) override;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnergyVisualizerAudioProcessor)

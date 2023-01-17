@@ -7,7 +7,8 @@ juce_add_plugin (SceneRotator
     COMPANY_NAME "IEM"
     PRODUCT_NAME "SceneRotator"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.4.4")
+    VERSION "0.4.5"
+    LV2URI "http://plugins.iem.at/SceneRotator")
 
 
 juce_generate_juce_header(SceneRotator)
@@ -32,6 +33,11 @@ target_compile_definitions(SceneRotator PRIVATE
     JUCE_USE_CURL=0
     JUCE_WEB_BROWSER=0
     JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1
+    JUCE_USE_FLAC=0
+    JUCE_USE_OGGVORBIS=0
+    JUCE_USE_MP3AUDIOFORMAT=0
+    JUCE_USE_LAME_AUDIO_FORMAT=0
+    JUCE_USE_WINDOWS_MEDIA_FORMAT=0
     JUCE_DISPLAY_SPLASH_SCREEN=0
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
@@ -39,6 +45,7 @@ target_include_directories(SceneRotator PRIVATE Source)
 
 target_link_libraries(SceneRotator PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc

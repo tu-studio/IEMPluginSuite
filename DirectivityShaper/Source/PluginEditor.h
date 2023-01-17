@@ -26,17 +26,16 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
+#include "../../resources/customComponents/FilterVisualizer.h"
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
-#include "ShapeAndOrderXyPad.h"
-#include "DirectivityVisualizer.h"
-#include "../../resources/customComponents/FilterVisualizer.h"
 #include "../../resources/customComponents/SpherePanner.h"
-
+#include "DirectivityVisualizer.h"
+#include "ShapeAndOrderXyPad.h"
 
 typedef ReverseSlider::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -45,10 +44,11 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class DirectivityShaperAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer
+class DirectivityShaperAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
-    DirectivityShaperAudioProcessorEditor (DirectivityShaperAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    DirectivityShaperAudioProcessorEditor (DirectivityShaperAudioProcessor&,
+                                           juce::AudioProcessorValueTreeState&);
     ~DirectivityShaperAudioProcessorEditor();
 
     //==============================================================================
@@ -67,7 +67,7 @@ private:
 
     void timerCallback() override;
 
-    TitleBar<AudioChannelsIOWidget<1,false>, DirectivityIOWidget> title;
+    TitleBar<AudioChannelsIOWidget<1, false>, DirectivityIOWidget> title;
     OSCFooter footer;
 
     int maxPossibleOrder = -1;
@@ -86,7 +86,6 @@ private:
     ReverseSlider slProbeRoll;
     juce::ComboBox cbDirectivityNormalization;
     std::unique_ptr<ComboBoxAttachment> cbDirectivityNormalizationAttachment; // on-axis, energy
-
 
     SpherePanner sphere;
     std::unique_ptr<SpherePanner::AzimuthElevationParameterElement> sphereElements[numberOfBands];

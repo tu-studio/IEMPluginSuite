@@ -26,33 +26,36 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
+#include "../../resources/LabelAttachment.h"
+#include "../../resources/customComponents/PositionPlane.h"
 #include "../../resources/customComponents/ReverseSlider.h"
 #include "../../resources/customComponents/SimpleLabel.h"
 #include "../../resources/customComponents/SpherePanner.h"
-#include "../../resources/customComponents/PositionPlane.h"
-#include "../../resources/LabelAttachment.h"
 
-typedef ReverseSlider::SliderAttachment SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
+typedef ReverseSlider::SliderAttachment
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class CoordinateConverterAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, private juce::Button::Listener
+class CoordinateConverterAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                                private juce::Timer,
+                                                private juce::Button::Listener
 {
 public:
-    CoordinateConverterAudioProcessorEditor (CoordinateConverterAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    CoordinateConverterAudioProcessorEditor (CoordinateConverterAudioProcessor&,
+                                             juce::AudioProcessorValueTreeState&);
     ~CoordinateConverterAudioProcessorEditor();
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
-
 
     void timerCallback() override;
 
@@ -68,7 +71,6 @@ private:
     // stored references to the AudioProcessor and juce::ValueTreeState holding all the parameters
     CoordinateConverterAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
-
 
     /* title and footer component
      title component can hold different widgets for in- and output:
@@ -88,7 +90,8 @@ private:
     SpherePanner::AzimuthElevationParameterElement panner;
 
     ReverseSlider slAzimuth, slElevation, slRadius;
-    std::unique_ptr<SliderAttachment> slAzimuthAttachment, slElevationAttachment, slRadiusAttachment;
+    std::unique_ptr<SliderAttachment> slAzimuthAttachment, slElevationAttachment,
+        slRadiusAttachment;
     SimpleLabel lbAzimuth, lbElevation, lbRadius;
 
     // === Cartesian
@@ -100,10 +103,12 @@ private:
     SimpleLabel lbXPos, lbYPos, lbZPos;
 
     juce::ToggleButton tbAzimuthFlip, tbElevationFlip, tbRadiusFlip, tbXFlip, tbYFlip, tbZFlip;
-    std::unique_ptr<ButtonAttachment> tbAzimuthFlipAttachment, tbElevationFlipAttachment, tbRadiusFlipAttachment, tbXFlipAttachment, tbYFlipAttachment, tbZFlipAttachment;
+    std::unique_ptr<ButtonAttachment> tbAzimuthFlipAttachment, tbElevationFlipAttachment,
+        tbRadiusFlipAttachment, tbXFlipAttachment, tbYFlipAttachment, tbZFlipAttachment;
 
     juce::Label slXReference, slYReference, slZReference;
-    std::unique_ptr<LabelAttachment> slXReferenceAttachment, slYReferenceAttachment, slZReferenceAttachment;
+    std::unique_ptr<LabelAttachment> slXReferenceAttachment, slYReferenceAttachment,
+        slZReferenceAttachment;
     SimpleLabel lbXReference, lbYReference, lbZReference;
 
     // === juce::Range Settings

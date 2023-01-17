@@ -1,8 +1,8 @@
 /*
  ==============================================================================
  This file is part of the IEM plug-in suite.
- Author: Daniel Rudrich
- Copyright (c) 2017 - Institute of Electronic Music and Acoustics (IEM)
+ Author: Daniel Rudrich, Felix Holzmueller
+ Copyright (c) 2022 - Institute of Electronic Music and Acoustics (IEM)
  https://iem.at
 
  The IEM plug-in suite is free software: you can redistribute it and/or modify
@@ -25,31 +25,40 @@
  */
 
 /*
-  ==============================================================================
+==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User
+License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-7-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
+WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
+PURPOSE, ARE
    DISCLAIMED.
 
-  ==============================================================================
+  
+==============================================================================
 */
 #include "../JuceLibraryCode/JuceHeader.h"
+
+#if JUCE_JACK
+    #define IEM_JACK_DEVICENAME "JACK(iem)"
+#else
+    #define IEM_JACK_DEVICENAME "JACK"
+#endif
 
 namespace iem
 {
@@ -65,9 +74,7 @@ namespace iem
 
     @tags{Audio}
 */
-class  IEMAudioDeviceSelectorComponent  : public juce::Component,
-                                                private juce::ChangeListener,
-                                                private juce::Timer
+class IEMAudioDeviceSelectorComponent : public juce::Component, private juce::ChangeListener
 {
 public:
     //==============================================================================
@@ -90,14 +97,14 @@ public:
                                         are shown, with an "advanced" button that shows the rest of them
     */
     IEMAudioDeviceSelectorComponent (juce::AudioDeviceManager& deviceManager,
-                                  int minAudioInputChannels,
-                                  int maxAudioInputChannels,
-                                  int minAudioOutputChannels,
-                                  int maxAudioOutputChannels,
-                                  bool showMidiInputOptions,
-                                  bool showMidiOutputSelector,
-                                  bool showChannelsAsStereoPairs,
-                                  bool hideAdvancedOptionsWithButton);
+                                     int minAudioInputChannels,
+                                     int maxAudioInputChannels,
+                                     int minAudioOutputChannels,
+                                     int maxAudioOutputChannels,
+                                     bool showMidiInputOptions,
+                                     bool showMidiOutputSelector,
+                                     bool showChannelsAsStereoPairs,
+                                     bool hideAdvancedOptionsWithButton);
 
     /** Destructor */
     ~IEMAudioDeviceSelectorComponent() override;
@@ -109,7 +116,7 @@ public:
     void setItemHeight (int itemHeight);
 
     /** Returns the standard height used for items in the panel. */
-    int getItemHeight() const noexcept      { return itemHeight; }
+    int getItemHeight() const noexcept { return itemHeight; }
 
     /** Returns the ListBox that's being used to show the midi inputs, or nullptr if there isn't one. */
     juce::ListBox* getMidiInputSelectorListBox() const noexcept;
@@ -117,8 +124,6 @@ public:
     //==============================================================================
     /** @internal */
     void resized() override;
-    /** @internal */
-    void timerCallback() override;
 
 private:
     //==============================================================================
@@ -132,12 +137,13 @@ private:
     std::unique_ptr<juce::Label> deviceTypeDropDownLabel;
     std::unique_ptr<juce::Component> audioDeviceSettingsComp;
     juce::String audioDeviceSettingsCompType;
-    int itemHeight;
+    int itemHeight = 0;
     const int minOutputChannels, maxOutputChannels, minInputChannels, maxInputChannels;
     const bool showChannelsAsStereoPairs;
     const bool hideAdvancedOptionsWithButton;
 
     class MidiInputSelectorComponentListBox;
+    juce::Array<juce::MidiDeviceInfo> currentMidiOutputs;
     std::unique_ptr<MidiInputSelectorComponentListBox> midiInputsList;
     std::unique_ptr<juce::ComboBox> midiOutputSelector;
     std::unique_ptr<juce::Label> midiInputsLabel, midiOutputLabel;
@@ -147,4 +153,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IEMAudioDeviceSelectorComponent)
 };
 
-} // namespace juce
+} // namespace iem

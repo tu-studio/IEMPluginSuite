@@ -26,39 +26,42 @@
 #include "PluginProcessor.h"
 
 //Plugin Design Essentials
-#include "../../resources/lookAndFeel/IEM_LaF.h"
 #include "../../resources/customComponents/TitleBar.h"
+#include "../../resources/lookAndFeel/IEM_LaF.h"
 
 //Custom juce::Components
-#include "FilterBankVisualizer.h"
-#include "MasterControl.h"
-#include "../../resources/customComponents/RoundButton.h"
-#include "../../resources/customComponents/ReverseSlider.h"
-#include "../../resources/customComponents/SimpleLabel.h"
 #include "../../resources/customComponents/CompressorVisualizer.h"
 #include "../../resources/customComponents/FilterVisualizer.h"
 #include "../../resources/customComponents/LevelMeter.h"
+#include "../../resources/customComponents/ReverseSlider.h"
+#include "../../resources/customComponents/RoundButton.h"
+#include "../../resources/customComponents/SimpleLabel.h"
+#include "FilterBankVisualizer.h"
+#include "MasterControl.h"
 
-
-
-using SliderAttachment = ReverseSlider::SliderAttachment ; // all ReverseSliders will make use of the parameters' valueToText() function
+using SliderAttachment = ReverseSlider::
+    SliderAttachment; // all ReverseSliders will make use of the parameters' valueToText() function
 using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
 using ButtonAttachment = juce::AudioProcessorValueTreeState::ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class MultiBandCompressorAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer, public juce::Slider::Listener, public juce::Button::Listener
+class MultiBandCompressorAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                                private juce::Timer,
+                                                public juce::Slider::Listener,
+                                                public juce::Button::Listener
 {
 public:
-    MultiBandCompressorAudioProcessorEditor (MultiBandCompressorAudioProcessor&, juce::AudioProcessorValueTreeState&);
+    MultiBandCompressorAudioProcessorEditor (MultiBandCompressorAudioProcessor&,
+                                             juce::AudioProcessorValueTreeState&);
     ~MultiBandCompressorAudioProcessorEditor();
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    void sliderValueChanged (juce::Slider *slider) override;
+    void sliderValueChanged (juce::Slider* slider) override;
     void buttonClicked (juce::Button* bypassButton) override;
 
     void timerCallback() override;
@@ -83,8 +86,6 @@ private:
     OSCFooter footer;
     // =============== end essentials ============
 
-    static constexpr const int& numFreqBands = MultiBandCompressorAudioProcessor::numFreqBands;
-
     std::unique_ptr<ComboBoxAttachment> cbNormalizationAtachement;
     std::unique_ptr<ComboBoxAttachment> cbOrderAtachement;
 
@@ -92,34 +93,42 @@ private:
     juce::TooltipWindow tooltips;
 
     // Filter Crossovers
-    ReverseSlider slCrossover[numFreqBands-1];
-    std::unique_ptr<SliderAttachment> slCrossoverAttachment[numFreqBands-1];
+    ReverseSlider slCrossover[numFilterBands - 1];
+    std::unique_ptr<SliderAttachment> slCrossoverAttachment[numFilterBands - 1];
 
     // Solo and Bypass juce::Buttons
-    RoundButton tbSolo[numFreqBands];
-    RoundButton tbBypass[numFreqBands];
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> soloAttachment[numFreqBands], bypassAttachment[numFreqBands];
+    RoundButton tbSolo[numFilterBands];
+    RoundButton tbBypass[numFilterBands];
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment>
+        soloAttachment[numFilterBands], bypassAttachment[numFilterBands];
 
     // Compressor Parameters
-    ReverseSlider slKnee[numFreqBands], slThreshold[numFreqBands], slRatio[numFreqBands], slAttackTime[numFreqBands], slReleaseTime[numFreqBands], slMakeUpGain[numFreqBands];
-    std::unique_ptr<SliderAttachment> slKneeAttachment[numFreqBands], slThresholdAttachment[numFreqBands], slRatioAttachment[numFreqBands], slAttackTimeAttachment[numFreqBands], slReleaseTimeAttachment[numFreqBands], slMakeUpGainAttachment[numFreqBands];
+    ReverseSlider slKnee[numFilterBands], slThreshold[numFilterBands], slRatio[numFilterBands],
+        slAttackTime[numFilterBands], slReleaseTime[numFilterBands], slMakeUpGain[numFilterBands];
+    std::unique_ptr<SliderAttachment> slKneeAttachment[numFilterBands],
+        slThresholdAttachment[numFilterBands], slRatioAttachment[numFilterBands],
+        slAttackTimeAttachment[numFilterBands], slReleaseTimeAttachment[numFilterBands],
+        slMakeUpGainAttachment[numFilterBands];
 
     // Master parameters
     juce::GroupComponent gcMasterControls;
-    MasterControl slMasterThreshold, slMasterMakeUpGain, slMasterKnee, slMasterRatio, slMasterAttackTime, slMasterReleaseTime;
+    MasterControl slMasterThreshold, slMasterMakeUpGain, slMasterKnee, slMasterRatio,
+        slMasterAttackTime, slMasterReleaseTime;
 
     // Compressor Visualization
     juce::OwnedArray<CompressorVisualizer> compressorVisualizers;
 
     // Meters
-    LevelMeter GRmeter[numFreqBands], omniInputMeter, omniOutputMeter;
+    LevelMeter GRmeter[numFilterBands], omniInputMeter, omniOutputMeter;
 
     // juce::Toggle juce::Buttons
     juce::ToggleButton tbOverallMagnitude;
-    bool displayOverallMagnitude {false};
+    bool displayOverallMagnitude { false };
 
     // juce::Labels
-    SimpleLabel lbKnee[numFreqBands+1], lbThreshold[numFreqBands+1], lbMakeUpGain[numFreqBands+1], lbRatio[numFreqBands+1], lbAttack[numFreqBands+1], lbRelease[numFreqBands+1], lbInput, lbOutput;
+    SimpleLabel lbKnee[numFilterBands + 1], lbThreshold[numFilterBands + 1],
+        lbMakeUpGain[numFilterBands + 1], lbRatio[numFilterBands + 1], lbAttack[numFilterBands + 1],
+        lbRelease[numFilterBands + 1], lbInput, lbOutput;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiBandCompressorAudioProcessorEditor)
 };

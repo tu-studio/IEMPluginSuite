@@ -1,14 +1,14 @@
 
 juce_add_plugin (DistanceCompensator
     PLUGIN_MANUFACTURER_CODE IEMA
-    PLUGIN_CODE DiCo
+    PLUGIN_CODE DisC
     ICON_BIG "../resources/Standalone/IEMPluginSuiteSmall.png"
     ICON_SMALL "../resources/Standalone/IEMPluginSuiteSmall.png"
     COMPANY_NAME "IEM"
     PRODUCT_NAME "DistanceCompensator"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.3.3")
-
+    VERSION "0.3.4"
+    LV2URI "http://plugins.iem.at/DistanceCompensator")
 
 juce_generate_juce_header (DistanceCompensator)
 
@@ -32,6 +32,11 @@ target_compile_definitions (DistanceCompensator PRIVATE
     JUCE_USE_CURL=0
     JUCE_WEB_BROWSER=0
     JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1
+    JUCE_USE_FLAC=0
+    JUCE_USE_OGGVORBIS=0
+    JUCE_USE_MP3AUDIOFORMAT=0
+    JUCE_USE_LAME_AUDIO_FORMAT=0
+    JUCE_USE_WINDOWS_MEDIA_FORMAT=0
     JUCE_DISPLAY_SPLASH_SCREEN=0
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
@@ -39,6 +44,7 @@ target_include_directories (DistanceCompensator PRIVATE Source)
 
 target_link_libraries (DistanceCompensator PRIVATE
     LAF_fonts
+    IEM_logo
     juce::juce_audio_utils
     juce::juce_audio_plugin_client
     juce::juce_osc
