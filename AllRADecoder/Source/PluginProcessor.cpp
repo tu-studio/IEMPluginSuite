@@ -146,88 +146,85 @@ void AllRADecoderAudioProcessor::setCurrentProgram (int index)
         loudspeakers.removeAllChildren (&undoManager);
 
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (4.63f, 0.0f, 0.0f), 1),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 0.0f, 0.0f), 1),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.0252f, -23.7f, 0.0f), 2),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -24.0f, 0.0f), 2),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (6.1677f, -48.17f, 0.0f), 3),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -48.0f, 0.0f), 3),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.26f, -72.17f, 0.0f), 4),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -72.0f, 0.0f), 4),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.7f, -103.0f, 0.0f), 5),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -102.0f, 0.0f), 5),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.84f, -138.0f, 0.0f), 6),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -138.0f, 0.0f), 6),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (4.63f, -180.0f, 0.0f), 7),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -178.0f, 0.0f), 7),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.8f, 138.0f, 0.0f), 8),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 142.0f, 0.0f), 8),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.63f, 101.0f, 0.0f), 9),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 104.0f, 0.0f), 9),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.3f, 70.0f, 0.0f), 10),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 70.0f, 0.0f), 10),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (6.3f, 45.0f, 0.0f), 11),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 45.0f, 0.0f), 11),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.1f, 21.0f, 0.0f), 12),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 17.0f, 0.0f), 12),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.2f, -22.0f, 28.0f), 13),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -24.0f, 28.0f), 13),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.4f, -68.0f, 28.0f), 14),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -69.0f, 28.0f), 14),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.1f, -114.0f, 28.0f), 15),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -115.0f, 27.0f), 15),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (4.43f, -158.0f, 28.0f), 16),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -159.0f, 27.0f), 16),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (4.45f, 156.0f, 28.0f), 17),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 155.0f, 28.0f), 17),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.9f, 113.0f, 28.0f), 18),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 112.0f, 28.0f), 18),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.2f, 65.0f, 28.0f), 19),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 66.0f, 29.0f), 19),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (5.2f, 22.0f, 28.0f), 20),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 22.0f, 28.0f), 20),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (3.6f, -47.0f, 56.0f), 21),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 0.0f, 60.0f), 21),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (3.3f, -133.0f, 56.0f), 22),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -91.0f, 59.0f), 22),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (3.3f, 133.0f, 56.0f), 23),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -178.0f, 59.0f), 23),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (3.55f, 43.0f, 56.0f), 24),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 86.0f, 60.0f), 24),
+            &undoManager);
+        loudspeakers.appendChild (
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 0.0f, 90.0f), 25),
             &undoManager);
         loudspeakers.appendChild (
             createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 0.0f, -90.0f),
-                                            24,
-                                            true,
-                                            0.0f),
-            &undoManager);
-        loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 0.0f, 45.0f),
                                             25,
                                             true,
-                                            1.0f),
+                                            0.0f),
             &undoManager);
 
         loudspeakers.addListener (this);
