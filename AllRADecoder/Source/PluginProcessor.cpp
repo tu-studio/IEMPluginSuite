@@ -641,6 +641,8 @@ void AllRADecoderAudioProcessor::convertLoudspeakersToArray()
 void AllRADecoderAudioProcessor::prepareLayout()
 {
     isLayoutReady = false;
+    
+    wrapSphericalCoordinates();
     juce::Result res = checkLayout();
     if (res.failed())
     {
@@ -1259,6 +1261,50 @@ void AllRADecoderAudioProcessor::rotate (const float degreesAddedToAzimuth)
     loudspeakers.addListener (this);
     prepareLayout();
     updateTable = true;
+}
+
+void AllRADecoderAudioProcessor::wrapSphericalCoordinates()
+{
+    loudspeakers.removeListener (this);
+    undoManager.beginNewTransaction();
+    
+    for (juce::ValueTree::Iterator it = loudspeakers.begin(); it != loudspeakers.end(); ++it)
+    {
+        // Wrap azimuth
+        float az = (*it).getProperty ("Azimuth");
+        if (az > 180.0f || az < -180.0f)
+        {
+            float fullRotations = std::ceilf (az / 360.0f);
+            az -= fullRotations * 360.0f;
+            
+            (*it).setProperty ("Azimuth", az, &undoManager);
+        }
+        
+        // Wrap elevation
+        float el = (*it).getProperty ("Elevation");
+        bool updateEl = false;
+        if (el > 180.0f || el < -180.0f)
+        {
+            float fullRotations = std::ceilf (el / 360.0f);
+            el -= fullRotations * 360.0f;
+            updateEl = true;
+        }
+        if (el > 90.0f)
+        {
+            el = 180.0 - el;
+            updateEl = true;
+        }
+        else if (el < -90.0f)
+        {
+            el = -(180.0 + el);
+            updateEl = true;
+        }
+        
+        if (updateEl)
+            (*it).setProperty ("Elevation", el, &undoManager);
+    }
+    
+    loudspeakers.addListener (this);
 }
 
 //==============================================================================
