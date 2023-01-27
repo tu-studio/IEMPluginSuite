@@ -641,7 +641,7 @@ void AllRADecoderAudioProcessor::convertLoudspeakersToArray()
 void AllRADecoderAudioProcessor::prepareLayout()
 {
     isLayoutReady = false;
-    
+
     wrapSphericalCoordinates();
     juce::Result res = checkLayout();
     if (res.failed())
@@ -1266,44 +1266,43 @@ void AllRADecoderAudioProcessor::rotate (const float degreesAddedToAzimuth)
 void AllRADecoderAudioProcessor::wrapSphericalCoordinates()
 {
     loudspeakers.removeListener (this);
-    undoManager.beginNewTransaction();
-    
+
     for (juce::ValueTree::Iterator it = loudspeakers.begin(); it != loudspeakers.end(); ++it)
     {
-        // Wrap azimuth
+        bool updateElevation = false;
+
         float az = (*it).getProperty ("Azimuth");
-        if (az > 180.0f || az < -180.0f)
-        {
-            float fullRotations = std::ceilf (az / 360.0f);
-            az -= fullRotations * 360.0f;
-            
-            (*it).setProperty ("Azimuth", az, &undoManager);
-        }
-        
-        // Wrap elevation
         float el = (*it).getProperty ("Elevation");
-        bool updateEl = false;
+
+        // Wrap elevation
         if (el > 180.0f || el < -180.0f)
         {
-            float fullRotations = std::ceilf (el / 360.0f);
+            float fullRotations = std::copysign (std::ceilf (std::abs (el) / 360.0f), el);
             el -= fullRotations * 360.0f;
-            updateEl = true;
+            updateElevation = true;
         }
-        if (el > 90.0f)
+        if (el > 90.0f || el < -90.0f)
         {
-            el = 180.0 - el;
-            updateEl = true;
+            el = std::copysign (180.0 - std::abs (el), el);
+            az += 180.0f;
+            updateElevation = true;
+            (*it).setProperty ("Azimuth", az, &undoManager);
         }
-        else if (el < -90.0f)
+
+        // Wrap azimuth
+        if (az > 180.0f || az < -180.0f)
         {
-            el = -(180.0 + el);
-            updateEl = true;
+            float fullRotations = std::copysign (std::ceilf (std::abs (az) / 360.0f), az);
+            az -= fullRotations * 360.0f;
+
+            (*it).setProperty ("Azimuth", az, nullptr);
         }
-        
-        if (updateEl)
-            (*it).setProperty ("Elevation", el, &undoManager);
+
+        // Update coordinates
+        if (updateElevation)
+            (*it).setProperty ("Elevation", el, nullptr);
     }
-    
+
     loudspeakers.addListener (this);
 }
 
