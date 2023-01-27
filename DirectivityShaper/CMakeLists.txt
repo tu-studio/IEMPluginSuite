@@ -7,7 +7,7 @@ juce_add_plugin (DirectivityShaper
     COMPANY_NAME "IEM"
     PRODUCT_NAME "DirectivityShaper"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.8.4"
+    VERSION "0.8.5"
     LV2URI "http://plugins.iem.at/DirectivityShaper")
 
 

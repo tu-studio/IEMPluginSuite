@@ -7,7 +7,7 @@ juce_add_plugin (SceneRotator
     COMPANY_NAME "IEM"
     PRODUCT_NAME "SceneRotator"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.4.5"
+    VERSION "0.4.6"
     LV2URI "http://plugins.iem.at/SceneRotator")
 
 

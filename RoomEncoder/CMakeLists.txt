@@ -7,7 +7,7 @@ juce_add_plugin (RoomEncoder
     COMPANY_NAME "IEM"
     PRODUCT_NAME "RoomEncoder"
     FORMATS ${IEM_FORMATS}
-    VERSION "1.3.4"
+    VERSION "1.3.5"
     LV2URI "http://plugins.iem.at/RoomEncoder")
 
 

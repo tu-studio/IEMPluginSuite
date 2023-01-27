@@ -7,7 +7,7 @@ juce_add_plugin (MatrixMultiplier
     COMPANY_NAME "IEM"
     PRODUCT_NAME "MatrixMultiplier"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.3.4"
+    VERSION "0.3.5"
     LV2URI "http://plugins.iem.at/MatrixMultiplier")
 
 

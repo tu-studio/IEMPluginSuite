@@ -7,7 +7,7 @@ juce_add_plugin (StereoEncoder
     COMPANY_NAME "IEM"
     PRODUCT_NAME "StereoEncoder"
     FORMATS ${IEM_FORMATS}
-    VERSION "1.4.4"
+    VERSION "1.4.5"
     LV2URI "http://plugins.iem.at/StereoEncoder")
 
 

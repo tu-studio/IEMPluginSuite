@@ -7,7 +7,7 @@ juce_add_plugin (DualDelay
     COMPANY_NAME "IEM"
     PRODUCT_NAME "DualDelay"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.5.2"
+    VERSION "0.5.3"
     LV2URI "http://plugins.iem.at/DualDelay")
 
 
