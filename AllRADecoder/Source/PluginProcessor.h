@@ -170,6 +170,7 @@ private:
     juce::Result verifyLoudspeakers();
     juce::Result calculateTris();
     void convertLoudspeakersToArray();
+    void wrapSphericalCoordinates();
 
     float getKappa (float gIm, float gRe1, float gRe2, int N);
     juce::dsp::Matrix<float> getInverse (juce::dsp::Matrix<float> A);

@@ -122,6 +122,8 @@ public:
 
 private:
     //==============================================================================
+    void wrapSphericalCoordinates (float* azi, float* ele);
+
     juce::File lastDir;
     std::unique_ptr<juce::PropertiesFile> properties;
 
