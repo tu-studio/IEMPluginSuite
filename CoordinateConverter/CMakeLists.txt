@@ -7,7 +7,7 @@ juce_add_plugin (CoordinateConverter
     COMPANY_NAME "IEM"
     PRODUCT_NAME "CoordinateConverter"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.4.4"
+    VERSION "0.4.5"
     LV2URI "http://plugins.iem.at/CoordinateConverter")
 
 

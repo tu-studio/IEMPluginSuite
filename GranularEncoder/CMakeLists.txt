@@ -7,7 +7,7 @@ juce_add_plugin (GranularEncoder
     COMPANY_NAME "IEM"
     PRODUCT_NAME "GranularEncoder"
     FORMATS ${IEM_FORMATS}
-    VERSION "1.0.0"
+    VERSION "1.0.1"
     LV2URI "http://plugins.iem.at/GranularEncoder")
 
 

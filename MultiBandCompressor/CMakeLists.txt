@@ -7,7 +7,7 @@ juce_add_plugin (MultiBandCompressor
     COMPANY_NAME "IEM"
     PRODUCT_NAME "MultiBandCompressor"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.2.4"
+    VERSION "0.2.5"
     LV2URI "http://plugins.iem.at/MultiBandCompressor")
 
 

@@ -7,7 +7,7 @@ juce_add_plugin (BinauralDecoder
     COMPANY_NAME "IEM"
     PRODUCT_NAME "BinauralDecoder"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.6.4"
+    VERSION "0.6.5"
     LV2URI "http://plugins.iem.at/BinauralDecoder")
 
 
