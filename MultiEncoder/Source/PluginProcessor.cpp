@@ -658,7 +658,7 @@ void MultiEncoderAudioProcessor::wrapSphericalCoordinates (float* azi, float* el
     // Wrap elevation
     if (*ele > 180.0f || *ele < -180.0f)
     {
-        float fullRotations = std::copysign (std::ceilf (std::abs (*ele) / 360.0f), *ele);
+        float fullRotations = std::copysign (std::ceil (std::abs (*ele) / 360.0f), *ele);
         *ele -= fullRotations * 360.0f;
     }
     if (*ele > 90.0f || *ele < -90.0f)
@@ -670,7 +670,7 @@ void MultiEncoderAudioProcessor::wrapSphericalCoordinates (float* azi, float* el
     // Wrap azimuth
     if (*azi > 180.0f || *azi < -180.0f)
     {
-        float fullRotations = std::copysign (std::ceilf (std::abs (*azi) / 360.0f), *azi);
+        float fullRotations = std::copysign (std::ceil (std::abs (*azi) / 360.0f), *azi);
         *azi -= fullRotations * 360.0f;
     }
 }

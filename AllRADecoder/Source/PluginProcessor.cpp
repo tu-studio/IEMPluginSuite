@@ -1277,7 +1277,7 @@ void AllRADecoderAudioProcessor::wrapSphericalCoordinates()
         // Wrap elevation
         if (el > 180.0f || el < -180.0f)
         {
-            float fullRotations = std::copysign (std::ceilf (std::abs (el) / 360.0f), el);
+            float fullRotations = std::copysign (std::ceil (std::abs (el) / 360.0f), el);
             el -= fullRotations * 360.0f;
             updateElevation = true;
         }
@@ -1292,7 +1292,7 @@ void AllRADecoderAudioProcessor::wrapSphericalCoordinates()
         // Wrap azimuth
         if (az > 180.0f || az < -180.0f)
         {
-            float fullRotations = std::copysign (std::ceilf (std::abs (az) / 360.0f), az);
+            float fullRotations = std::copysign (std::ceil (std::abs (az) / 360.0f), az);
             az -= fullRotations * 360.0f;
 
             (*it).setProperty ("Azimuth", az, nullptr);
