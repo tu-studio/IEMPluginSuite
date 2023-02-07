@@ -84,7 +84,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     azimuthSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     azimuthSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     azimuthSlider.setReverse (true);
-    azimuthSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    azimuthSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                             globalLaF.ClWidgetColours[0]);
     azimuthSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                        3 * juce::MathConstants<float>::pi,
                                        false);
@@ -95,7 +96,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     elevationAttachment.reset (new SliderAttachment (valueTreeState, "elevation", elevationSlider));
     elevationSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     elevationSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
-    elevationSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
+    elevationSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                               globalLaF.ClWidgetColours[0]);
     elevationSlider.setRotaryParameters (0.5 * juce::MathConstants<float>::pi,
                                          2.5 * juce::MathConstants<float>::pi,
                                          false);
@@ -140,7 +142,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     deltaTimeSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     deltaTimeSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     deltaTimeSlider.setReverse (false);
-    deltaTimeSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
+    deltaTimeSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                               globalLaF.ClWidgetColours[1]);
     deltaTimeSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                          3 * juce::MathConstants<float>::pi,
                                          true);
@@ -153,7 +156,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     deltaTimeModSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     deltaTimeModSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     deltaTimeModSlider.setReverse (false);
-    deltaTimeModSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
+    deltaTimeModSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                                  globalLaF.ClWidgetColours[1]);
     deltaTimeModSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                             3 * juce::MathConstants<float>::pi,
                                             true);
@@ -168,7 +172,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     grainLengthSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     grainLengthSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     grainLengthSlider.setReverse (false);
-    grainLengthSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
+    grainLengthSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                                 globalLaF.ClWidgetColours[1]);
     grainLengthSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                            3 * juce::MathConstants<float>::pi,
                                            true);
@@ -195,7 +200,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     positionSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     positionSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     positionSlider.setReverse (false);
-    positionSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
+    positionSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                              globalLaF.ClWidgetColours[1]);
     positionSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                         3 * juce::MathConstants<float>::pi,
                                         true);
@@ -208,7 +214,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     positionModSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     positionModSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     positionModSlider.setReverse (false);
-    positionModSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
+    positionModSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                                 globalLaF.ClWidgetColours[1]);
     positionModSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                            3 * juce::MathConstants<float>::pi,
                                            true);
@@ -234,7 +241,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     pitchModSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     pitchModSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     pitchModSlider.setReverse (false);
-    pitchModSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[1]);
+    pitchModSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                              globalLaF.ClWidgetColours[1]);
     pitchModSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                         3 * juce::MathConstants<float>::pi,
                                         true);
@@ -248,7 +256,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     windowAttackSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     windowAttackSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     windowAttackSlider.setReverse (false);
-    windowAttackSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
+    windowAttackSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                                  globalLaF.ClWidgetColours[2]);
     windowAttackSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                             3 * juce::MathConstants<float>::pi,
                                             true);
@@ -275,7 +284,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     windowDecaySlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     windowDecaySlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     windowDecaySlider.setReverse (false);
-    windowDecaySlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[2]);
+    windowDecaySlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                                 globalLaF.ClWidgetColours[2]);
     windowDecaySlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                            3 * juce::MathConstants<float>::pi,
                                            true);
@@ -315,7 +325,8 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     sourceSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     sourceSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     sourceSlider.setReverse (false);
-    sourceSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[3]);
+    sourceSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
+                            globalLaF.ClWidgetColours[3]);
     sourceSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                       3 * juce::MathConstants<float>::pi,
                                       true);
