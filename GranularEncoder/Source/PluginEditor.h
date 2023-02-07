@@ -69,7 +69,7 @@ private:
     GranularEncoderAudioProcessor& processor;
     juce::AudioProcessorValueTreeState& valueTreeState;
 
-    juce::GroupComponent quatGroup, ypGroup, grainGroup, settingsGroup;
+    juce::GroupComponent quatGroup, ypGroup, grainGroup;
     ReverseSlider azimuthSlider, elevationSlider, shapeSlider, sizeSlider, qwSlider, qxSlider,
         qySlider, qzSlider;
     ReverseSlider deltaTimeSlider, deltaTimeModSlider, grainLengthSlider, grainLengthModSlider;

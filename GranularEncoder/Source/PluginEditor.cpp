@@ -355,14 +355,6 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     qzSlider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 50, 15);
     qzSlider.setColour (juce::Slider::rotarySliderOutlineColourId, globalLaF.ClWidgetColours[0]);
 
-    // =========================== SETTINGS GROUP
-    addAndMakeVisible (&settingsGroup);
-    settingsGroup.setText ("Settings");
-    settingsGroup.setTextLabelPosition (juce::Justification::centredLeft);
-    settingsGroup.setColour (juce::GroupComponent::outlineColourId, globalLaF.ClSeperator);
-    settingsGroup.setColour (juce::GroupComponent::textColourId, juce::Colours::white);
-    settingsGroup.setVisible (true);
-    
     // FREEZE STATE
     addAndMakeVisible (tbFreeze);
     tbFreezeAttachment.reset (new ButtonAttachment (valueTreeState, "freeze", tbFreeze));
