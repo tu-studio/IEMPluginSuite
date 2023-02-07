@@ -129,7 +129,6 @@ private:
     SimpleLabel lbMix, lbSource;
 
     juce::ToggleButton tbFreeze;
-    SimpleLabel lbFreeze;
 
     // juce::ToggleButton tb2D;
     // SimpleLabel lb2D;

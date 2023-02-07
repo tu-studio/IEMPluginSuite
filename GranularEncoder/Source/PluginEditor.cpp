@@ -182,7 +182,7 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     grainLengthModSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 50, 15);
     grainLengthModSlider.setReverse (false);
     grainLengthModSlider.setColour (juce::Slider::rotarySliderOutlineColourId,
-                                    juce::Colours::white);
+                                    globalLaF.ClWidgetColours[1]);
     grainLengthModSlider.setRotaryParameters (juce::MathConstants<float>::pi,
                                               3 * juce::MathConstants<float>::pi,
                                               true);
@@ -358,13 +358,10 @@ GranularEncoderAudioProcessorEditor::GranularEncoderAudioProcessorEditor (
     // FREEZE STATE
     addAndMakeVisible (tbFreeze);
     tbFreezeAttachment.reset (new ButtonAttachment (valueTreeState, "freeze", tbFreeze));
-    tbFreeze.setButtonText ("Freeze Buffer");
+    tbFreeze.setButtonText ("Freeze Audio");
     tbFreeze.setColour (juce::ToggleButton::tickColourId, globalLaF.ClWidgetColours[3]);
     tbFreeze.setTooltip (
         "Toggle to switch between a freezed audio buffer and realtime audio input.");
-
-    addAndMakeVisible (&lbFreeze);
-    lbFreeze.setText ("Freeze Audio");
 
     // 2D/3D Spatialization Toggle
     /*
@@ -605,8 +602,7 @@ void GranularEncoderAudioProcessorEditor::resized()
     sliderRow.removeFromLeft (rotSliderSpacing);
     windowDecayModSlider.setBounds (sliderRow.removeFromLeft (rotSliderWidth));
     sliderRow.removeFromLeft (rotSliderSpacing);
-    tbFreeze.setBounds (sliderRow.removeFromLeft (20));
-    lbFreeze.setBounds (sliderRow.removeFromLeft (70));
+    tbFreeze.setBounds (sliderRow.removeFromLeft (90));
 
     // ============== SIDEBAR LEFT ====================
     area.removeFromRight (10); // spacing
