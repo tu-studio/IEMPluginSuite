@@ -170,7 +170,7 @@ void AllRADecoderAudioProcessor::setCurrentProgram (int index)
             createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 142.0f, 0.0f), 8),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 104.0f, 0.0f), 9),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 102.0f, 0.0f), 9),
             &undoManager);
         loudspeakers.appendChild (
             createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 70.0f, 0.0f), 10),
@@ -179,7 +179,7 @@ void AllRADecoderAudioProcessor::setCurrentProgram (int index)
             createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 45.0f, 0.0f), 11),
             &undoManager);
         loudspeakers.appendChild (
-            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 17.0f, 0.0f), 12),
+            createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, 23.0f, 0.0f), 12),
             &undoManager);
         loudspeakers.appendChild (
             createLoudspeakerFromSpherical (juce::Vector3D<float> (1.0f, -24.0f, 28.0f), 13),
