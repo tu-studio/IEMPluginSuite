@@ -7,7 +7,7 @@ juce_add_plugin (ProbeDecoder
     COMPANY_NAME "IEM"
     PRODUCT_NAME "ProbeDecoder"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.5.4"
+    VERSION "0.5.5"
     LV2URI "http://plugins.iem.at/ProbeDecoder")
 
 

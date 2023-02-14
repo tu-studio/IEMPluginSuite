@@ -51,7 +51,7 @@ set (prefix "/usr/local" CACHE STRING "Path prefix for custom installation")
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Actual project configuration
-project (IEMPluginSuite VERSION 1.14.0 LANGUAGES C CXX)
+project (IEMPluginSuite VERSION 1.14.1 LANGUAGES C CXX)
 
 set_property (GLOBAL PROPERTY USE_FOLDERS YES)
 

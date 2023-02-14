@@ -7,7 +7,7 @@ juce_add_plugin (ToolBox
     COMPANY_NAME "IEM"
     PRODUCT_NAME "ToolBox"
     FORMATS ${IEM_FORMATS}
-    VERSION "0.5.4"
+    VERSION "0.5.5"
     LV2URI "http://plugins.iem.at/ToolBox")
 
 

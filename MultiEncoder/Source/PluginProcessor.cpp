@@ -639,14 +639,40 @@ juce::Result MultiEncoderAudioProcessor::loadConfiguration (const juce::File& co
 
             parameters.getParameterAsValue ("mute" + juce::String (ch)).setValue (0);
 
-            auto azi = src.getProperty ("Azimuth", 0.0f);
+            float azi = src.getProperty ("Azimuth", 0.0f);
+            float ele = src.getProperty ("Elevation", 0.0f);
+
+            if (azi > 180.0f || azi < -180.0f || ele > 90.0f || ele < -90.0f)
+                wrapSphericalCoordinates (&azi, &ele);
+
             parameters.getParameterAsValue ("azimuth" + juce::String (ch)).setValue (azi);
-            auto ele = src.getProperty ("Elevation", 0.0f);
             parameters.getParameterAsValue ("elevation" + juce::String (ch)).setValue (ele);
         }
     }
 
     return result;
+}
+
+void MultiEncoderAudioProcessor::wrapSphericalCoordinates (float* azi, float* ele)
+{
+    // Wrap elevation
+    if (*ele > 180.0f || *ele < -180.0f)
+    {
+        float fullRotations = std::copysign (std::ceil (std::abs (*ele) / 360.0f), *ele);
+        *ele -= fullRotations * 360.0f;
+    }
+    if (*ele > 90.0f || *ele < -90.0f)
+    {
+        *ele = std::copysign (180.0 - std::abs (*ele), *ele);
+        *azi += 180.0f;
+    }
+
+    // Wrap azimuth
+    if (*azi > 180.0f || *azi < -180.0f)
+    {
+        float fullRotations = std::copysign (std::ceil (std::abs (*azi) / 360.0f), *azi);
+        *azi -= fullRotations * 360.0f;
+    }
 }
 
 void MultiEncoderAudioProcessor::setLastDir (juce::File newLastDir)
