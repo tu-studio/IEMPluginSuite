@@ -14,26 +14,26 @@ include(CheckIncludeFiles)
 # Simply comment them out if you want to build only a subset of the plug-ins.
 set (PLUGINS_TO_BUILD
         AllRADecoder
-        BinauralDecoder
-        CoordinateConverter
-        DirectionalCompressor
-        DirectivityShaper
-        DistanceCompensator
-        DualDelay
-        EnergyVisualizer
-        FdnReverb
-        GranularEncoder
-        MatrixMultiplier
-        MultiBandCompressor
-        MultiEncoder
-        MultiEQ
-        OmniCompressor
-        ProbeDecoder
-        RoomEncoder
-        SceneRotator
-        SimpleDecoder
-        StereoEncoder
-        ToolBox
+        # BinauralDecoder
+        # CoordinateConverter
+        # DirectionalCompressor
+        # DirectivityShaper
+        # DistanceCompensator
+        # DualDelay
+        # EnergyVisualizer
+        # FdnReverb
+        # GranularEncoder
+        # MatrixMultiplier
+        # MultiBandCompressor
+        # MultiEncoder
+        # MultiEQ
+        # OmniCompressor
+        # ProbeDecoder
+        # RoomEncoder
+        # SceneRotator
+        # SimpleDecoder
+        # StereoEncoder
+        # ToolBox
     )
 
 # The following options let you select the plug-ins formats you want to build.
@@ -43,6 +43,7 @@ option (IEM_BUILD_VST2 "Build VST2 version of the plug-ins." OFF)
 option (IEM_BUILD_VST3 "Build VST3 version of the plug-ins." OFF)
 option (IEM_BUILD_LV2 "Build LV2 version of the plug-ins." OFF)
 option (IEM_BUILD_STANDALONE "Build standalones of the plug-ins." ON)
+option (IEM_STANDALONE_HEADLESS "Build standalones without GUI." ON)
 option (IEM_STANDALONE_JACK_SUPPORT "Build standalones with JACK support." ON)
 
 set (IEM_POST_BUILD_INSTALL "USER" CACHE STRING "Define if plug-ins are installed for USER, SYSTEM or if you want NO installation")
@@ -205,6 +206,11 @@ if (IEM_BUILD_STANDALONE)
             resources/Standalone/IEM_AudioDeviceSelectorComponent.h)
     endforeach()
 
+    if (IEM_STANDALONE_HEADLESS)
+        foreach (subproject IN LISTS PLUGINS_TO_BUILD)
+            target_compile_definitions(${subproject} PUBLIC HEADLESS_BUILD=1)
+        endforeach()
+    endif()
     if (NOT IEM_STANDALONE_JACK_SUPPORT)
         foreach (subproject IN LISTS PLUGINS_TO_BUILD)
             target_compile_definitions(${subproject} PUBLIC DONT_BUILD_WITH_JACK_SUPPORT=1)

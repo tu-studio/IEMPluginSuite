@@ -179,6 +179,10 @@ public:
 
     ~MyStandalonePluginHolder() override
     {
+#ifdef HEADLESS_BUILD
+        stopPlaying();
+        // savePluginState(); never save state in headless mode because settings file would be overwritten
+#endif
         stopTimer();
 
         deletePlugin();

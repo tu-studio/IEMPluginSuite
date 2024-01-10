@@ -90,6 +90,17 @@ public:
     bool moreThanOneInstanceAllowed() override { return true; }
     void anotherInstanceStarted (const juce::String&) override {}
 
+#ifdef HEADLESS_BUILD
+    virtual MyStandalonePluginHolder* createProcessor() { 
+#ifdef JucePlugin_PreferredChannelConfigurations
+        StandalonePluginHolder::PluginInOuts channels[] = {
+            JucePlugin_PreferredChannelConfigurations
+        };
+#endif
+
+        return new MyStandalonePluginHolder (appProperties.getUserSettings());
+    }
+#else
     virtual MyStandaloneFilterWindow* createWindow()
     {
 #ifdef JucePlugin_PreferredChannelConfigurations
@@ -120,10 +131,14 @@ public:
 #endif
         );
     }
+#endif
 
     //==============================================================================
     void initialise (const juce::String&) override
     {
+#ifdef HEADLESS_BUILD
+        mainProcessor.reset (createProcessor());
+#else
         mainWindow.reset (createWindow());
 
 #if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
@@ -131,19 +146,29 @@ public:
 #endif
 
         mainWindow->setVisible (true);
+#endif
     }
 
     void shutdown() override
     {
-        mainWindow = nullptr;
+#ifdef HEADLESS_BUILD
+        mainProcessor.reset();
+#else
+        mainWindow.reset();
+#endif
         appProperties.saveIfNeeded();
     }
 
     //==============================================================================
     void systemRequestedQuit() override
     {
+#ifdef HEADLESS_BUILD
+        if (mainProcessor.get() != nullptr)
+            mainProcessor->savePluginState();
+#else
         if (mainWindow.get() != nullptr)
             mainWindow->pluginHolder->savePluginState();
+#endif
 
         if (ModalComponentManager::getInstance()->cancelAllModalComponents())
         {
@@ -162,7 +187,11 @@ public:
 
 protected:
     ApplicationProperties appProperties;
+#ifdef HEADLESS_BUILD
+    std::unique_ptr<MyStandalonePluginHolder> mainProcessor;
+#else
     std::unique_ptr<MyStandaloneFilterWindow> mainWindow;
+#endif
 };
 
 } // namespace juce

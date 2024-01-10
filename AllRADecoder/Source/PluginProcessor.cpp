@@ -57,12 +57,17 @@ AllRADecoderAudioProcessor::AllRADecoderAudioProcessor() :
     parameters.addParameterListener ("inputOrderSetting", this);
     parameters.addParameterListener ("useSN3D", this);
 
-    // global properties
+    // global properties taken from resources/Standalone/StandaloneApp.cpp
     juce::PropertiesFile::Options options;
+
     options.applicationName = "AllRADecoder";
-    options.filenameSuffix = "settings";
-    options.folderName = "IEM";
-    options.osxLibrarySubFolder = "Preferences";
+    options.filenameSuffix = ".settings";
+    options.osxLibrarySubFolder = "Application Support/IEMAudioPlugins";
+#if JUCE_LINUX || JUCE_BSD
+    options.folderName = juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory).getFullPathName() + juce::File::getSeparatorString() + "IEMAudioPlugins";
+#else
+    options.folderName = "IEMAudioPlugins";
+#endif
 
     properties.reset (new juce::PropertiesFile (options));
     lastDir = juce::File (properties->getValue ("presetFolder"));
