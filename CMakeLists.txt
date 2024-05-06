@@ -18,7 +18,7 @@ set (PLUGINS_TO_BUILD
         # CoordinateConverter
         # DirectionalCompressor
         # DirectivityShaper
-        # DistanceCompensator
+        DistanceCompensator
         # DualDelay
         # EnergyVisualizer
         # FdnReverb
