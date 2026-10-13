@@ -176,6 +176,37 @@ void OSCParameterInterface::oscMessageReceived (const juce::OSCMessage& message)
                                                  { oscReceiver.connect (newPort); });
         }
 
+        // Change the outgoing OSC destination. Usage: /setOSCSender <host> <port>.
+        if (message.getAddressPattern().toString().equalsIgnoreCase ("/setOSCSender")
+            && message.size() == 2 && message[0].isString())
+        {
+            int newPort = 0;
+            bool hasValidPortArgument = false;
+
+            if (message[1].isInt32())
+            {
+                newPort = message[1].getInt32();
+                hasValidPortArgument = true;
+            }
+            else if (message[1].isFloat32())
+            {
+                const auto portValue = message[1].getFloat32();
+                if (portValue >= -1.0f && portValue <= 65535.0f)
+                {
+                    newPort = static_cast<int> (portValue);
+                    hasValidPortArgument = true;
+                }
+            }
+
+            const auto newHost = message[0].getString();
+            if (hasValidPortArgument
+                && (newPort == -1 || (newPort > 0 && newPort <= 65535 && newHost.isNotEmpty())))
+            {
+                juce::MessageManager::callAsync ([this, newHost, newPort]()
+                                                 { oscSender.connect (newHost, newPort); });
+            }
+        }
+
         if (message.getAddressPattern().toString().equalsIgnoreCase ("/flushParams"))
             juce::MessageManager::callAsync ([this]() { sendParameterChanges (true); });
     }

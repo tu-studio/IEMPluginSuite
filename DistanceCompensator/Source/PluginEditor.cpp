@@ -176,7 +176,7 @@ DistanceCompensatorAudioProcessorEditor::DistanceCompensatorAudioProcessorEditor
     toolTipWin.setMillisecondsBeforeTipAppears (500);
     toolTipWin.setOpaque (false);
 
-    setResizeLimits (500, 650, 500, 650); // use this to create a resizable GUI
+    setResizeLimits (500, 650, 1000, 1150); // use this to create a resizable GUI
 
     // start timer after everything is set up properly
     startTimer (20);
